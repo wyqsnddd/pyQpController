@@ -1,0 +1,55 @@
+{"jointVelocityController":{
+	                "K_v": 10.0
+},
+"jointPositionController":{
+	                "K_v": 2.0,
+			                        "K_p":5
+},
+"qpController":{ 
+	"showProgress": false,
+	"jointUnitWeight": 10.0,
+	"jointLimits":{
+		"dt": 0.01
+	},
+	"torqueLimits":{
+		"upper": [200.0, 200.0, 200.0, 200.0, 200.0, 200.0],
+		"lower": [-200.0, -200.0, -200.0, -200.0, -200.0, -200.0 ]
+	},
+	"positionTask":{
+		"enabled": false,
+		"taskWeight": 200.0,
+		"setPoint":[0.1, 0.2, 0.1],
+		"bodyLinkNumber": -1,
+		"Comment": "-1: end-effector, 4: elbow",
+		"Kp": 100.0,
+		"Kd": 20.0
+	},
+	"admittanceTask":{
+		"enabled": false,
+		"taskWeight": 100.0,
+		"desiredForce": [10, 0.0, 0.0],
+		"desiredVelocity": [0.0, 0.0, 0.0],
+		"bodyLinkNumer": -1,
+		"Kf": 100.0,
+		"Ki": 100.0,
+		"Kd": 100.0
+	},
+	"velocityTask":{
+		"enabled": false,
+		"desiredVelocity": [0.1, 0.0, 0.0],
+		"bodyLinkNumer": -1,
+		"Kp": 1000.0
+	},
+	"trajectoryTask":{
+		"enabled": true,
+		"taskWeight": 200.0,
+		"end-effector-frame": true,
+		"bodyLinkNumber": -1,
+		"Kp": 100.0,
+		"Kd": 60.0,
+		"sampleNumber": 100,
+		"way-points":[[0.0, -0.0, -0.0], [0.15, -0.01, -0.04], [0.25, -0.02, -0.06], [0.28, -0.07, -0.08], [0.30, -0.12, -0.11], [0.35, -0.15, -0.12] ],
+		"time-knots":[0.0, 0.4, 0.8, 2.5, 3.5, 4.5]
+	}
+}
+} 
