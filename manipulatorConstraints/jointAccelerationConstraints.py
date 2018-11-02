@@ -15,8 +15,10 @@ class jointAccelerationLimitConstraints:
         self.robot = skel
 
         self.upper = 5*np.array([0.87266, 0.87266, 0.87266, 1.466, 2.059, 2.094])
-        self.lower = self.upper
+        self.lower = -self.upper
 
+        print "The joint acc upper limit is: ", self.upper
+        print "The joint acc lower limit is: ", self.lower
 
     def update(self):
         pass
@@ -24,7 +26,7 @@ class jointAccelerationLimitConstraints:
     def calcMatricies(self):
 
         G = np.concatenate((np.identity(self.robot.ndofs), -np.identity(self.robot.ndofs)), axis=0)
-        h = np.reshape(np.concatenate((self.upper, self.lower)),(12,1))
+        h = np.reshape(np.concatenate((self.upper, -self.lower)),(12,1))
 
         return [G, h]
 
