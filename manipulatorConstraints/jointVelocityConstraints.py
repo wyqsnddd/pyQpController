@@ -32,19 +32,22 @@ class jointVelocityLimitConstraints:
             self.upper.append(dof.velocity_upper_limit())
             self.lower.append(dof.velocity_lower_limit())
 
+        print "The joint velocity upper limit is: ", self.upper
+        print "The joint velocity lower limit is: ", self.lower
+        
         self.upper = np.reshape(self.upper, (self.robot.ndofs, 1))
         self.lower = np.reshape(self.lower, (self.robot.ndofs, 1))
 
         self.dt = dt
 
     def upperRhs(self, q, dq):
-        return (self.upper - q)*(1/self.dt)
+        return (self.upper - dq)*(1/self.dt)
 
     def update(self):
         pass
 
     def lowerRhs(self, q, dq):
-        return -(self.lower - q)*(1/self.dt)
+        return -(self.lower - dq)*(1/self.dt)
 
 
     def calcMatricies(self):
