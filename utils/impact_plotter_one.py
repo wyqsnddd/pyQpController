@@ -3,6 +3,7 @@ import numpy as np
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
 
 
 if __name__ =="__main__":
@@ -18,6 +19,8 @@ if __name__ =="__main__":
     error_z = loaded['error'][:, 2]
 
 
+    fontP = FontProperties()
+    fontP.set_size('small')
 
 
 
@@ -42,7 +45,7 @@ if __name__ =="__main__":
     ax.plot(time, error_x, label='Error x')
     ax.plot(time, error_y, label='Error y')
     ax.plot(time, error_z, label='Error z')
-    ax.legend()
+    ax.legend(frameon=False, loc='upper left', prop=fontP)
     plt.xlabel('Time [s]')
     plt.ylabel('Task Error')
     plt.grid(True)
@@ -148,8 +151,8 @@ if __name__ =="__main__":
     ax20.plot(time, q_3, label='q 3')
     ax20.plot(time, q_4, label='q 4')
     ax20.plot(time, q_5, label='q 5')
-    ax20.legend()
-    plt.ylabel('Joint positions')
+    ax20.legend(frameon=False, loc='upper left', prop=fontP)
+    plt.ylabel('Joint positions [Radian]')
     plt.xlabel('Time [s]')
     plt.grid(True)
     fig20.savefig("joint_positions.pdf", bbox_inches='tight')
@@ -164,8 +167,8 @@ if __name__ =="__main__":
     ax.plot(time, dq_3, label='dq 3')
     ax.plot(time, dq_4, label='dq 4')
     ax.plot(time, dq_5, label='dq 5')
-    ax.legend()
-    plt.ylabel('Joint velocities')
+    ax.legend(frameon=False, loc='upper left', prop=fontP)
+    plt.ylabel('Joint velocities [Radion/s]')
     plt.xlabel('Time [s]')
     plt.grid(True)
     fig21.savefig("joint_velocities.pdf", bbox_inches='tight')
@@ -179,8 +182,8 @@ if __name__ =="__main__":
     ax22.plot(time, acc_3, label='acc 3')
     ax22.plot(time, acc_4, label='acc 4')
     ax22.plot(time, acc_5, label='acc 5')
-    ax22.legend()
-    plt.ylabel('Joint accelerations')
+    ax22.legend(frameon=False, loc='upper left', prop=fontP)
+    plt.ylabel('Joint accelerations [Radion/s^2]')
     plt.xlabel('Time [s]')
     plt.grid(True)
     fig22.savefig("joint_accelerations.pdf", bbox_inches='tight')
@@ -193,8 +196,8 @@ if __name__ =="__main__":
     ax23.plot(time[0:len(tau_0)], tau_3, label='tau 3')
     ax23.plot(time[0:len(tau_0)], tau_4, label='tau 4')
     ax23.plot(time[0:len(tau_0)], tau_5, label='tau 5')
-    ax23.legend()
-    plt.ylabel('Joint torque')
+    ax23.legend(frameon=False, loc='upper left', prop=fontP)
+    plt.ylabel('Joint torque [Nm]')
     plt.xlabel('Time [s]')
     plt.grid(True)
     fig23.savefig("joint_torques.pdf", bbox_inches='tight')
@@ -207,8 +210,8 @@ if __name__ =="__main__":
     ax24.plot(time[0:len(tau_0)], sol_acc_3, label='sol 3')
     ax24.plot(time[0:len(tau_0)], sol_acc_4, label='sol 4')
     ax24.plot(time[0:len(tau_0)], sol_acc_5, label='sol 5')
-    ax24.legend()
-    plt.ylabel('QP: Joint acceleration')
+    ax24.legend(frameon=False, loc='upper left', prop=fontP)
+    plt.ylabel('QP: Joint acceleration [Radion/s^2]')
     plt.xlabel('Time [s]')
     plt.grid(True)
     fig24.savefig("solution_acc.pdf", bbox_inches='tight')
@@ -221,9 +224,9 @@ if __name__ =="__main__":
     ax25.plot(time[0:len(tau_0)], sol_dq_3, label='sol 3')
     ax25.plot(time[0:len(tau_0)], sol_dq_4, label='sol 4')
     ax25.plot(time[0:len(tau_0)], sol_dq_5, label='sol 5')
+    ax25.legend(frameon=False, loc='upper left', prop=fontP)
 
-    ax25.legend()
-    plt.ylabel('QP: Joint Velocity')
+    plt.ylabel('QP: Joint Velocity [Radion/s]')
     plt.xlabel('Time [s]')
     plt.grid(True)
     fig25.savefig("solution_dq.pdf", bbox_inches='tight')
@@ -236,10 +239,8 @@ if __name__ =="__main__":
     ax26.plot(time[0:len(tau_0)], sol_q_3, label='sol 3')
     ax26.plot(time[0:len(tau_0)], sol_q_4, label='sol 4')
     ax26.plot(time[0:len(tau_0)], sol_q_5, label='sol 5')
-
-
-    ax26.legend()
-    plt.ylabel('QP: Joint Position')
+    ax26.legend(frameon=False, loc='upper left', prop=fontP)
+    plt.ylabel('QP: Joint Position [Radion]')
     plt.xlabel('Time [s]')
     plt.grid(True)
     fig26.savefig("solution_q.pdf", bbox_inches='tight')
@@ -253,9 +254,8 @@ if __name__ =="__main__":
     ax27.plot(time[0:len(tau_0)], sol_tau_3, label='sol 3')
     ax27.plot(time[0:len(tau_0)], sol_tau_4, label='sol 4')
     ax27.plot(time[0:len(tau_0)], sol_tau_5, label='sol 5')
-
-    ax27.legend()
-    plt.ylabel('QP: Joint Torque')
+    ax27.legend(frameon=False, loc='upper left', prop=fontP)
+    plt.ylabel('QP: Joint Torque [Nm]')
     plt.xlabel('Time [s]')
     plt.grid(True)
     fig27.savefig("solution_torque.pdf", bbox_inches='tight')

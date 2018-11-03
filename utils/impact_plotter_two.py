@@ -16,8 +16,9 @@ if __name__ =="__main__":
     impactFileName = sys.argv[2]
     impact_loaded = np.load(impactFileName)
 
-    #loaded = np.load("../log/data/data_Oct_23_2018_20-53-13.npz")
-    #impact_loaded = np.load("../log/data/impact-data_Oct_23_2018_20-53-13.npz")
+    # loaded = np.load("../log/data/data_Nov_03_2018_15-40-26.npz")
+    # impact_loaded = np.load("../log/data/impact-data_Nov_03_2018_15-40-26.npz")
+
 
     time = loaded['time']
 
@@ -60,7 +61,7 @@ if __name__ =="__main__":
     # plt.axvspan(impact_time_3[0], impact_time_3[1], color='red', alpha=0.1)
     ax.plot(time, error_y, label='Error y')
     ax.plot(time, error_z, label='Error z')
-    ax.legend(prop=fontP)
+    ax.legend(frameon=False, loc='upper left', prop=fontP)
     plt.xlabel('Time [s]')
     plt.ylabel('Task Error')
     plt.title('End-effector velocity Task')
@@ -88,6 +89,28 @@ if __name__ =="__main__":
     actual_delta_dq_3 = impact_loaded['actual_delta_dq'][:, 3]
     actual_delta_dq_4 = impact_loaded['actual_delta_dq'][:, 4]
     actual_delta_dq_5 = impact_loaded['actual_delta_dq'][:, 5]
+
+    predict_average_ddq_0 = impact_loaded['predict_average_acc'][:,0]
+    predict_average_ddq_1 = impact_loaded['predict_average_acc'][:, 0]
+    predict_average_ddq_2 = impact_loaded['predict_average_acc'][:, 0]
+    predict_average_ddq_3 = impact_loaded['predict_average_acc'][:, 0]
+    predict_average_ddq_4 = impact_loaded['predict_average_acc'][:, 0]
+    predict_average_ddq_5 = impact_loaded['predict_average_acc'][:, 0]
+
+    acc_0 = loaded['acc'][:, 0]
+    acc_1 = loaded['acc'][:, 1]
+    acc_2 = loaded['acc'][:, 2]
+    acc_3 = loaded['acc'][:, 3]
+    acc_4 = loaded['acc'][:, 4]
+    acc_5 = loaded['acc'][:, 5]
+    sol_acc_0 = loaded['sol_acc'][:, 0]
+    sol_acc_1 = loaded['sol_acc'][:, 1]
+    sol_acc_2 = loaded['sol_acc'][:, 2]
+    sol_acc_3 = loaded['sol_acc'][:, 3]
+    sol_acc_4 = loaded['sol_acc'][:, 4]
+    sol_acc_5 = loaded['sol_acc'][:, 5]
+
+
 
     predict_delta_torque_0 = impact_loaded['predict_delta_tau'][:,0]
     predict_delta_torque_1 = impact_loaded['predict_delta_tau'][:,1]
@@ -130,7 +153,8 @@ if __name__ =="__main__":
     ax21.locator_params(nbins=5, axis='y')
 
     plt.grid(True)
-    ax21.legend(prop=fontP)
+    #ax21.legend(fancybox=True, framealpha=0.5)
+    ax21.legend(frameon=False, loc='upper left', prop=fontP)
     plt.title("Joint velocities and joint velocities jump at the impact time")
 
     ax22 = plt.subplot(612)
@@ -144,7 +168,9 @@ if __name__ =="__main__":
     ax22.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
     plt.setp(ax22.get_xticklabels(), visible=False)
     plt.grid(True)
-    ax22.legend()
+    #ax22.legend(fancybox=True, framealpha=0.5)
+    #ax23.legend(frameon=False)
+    #ax23.legend(frameon=False, fancybox=True, framealpha=0.2, loc='best', prop=fontP)
     ax22.locator_params(nbins=5, axis='y')
 
     ax23 = plt.subplot(613)
@@ -158,7 +184,6 @@ if __name__ =="__main__":
     ax23.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
     plt.setp(ax23.get_xticklabels(), visible=False)
     plt.grid(True)
-    ax23.legend()
     ax23.locator_params(nbins=5, axis='y')
 
     ax24 = plt.subplot(614)
@@ -216,7 +241,9 @@ if __name__ =="__main__":
     # plt.axvspan(impact_time_3[0], impact_time_3[1], color='red', alpha=0.1)
     plt.setp(ax31.get_xticklabels(), visible=False)
     plt.grid(True)
-    ax31.legend(prop=fontP)
+    #ax31.legend(prop=fontP)
+    ax31.legend(frameon=False, loc='upper left', prop=fontP)
+
     plt.title("Joint torque jumps at the impact time")
     ax31.locator_params(nbins=5, axis='y')
     ax31.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
@@ -289,8 +316,8 @@ if __name__ =="__main__":
 
     fig4, (ax41, ax42, ax43 )= plt.subplots(nrows=3, ncols=1)
     ax41 = plt.subplot(311)
-    plt.plot(impact_time, predict_F_0, label='Predicted')
-    plt.plot(impact_time, actual_F_0, label='Actual')
+    plt.plot(impact_time, predict_F_0, label='Predicted contact force jump')
+    plt.plot(impact_time, actual_F_0, label='Measured contact force jump')
     # plt.axvspan(impact_time_1[0], impact_time_1[1], color='red', alpha=0.1)
     # plt.axvspan(impact_time_2[0], impact_time_2[1], color='red', alpha=0.1)
     # plt.axvspan(impact_time_3[0], impact_time_3[1], color='red', alpha=0.1)
@@ -298,9 +325,11 @@ if __name__ =="__main__":
     ax41.locator_params(nbins=5, axis='y')
     ax41.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
     plt.grid(True)
-    ax41.legend(prop=fontP)
+    #ax41.legend(prop=fontP)
+    ax41.legend(frameon=False, loc='upper left', prop=fontP)
+
     ax41.set_ylabel('Force x')
-    plt.title("Precited contact force Versus measured contact force ")
+    plt.title("Precited contact force jump Versus measured contact force ")
 
     ax42 = plt.subplot(312)
     plt.plot(impact_time, predict_F_1)
@@ -330,5 +359,86 @@ if __name__ =="__main__":
     plt.grid(True)
     plt.xlabel('Impact Time [s]')
 
-    plt.show()
 
+
+    fig5, (ax51, ax52, ax53, ax54, ax55, ax56) = plt.subplots(nrows=6, ncols=1)
+    impact_length = len(impact_time)
+    ax51 = plt.subplot(611)
+    plt.plot(impact_time, acc_0[-impact_length:], label='Actual joint acceleration')
+    plt.plot(impact_time, sol_acc_0[-impact_length:], label='QP predict joint acceleration')
+    plt.plot(impact_time, predict_average_ddq_0, label='Average joint acceleration at impact')
+    #ax51.legend(fancybox=True, framealpha=0.5)
+    ax51.legend(frameon=False, loc='upper left', prop=fontP)
+
+    ax51.set_ylabel('joint 0')
+    plt.grid(True)
+    ax51.locator_params(nbins=5, axis='y')
+    ax51.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    plt.title("Comparison between actual joint acc, joint acc known by QP and the average acc. Unit [Radion/s^2]")
+
+    ax52 = plt.subplot(612)
+    plt.plot(impact_time, acc_1[-impact_length:])
+    plt.plot(impact_time, sol_acc_1[-impact_length:])
+    plt.plot(impact_time, predict_average_ddq_1)
+    ax52.legend()
+    ax52.set_ylabel('joint 1')
+    plt.grid(True)
+    ax52.locator_params(nbins=5, axis='y')
+    ax52.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+
+    ax53 = plt.subplot(613)
+    plt.plot(impact_time, acc_2[-impact_length:])
+    plt.plot(impact_time, sol_acc_2[-impact_length:])
+    plt.plot(impact_time, predict_average_ddq_2)
+    ax53.legend()
+    ax53.set_ylabel('joint 2')
+    plt.grid(True)
+    ax53.locator_params(nbins=5, axis='y')
+    ax53.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+
+    ax54 = plt.subplot(614)
+    plt.plot(impact_time, acc_3[-impact_length:])
+    plt.plot(impact_time, sol_acc_3[-impact_length:])
+    plt.plot(impact_time, predict_average_ddq_3)
+    ax54.legend()
+    ax54.set_ylabel('joint 3')
+    plt.grid(True)
+    ax54.locator_params(nbins=5, axis='y')
+    ax54.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+
+    ax55 = plt.subplot(615)
+    plt.plot(impact_time, acc_4[-impact_length:])
+    plt.plot(impact_time, sol_acc_4[-impact_length:])
+    plt.plot(impact_time, predict_average_ddq_4)
+    ax55.legend()
+    ax55.set_ylabel('joint 4')
+    plt.grid(True)
+    ax55.locator_params(nbins=5, axis='y')
+    ax55.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+
+    ax56 = plt.subplot(616)
+    plt.plot(impact_time, acc_5[-impact_length:])
+    plt.plot(impact_time, sol_acc_5[-impact_length:])
+    plt.plot(impact_time, predict_average_ddq_5)
+    ax56.legend()
+    ax56.set_ylabel('joint 3')
+    plt.grid(True)
+    ax56.locator_params(nbins=5, axis='y')
+    ax56.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+
+    #
+    #
+    # ax22.plot(time, acc_0, label='acc 0')
+    # ax22.plot(time, predict_average_ddq_0, label='acc 0')
+    #
+    # ax22.plot(time, acc_1, label='acc 1')
+    # ax22.plot(time, acc_2, label='acc 2')
+    # ax22.plot(time, acc_3, label='acc 3')
+    # ax22.plot(time, acc_4, label='acc 4')
+    # ax22.plot(time, acc_5, label='acc 5')
+
+    # plt.ylabel('Joint accelerations [Radion/s^2]')
+    plt.xlabel('Time [s]')
+    plt.grid(True)
+    fig5.savefig("joint_accelerations_comparison.pdf", bbox_inches='tight')
+    plt.show()
