@@ -99,11 +99,10 @@ if __name__ == '__main__':
 
     panel = pydart.gui.pyqt5.side_panel.SidePanel()
     panel.add_label("Mode")
-    panel.add_push_button("Hello", world.print_text, next_line=False)
+    panel.add_push_button("Clear Captures", world.clear_captures, next_line=False)
     panel.add_push_button("Record Movie", world.produce_movie)
     panel.add_combobox("Render", ["No", "Yes"], default=1, callback=world.print_text, label="MyRenderSetting")
     panel.add_double_spinbox("Step", 0, 10.0, step=2.5, callback=world.print_text)
-    panel.set_text("Mode", "Melo")
 
     win.add_right_panel(panel)
     win.run_application()

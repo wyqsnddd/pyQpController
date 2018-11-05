@@ -26,15 +26,28 @@
 		"lower": [-50.0, -50.0, -50.0, -50.0, -50.0, -50.0 ]
 	},
 	"positionTask":{
-		"enabled": true,
+		"enabled": false,
 		"taskWeight": 200.0,
 		"axis_selection":[1.0, 1.0, 1.0],
 		"setPoint_fake":[0.1, 0.2, 0.1],
-		"setPoint":[0.12, 0.3, 0.2],
+		"setPoint_fake":[0.12, 0.2, 0.2],
+		"setPoint":[0.15, 0.2, 0.3],
 		"bodyLinkNumber": -1,
 		"Comment": "-1: end-effector, 4: elbow",
 		"Kp": 100.0,
 		"Kd": 20.0
+	},
+	"orientationTask":{
+		"enabled": true,
+		"stayStill": true,
+		"taskWeight": 300.0,
+		"axis_selection":[1.0, 1.0, 1.0],
+		"setPoint_fake":[0.70738827,  -0.70682518, 0.0, 0.0],
+		"setPoint":[1.0,  0.0, 0.0, 0.0],
+		"bodyLinkNumber": -1,
+		"Comment": "-1: end-effector, 4: elbow",
+		"Kp": 200.0,
+		"Kd": 30.0
 	},
 	"admittanceTask":{
 		"enabled": false,
@@ -48,12 +61,12 @@
 		"Kd": 100.0
 	},
 	"velocityTask":{
-		"enabled": false,
-		"taskWeight": 100.0,
+		"enabled": true,
+		"taskWeight": 300.0,
 		"axis_selection":[1.0, 1.0, 0.0],
-		"desiredVelocity": [0.2, 0.0, 0.0],
+		"desiredVelocity": [0.5, 0.0, 0.0],
 		"bodyLinkNumber": -1,
-		"Kp": 100.0
+		"Kp": 200.0
 	},
 	"trajectoryTask":{
 		"enabled": false,
