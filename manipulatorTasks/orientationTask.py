@@ -67,8 +67,15 @@ class orientationTask:
 
         transform = self.robot.bodynodes[self.bodyNodeIndex].world_transform()
         rotation = transform[:3,:3].reshape((3,3))
+        self.iniRotation = rotation
+        self.rotation_last = self.iniRotation
 
+        self.error_last = np.zeros((4,1))
+        self.error_v_last = np.zeros((4,1))
+
+        
         self.current_quat_last = pydart.utils.transformations.quaternion_from_matrix(rotation)
+        #self.current_quat_last = pydart.utils.transformations.quaternion_conjugate(self.current_quat_last)
 
         # end
 
@@ -198,7 +205,11 @@ class orientationTask:
         test_Q = 0.5*self.Q(current_quat)
 
         temp_1 = test_Q.dot(test_dimension_Matrix)
+
         current_quat_d_calc = temp_1.dot(angular_jac.dot(dq))
+        print "The calculated current end-effector quaternion rate is: ", '\n', current_quat_d_calc.transpose()
+
+        current_quat_d_calc = 0.5*(self.W(current_quat).transpose()).dot(angular_jac.dot(dq))
 
         print "The calculated current end-effector quaternion rate is: ", '\n', current_quat_d_calc.transpose()
 
@@ -209,6 +220,8 @@ class orientationTask:
         angular_jac_dot = self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian_deriv()
         current_quat_dd_calc = temp_1.dot(angular_jac_dot.dot(dq) + angular_jac.dot(ddq))
         print "The calculated current end-effector quaternion acc is: ", '\n', current_quat_dd_calc.transpose()
+        current_quat_dd_calc = 0.5*(self.W(current_quat).transpose()).dot(angular_jac_dot.dot(dq) + angular_jac.dot(ddq))
+        print "The calculated current end-effector quaternion acc is: ", '\n', current_quat_dd_calc.transpose()
 
         current_quat_con = pydart.utils.transformations.quaternion_conjugate(current_quat)
         print "Test conjugate: ", (self.Q(current_quat_con).dot(current_quat)).transpose()
@@ -218,17 +231,92 @@ class orientationTask:
         self.current_quat_d_last = current_quat_d
 
 
+    def vee(self, input):
+        w = np.zeros((3,1))
+        w[0] = 0.5*(input[2,1] - input[1, 2])
+        w[1] = 0.5*(-input[2,0] + input[0, 2])
+        w[2] = 0.5*(input[1,0] - input[0, 1])
+        
+        return w
+    
+    def testErrorRates(self):
+
+        transform = self.robot.bodynodes[self.bodyNodeIndex].world_transform()
+        rotation = transform[:3,:3].reshape((3,3))
+
+        rotation_rate = (rotation - self.rotation_last)/self.robot.world.dt
+
+        body_velocity_skew = (rotation.transpose()).dot(rotation_rate)
+        print "the body velocity is: ", '\n', self.vee(body_velocity_skew).transpose()
+
+        spatial_velocity_skew = rotation_rate.dot(rotation.transpose())
+        print "the spatial velocity is: ", '\n', self.vee(spatial_velocity_skew).transpose()
+
+        angular_jacobian = self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian()
+        dq = (self.robot.dq).reshape((self.robot.ndofs, 1))
+
+        calc_w = angular_jacobian.dot(dq)
+        print "the calculated angular velocity is: ", '\n', calc_w.transpose()
+
+
+
+        current_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
+        current_quat_con = pydart.utils.transformations.quaternion_conjugate(current_quat)
+        current_quat_con = np.reshape(current_quat_con, (4,1))
+
+        error = self.quat_desired_m.dot(current_quat_con)
+        
+        error_v = (error - self.error_last)/self.robot.world.dt
+
+
+
+        print "the current error v is: ", '\n', error_v.transpose()
+
+        temp_id = -np.identity(4)
+        temp_id[0, 0] = 1
+
+        block_one = (self.quat_desired_m.dot(temp_id)).dot(self.W(current_quat).transpose())
+
+        error_v_calc = 0.5*block_one.dot(calc_w)
+        
+        print "the calculated error v is: ", '\n', error_v_calc.transpose()
+        
+        error_acc = (error_v - self.error_v_last)/self.robot.world.dt        
+        print "the current error acc is: ", '\n', error_acc.transpose()
+
+        angular_jacobian_dot = self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian_deriv()
+        
+        ddq = (self.robot.ddq).reshape((self.robot.ndofs, 1))
+        error_acc_calc = 0.5*block_one.dot(angular_jacobian_dot.dot(dq) + angular_jacobian.dot(ddq) )
+        print "the calculated error acc is: ", '\n', error_acc_calc.transpose()
+        
+        
+
+        
+
+        
+        # update 
+        self.rotation_last = rotation
+        self.error_last = error
+        self.error_v_last = error_v
+
     def calcMatricies(self):
-        # self.testQuaternionRates()
+        #self.testQuaternionRates()
+        # self.testErrorRates()
 
         transform = self.robot.bodynodes[self.bodyNodeIndex].world_transform()
         rotation = transform[:3,:3].reshape((3,3))
 
         current_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
-        current_quat = pydart.utils.transformations.quaternion_conjugate(current_quat)
-        current_quat = np.reshape(current_quat, (4,1))
+        current_quat_con = pydart.utils.transformations.quaternion_conjugate(current_quat)
 
-        block_one = self.quat_desired_m.dot(self.W(current_quat).transpose())
+        current_quat_con = np.reshape(current_quat_con, (4,1))
+
+        temp_id = -np.identity(4)
+        temp_id[0, 0] = 1
+
+        block_one = (self.quat_desired_m.dot(temp_id)).dot(self.W(current_quat).transpose())
+
         newJacobian = 0.5*block_one.dot(self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian())
         newJacobian = self.selectionMatrix.dot(newJacobian)
 
@@ -236,10 +324,23 @@ class orientationTask:
         angular_jacobian_dot = self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian_deriv()
         dq = (self.robot.dq).reshape((self.robot.ndofs, 1))
 
-        error = self.quat_desired_m.dot(current_quat)
 
-        # print "The desired quaternionis: ", '\n', self.desiredOrientation
-        # print "The current quaternionis: ", '\n', current_quat.transpose()
+        #error = self.quat_desired_m.dot(current_quat_con)
+        #error = self.quat_desired_m.dot(temp_id.dot(current_quat))
+        error = self.Q(current_quat_con).dot(self.desiredOrientation)
+        error = np.reshape(error, (4,1))
+        # print "The current error is: ", '\n', error.transpose()
+        # test_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
+        #
+        # temp_id = -np.identity(4)
+        # temp_id[0,0] = 1
+        #
+        # temp_error = (self.quat_desired_m.dot(temp_id)).dot(test_quat)
+        #
+        # print "The inferred  error is: ", '\n', temp_error.transpose()
+
+        # print "The desired quaternion is: ", '\n', self.desiredOrientation
+        # print "The current quaternion is: ", '\n', current_quat.transpose()
         # print "The orientation task error is: ", '\n', error.transpose()
 
         error = self.selectionMatrix.dot(error)

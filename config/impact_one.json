@@ -31,7 +31,7 @@
 		"axis_selection":[1.0, 1.0, 1.0],
 		"setPoint_fake":[0.1, 0.2, 0.1],
 		"setPoint_fake":[0.12, 0.2, 0.2],
-		"setPoint":[0.15, 0.2, 0.3],
+		"setPoint":[0.0, 0.2, 0.3],
 		"bodyLinkNumber": -1,
 		"Comment": "-1: end-effector, 4: elbow",
 		"Kp": 100.0,
@@ -46,8 +46,8 @@
 		"setPoint":[1.0,  0.0, 0.0, 0.0],
 		"bodyLinkNumber": -1,
 		"Comment": "-1: end-effector, 4: elbow",
-		"Kp": 200.0,
-		"Kd": 30.0
+		"Kp": 10.0,
+		"Kd": 5.0
 	},
 	"admittanceTask":{
 		"enabled": false,
