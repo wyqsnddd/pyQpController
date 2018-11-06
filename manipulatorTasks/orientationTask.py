@@ -258,6 +258,11 @@ class orientationTask:
         calc_w = angular_jacobian.dot(dq)
         print "the calculated angular velocity is: ", '\n', calc_w.transpose()
 
+        current_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
+
+        current_quat_d = (current_quat - self.current_quat_last) / self.robot.world.dt
+        self.current_quat_last = current_quat
+        print "the predicted spatial velocity is: ", '\n', 2*self.Q(current_quat).transpose().dot(current_quat_d)
 
 
         current_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
@@ -289,33 +294,38 @@ class orientationTask:
         ddq = (self.robot.ddq).reshape((self.robot.ndofs, 1))
         error_acc_calc = 0.5*block_one.dot(angular_jacobian_dot.dot(dq) + angular_jacobian.dot(ddq) )
         print "the calculated error acc is: ", '\n', error_acc_calc.transpose()
-        
-        
 
-        
+        error_test_1 = self.quat_desired_m.dot(current_quat_con)
+        error_test_2 = (self.quat_desired_m.transpose()).dot(current_quat)
 
-        
-        # update 
+        print "old error is: ", error_test_1.transpose()
+        print "new error is: ", error_test_2.transpose()
+
+        # update
         self.rotation_last = rotation
         self.error_last = error
         self.error_v_last = error_v
 
     def calcMatricies(self):
         #self.testQuaternionRates()
-        # self.testErrorRates()
+        #self.testErrorRates()
 
         transform = self.robot.bodynodes[self.bodyNodeIndex].world_transform()
+        #transform = self.robot.bodynodes[self.bodyNodeIndex].transform()
+
         rotation = transform[:3,:3].reshape((3,3))
 
         current_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
-        current_quat_con = pydart.utils.transformations.quaternion_conjugate(current_quat)
+        current_quat = np.reshape(current_quat, (4,1))
 
-        current_quat_con = np.reshape(current_quat_con, (4,1))
+        #current_quat_con = pydart.utils.transformations.quaternion_conjugate(current_quat)
+        #current_quat_con = np.reshape(current_quat_con, (4,1))
 
         temp_id = -np.identity(4)
         temp_id[0, 0] = 1
 
         block_one = (self.quat_desired_m.dot(temp_id)).dot(self.W(current_quat).transpose())
+        #block_one = (self.quat_desired_m.transpose()).dot(self.W(current_quat).transpose())
 
         newJacobian = 0.5*block_one.dot(self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian())
         newJacobian = self.selectionMatrix.dot(newJacobian)
@@ -326,8 +336,9 @@ class orientationTask:
 
 
         #error = self.quat_desired_m.dot(current_quat_con)
-        #error = self.quat_desired_m.dot(temp_id.dot(current_quat))
-        error = self.Q(current_quat_con).dot(self.desiredOrientation)
+        #error = (self.quat_desired_m.transpose()).dot(current_quat)
+        error = self.quat_desired_m.dot(temp_id.dot(current_quat))
+        #error = self.Q(current_quat_con).dot(self.desiredOrientation)
         error = np.reshape(error, (4,1))
         # print "The current error is: ", '\n', error.transpose()
         # test_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
@@ -339,9 +350,9 @@ class orientationTask:
         #
         # print "The inferred  error is: ", '\n', temp_error.transpose()
 
-        # print "The desired quaternion is: ", '\n', self.desiredOrientation
-        # print "The current quaternion is: ", '\n', current_quat.transpose()
-        # print "The orientation task error is: ", '\n', error.transpose()
+        print "The desired quaternion is: ", '\n', self.desiredOrientation
+        print "The current quaternion is: ", '\n', current_quat.transpose()
+        print "The orientation task error is: ", '\n', error.transpose()
 
         error = self.selectionMatrix.dot(error)
 
@@ -352,8 +363,14 @@ class orientationTask:
 
         constant = (0.5*block_one.dot(angular_jacobian_dot + self.Kd*angular_jacobian)).dot(dq) + self.Kp*(error)
 
-        dimension_Matrix = np.zeros([3,4])
-        dimension_Matrix[:, 1:4] = np.identity(3)
+        # dimension_Matrix = np.zeros([3,4])
+        # dimension_Matrix[:, 1:4] = np.identity(3)
+        #
+        # newJacobian = dimension_Matrix.dot(newJacobian)
+        # constant = dimension_Matrix.dot(constant)
+
+        dimension_Matrix = np.identity(4)
+        dimension_Matrix[0,0] = 0.8
 
         newJacobian = dimension_Matrix.dot(newJacobian)
         constant = dimension_Matrix.dot(constant)

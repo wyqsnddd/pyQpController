@@ -210,6 +210,7 @@ class manipulatorController:
         Would be called automatically by "step()" function of the world object
         """
         self.errorZero.append(self.qp.obj.tasks[0].error)
+        #self.errorZero.append(self.qp.obj.tasks[1].error)
         self.time.append(self.skel.world.t)
         self.q_his.append(self.skel.q)
         self.dq_his.append(self.skel.dq)
