@@ -2,7 +2,7 @@
 import pydart2 as pydart
 import numpy as np
 from qpControllers import manipulatorQP
-from manipulatorTasks import contactAdmittanceTask, admittanceTask, positionTask
+from manipulatorTasks import contactAdmittanceTask, admittanceTask, positionTask, orientationTask
 from manipulatorController import  manipulatorController
 import executeACC
 
@@ -150,6 +150,34 @@ class manipulatorImpactController(manipulatorController):
         self.qp.obj.addTask(newPositionTask)
         logger.info("initialized position task ")
 
+    def addOrientationTask(self):
+        logger = logging.getLogger(__name__)
+
+        test_stableStill = self.qp.data["qpController"]["orientationTask"]["stayStill"]
+        Kp = self.qp.data["qpController"]["orientationTask"]["Kp"]
+        Kd = self.qp.data["qpController"]["orientationTask"]["Kd"]
+        linkIndex = self.qp.data["qpController"]["orientationTask"]["bodyLinkNumber"]
+
+        if(test_stableStill):
+            transform = self.skel.bodynodes[linkIndex].world_transform()
+            rotation = transform[:3, :3]
+            test_desiredOrientation = pydart.utils.transformations.quaternion_from_matrix(rotation)
+        else:
+            test_desiredOrientation = self.qp.data["qpController"]["orientationTask"]["setPoint"]
+            
+        test_weight = self.qp.data["qpController"]["orientationTask"]["taskWeight"]
+
+                
+        test_selectionVector = self.qp.data["qpController"]["orientationTask"]["axis_selection"]
+        test_selectionVector = np.asarray(test_selectionVector).reshape((3, 1))
+        
+        newOrientationTask = orientationTask.orientationTask(self.skel, test_desiredOrientation, test_weight, test_selectionVector, Kd, Kp, linkIndex)
+
+
+        self.qp.obj.addTask(newOrientationTask)
+        logger.info("initialized orientation task ")
+
+        
     def compute(self):
         """!@brief
         Would be called automatically by "step()" function of the world object
@@ -170,7 +198,13 @@ class manipulatorImpactController(manipulatorController):
             self.logData()
             # turn off the x axis control
             #self.qp.obj.tasks[0].selectionMatrix[0, 0] = 0.0
-            self.qp.obj.tasks.remove(self.qp.obj.tasks[0])
+
+            # remove all the tasks:
+            n_tasks =  len(self.qp.obj.tasks)
+            for ii in range(0, n_tasks):
+                self.qp.obj.tasks.remove(self.qp.obj.tasks[n_tasks - ii - 1])
+
+
             self.switchedTasks = True
 
             logger = logging.getLogger(__name__)
@@ -183,6 +217,7 @@ class manipulatorImpactController(manipulatorController):
             translation = transform[[0, 1, 2], 3].reshape((3, 1))
             self.addContactAdmittanceTask(ee_position=translation)
             self.addPositionTask()
+            self.addOrientationTask()
 
 
         self.solution = self.solveQP()

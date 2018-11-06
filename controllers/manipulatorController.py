@@ -38,11 +38,12 @@ class manipulatorController:
         logger.debug('manipulator controller created')
         self.errorZero = []
         self.time = []
-        self.tau_his = []
-        self.acc_his = []
+
         self.q_his = []
         self.dq_his = []
-
+        self.acc_his = []
+        self.tau_his = []
+        
         self.sol_q_his = []
         self.sol_dq_his = []
         self.sol_acc_his = []
@@ -198,7 +199,7 @@ class manipulatorController:
 
         if(self.impactEstimatorEnabled):
             impac_log_file_name = os.path.join('./log/data', 'impact-data_' + time_now)
-            np.savez_compressed(impac_log_file_name, time=self.impactEstimator.time, predict_F=self.impactEstimator.predictionLog.impulsiveForce, predict_delta_tau=self.impactEstimator.predictionLog.deltaTorque, predict_delta_dq = self.impactEstimator.predictionLog.deltaDq,
+            np.savez_compressed(impac_log_file_name, time=self.impactEstimator.time, predict_F=self.impactEstimator.predictionLog.impulsiveForce, predict_delta_tau=self.impactEstimator.predictionLog.deltaTorque, predict_delta_dq = self.impactEstimator.predictionLog.deltaDq, predict_average_acc = self.impactEstimator.predictionLog.averageDdq,
                                 actual_F = self.impactEstimator.actualLog.impulsiveForce, actual_delta_tau = self.impactEstimator.actualLog.deltaTorque, actual_delta_dq = self.impactEstimator.actualLog.deltaDq)
 
 
@@ -211,8 +212,9 @@ class manipulatorController:
         self.errorZero.append(self.qp.obj.tasks[0].error)
         self.time.append(self.skel.world.t)
         self.q_his.append(self.skel.q)
-        self.acc_his.append(self.skel.ddq)
         self.dq_his.append(self.skel.dq)
+        self.acc_his.append(self.skel.ddq)
+
 
 
 
@@ -232,7 +234,7 @@ class manipulatorController:
         #print "The generated joint acc is: ", '\n', solution
         self.sol_acc_his.append(self.solution)
         tau = self.jointAccToTau(self.solution)
-        self.tau_his.append(self.skel.tau)
+        self.tau_his.append(self.tau_last)
 
         return tau
         #return self.jointPositionControl(solution)

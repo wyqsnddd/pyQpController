@@ -8,6 +8,7 @@ import logging
 
 from manipulatorTasks import positionTask
 
+
 class qpObj:
     def __init__(self, skel, jointUnitWeight):
 
@@ -88,6 +89,23 @@ if __name__ == "__main__":
     test_obj.addTask(test_task)
 
 
+    print "The weight matrix is: ", '\n', test_obj.dofWeightMatrix
+    print "The numer of tasks is: ", test_obj.numTasks()
+
+
+
+
+    transform = test_robot.bodynodes[-1].world_transform()
+    rotation = transform[:3, :3]
+    current_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
+
+
+    # test_desiredPosition = array([0.1, 0.2, 0.3]).reshape((3,1))
+    taskWeight = 1000
+
+    test_orientationTask = orientationTask.orientationTask(test_robot, current_quat, taskWeight, Kd=5, Kp=10, bodyNodeIndex=-1)
+
+    test_obj.addTask(test_orientationTask)
     print "The weight matrix is: ", '\n', test_obj.dofWeightMatrix
     print "The numer of tasks is: ", test_obj.numTasks()
 
