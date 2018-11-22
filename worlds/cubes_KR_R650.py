@@ -43,10 +43,10 @@ class cubeKR5World(pydart.World):
         #ri.render_sphere(self.controller.qp.obj.tasks[0].desiredPosition, 0.05)
         ri.render_axes([0, 0, 0], 0.2, True)
 
-        desired_translation = self.controller.qp.obj.tasks[0].desiredPosition
+        #desired_translation = self.controller.qp.obj.tasks[0].desiredPosition
         # size = [0.01, 0.01, 0.01]
         # ri.render_box(desired_translation, size)
-        ri.render_sphere(desired_translation, 0.02)
+        #ri.render_sphere(desired_translation, 0.02)
 
         # transform = self.robot.bodynodes[-1].world_transform()
         # robot_ee_translation = transform[:3, 3]
@@ -62,10 +62,33 @@ class cubeKR5World(pydart.World):
         ri.set_color(0, 0, 0)
 
         ri.draw_text([20, 40], "time = %.4fs" % self.t)
-        ri.draw_text([20, 70], "Controller = %s" %
-                     ("ON" if self.controller.enabled else "OFF"))
 
+        # ri.draw_text([20, 70], "Controller = %s" %
+        #              ("ON" if self.controller.enabled else "OFF"))
 
+        J = np.reshape(self.robot.bodynodes[-1].linear_jacobian(), (3, self.robot.ndofs))
+
+        velocity = J.dot(np.reshape(self.skeletons[-1].dq, (self.robot.ndofs, 1)))
+
+        ri.draw_text([300, 60], "Robot end-effector velocity = %.2f %.2f %.2f " % (
+        velocity[0],
+        velocity[1],
+        velocity[2]))
+        ri.draw_text([300, 30], "Robot weight = %.2f Kilos" % self.robot.world.skeletons[-1].mass())
+
+        ri.set_color(0, 0, 0)
+
+        ri.draw_text([20, 40], "time = %.4fs" %self.t )
+
+        ri.draw_text([900, 60], "Wall friction coefficient = %.2f" %self.robot.world.skeletons[1].bodynodes[0].friction_coeff())
+        ri.draw_text([900, 90], "Wall restitution coefficient = %.2f" %self.robot.world.skeletons[1].bodynodes[0].restitution_coeff())
+        ri.draw_text([900, 120], "Robot palm restitution coefficient = %.2f" %self.robot.world.skeletons[-1].bodynode("palm").restitution_coeff())
+
+        
+
+    def clear_captures(self):
+        command = "rm ./data/captures/robot*"
+        os.popen(command)
 
     def on_key_press(self, key):
         if key == 'G':
