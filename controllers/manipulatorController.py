@@ -69,7 +69,7 @@ class manipulatorController:
 
     def solveQP(self):
 
-        return self.qp.solve()
+        return self.qp.solve(self.impactEstimator)
 
     def gravityCompensationTau(self):
         tau = np.zeros(self.skel.num_dofs())
@@ -105,12 +105,12 @@ class manipulatorController:
 
     def jointVelocityControl(self, jointAcc):
 
-        #jointAccError = (np.reshape(self.skel.ddq, (self.skel.ndofs,1)) - jointAcc)
+        jointAccError = (np.reshape(self.skel.ddq, (self.skel.ndofs,1)) - jointAcc)
         #jointAccError = self.skel.ddq - jointAcc.reshape((1, self.skel.ndofs))
 
-        #tau = self.tau_last + self.joint_v_K_v * (jointAccError) * self.skel.world.dt
+        tau = self.tau_last - self.joint_v_K_v * (jointAccError) * self.skel.world.dt
 
-        tau = self.tau_last + self.joint_v_K_v * (jointAcc) * self.skel.world.dt
+        #tau = self.tau_last + self.joint_v_K_v * (jointAcc) * self.skel.world.dt
 
         self.tau_last = tau
         #self.tau_last = (self.joint_v_K_v *self.skel.dq).reshape((self.skel.ndofs, 1))
@@ -118,7 +118,7 @@ class manipulatorController:
         tau = tau.flatten()
 
         #tau = tau + self.gravityCompensationTau()
-        tau = tau
+        #tau = tau
 
         logger = logging.getLogger(__name__)
         logger.debug('The generated tau is %s ', tau)
@@ -173,11 +173,15 @@ class manipulatorController:
 
         # It seems that we can work with this equality if there is no forces
         # tau = self.skel.M.dot(jointAcc) + (self.skel.coriolis_and_gravity_forces()).reshape((self.skel.ndofs, 1)) - J.transpose().dot(self.skel.constraint_forces().reshape((self.skel.ndofs,1)))
+
         if(self.constraintForceAware):
             tau = self.skel.M.dot(jointAcc - self.joint_p_K_v * velocityError - self.joint_p_K_p * positionError) + (self.skel.coriolis_and_gravity_forces()).reshape((self.skel.ndofs, 1)) - self.skel.constraint_forces().reshape((self.skel.ndofs,1))
         else:
             tau = self.skel.M.dot(jointAcc - self.joint_p_K_v * velocityError - self.joint_p_K_p * positionError) + (self.skel.coriolis_and_gravity_forces()).reshape(
             (self.skel.ndofs, 1))
+        
+        #tau = self.jointVelocityControl(jointAcc)
+
 
         self.sol_tau_his.append(tau)
         #print "The generated tau is: ", '\n', tau
@@ -209,7 +213,7 @@ class manipulatorController:
         """!@brief
         Would be called automatically by "step()" function of the world object
         """
-        self.errorZero.append(self.qp.obj.tasks[0].error)
+        self.errorZero.append(self.qp.obj.tasks[2].error)
         #self.errorZero.append(self.qp.obj.tasks[1].error)
         self.time.append(self.skel.world.t)
         self.q_his.append(self.skel.q)
@@ -235,6 +239,7 @@ class manipulatorController:
         #print "The generated joint acc is: ", '\n', solution
         self.sol_acc_his.append(self.solution)
         tau = self.jointAccToTau(self.solution)
+        #tau = self.jointVelocityControl(self.solution)
         self.tau_his.append(self.tau_last)
 
         return tau
