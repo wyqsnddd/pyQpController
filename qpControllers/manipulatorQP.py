@@ -11,6 +11,7 @@ from manipulatorConstraints import jointPositionLimits, jointVelocityConstraints
 from qpControllers import qpObj
 
 from manipulatorTasks import positionTask
+from manipulatorTasks import orientationTask
 from manipulatorTasks import translationVelocityTask
 from manipulatorTasks import trajectoryTask
 #from qpsolvers import solve_qp
@@ -114,6 +115,46 @@ class manipulatorQP:
         else:
             logger.info("Position task is disabled")
 
+        test_orientationTask = data["qpController"]["orientationTask"]["enabled"]
+
+        if(test_orientationTask):
+
+            test_stableStill = data["qpController"]["orientationTask"]["stayStill"]
+            Kp = data["qpController"]["orientationTask"]["Kp"]
+            Kd = data["qpController"]["orientationTask"]["Kd"]
+            linkIndex = data["qpController"]["orientationTask"]["bodyLinkNumber"]
+
+            if(test_stableStill):
+                transform = self.robot.bodynodes[linkIndex].world_transform()
+                #transform = self.robot.bodynodes[linkIndex].transform()
+
+                rotation = transform[:3, :3]
+                test_desiredOrientation = pydart.utils.transformations.quaternion_from_matrix(rotation)
+            else:
+                test_desiredOrientation = data["qpController"]["orientationTask"]["setPoint"]
+            test_weight = data["qpController"]["orientationTask"]["taskWeight"]
+
+
+            #test_desiredPosition = listToArray.listToArray(test_desiredPosition)
+            #test_desiredPosition = np.asarray(test_desiredPosition).reshape((3,1))
+            logger.info( "desired orientation is: %s, controller gains are %d and %d. End-effector is link: %d ", test_desiredOrientation, Kd, Kp, linkIndex)
+            #test_vector = np.zeros(5)
+            # initialize the tasks:
+
+            test_selectionVector = data["qpController"]["orientationTask"]["axis_selection"]
+            test_selectionVector = np.asarray(test_selectionVector).reshape((3, 1))
+
+            test_scalarWeight = data["qpController"]["orientationTask"]["quaternion_scalar_weight"]
+
+            newOrientationTask = orientationTask.orientationTask(self.robot, test_desiredOrientation, test_weight, test_scalarWeight, test_selectionVector, Kd, Kp, linkIndex)
+
+            self.obj.addTask(newOrientationTask)
+            logger.info("initialized orientation task ")
+
+        else:
+            logger.info("Orientation task is disabled")
+
+
         test_velocityTask = data["qpController"]["velocityTask"]["enabled"]
 
         if(test_velocityTask):
@@ -181,8 +222,8 @@ class manipulatorQP:
         self.inequalityConstraints.append(self.jointVelocityLimitConstraints)
         logger.info("initialized joint velocity limits inequality constraints ")
 
-        self.inequalityConstraints.append(self.jointAccelerationLimitConstraints)
-        logger.info("initialized joint acceleration limits inequality constraints ")
+        #self.inequalityConstraints.append(self.jointAccelerationLimitConstraints)
+        #logger.info("initialized joint acceleration limits inequality constraints ")
 
 
         self.inequalityConstraints.append(self.torqueLimitConstraints)
@@ -208,10 +249,10 @@ class manipulatorQP:
 
         return output
 
-    def update(self):
+    def update(self, impactEstimator):
 
         for ii in range(0, len(self.inequalityConstraints)):
-            self.inequalityConstraints[ii].update()
+            self.inequalityConstraints[ii].update(impactEstimator)
 
         for ii in range(0, len(self.equalityConstaints)):
             self.equalityConstaints[ii].update()
@@ -219,8 +260,8 @@ class manipulatorQP:
         for ii in range(0,  len(self.obj.tasks)):
             self.obj.tasks[ii].update()
 
-    def solve(self):
-        self.update()
+    def solve(self, impactEstimator):
+        self.update(impactEstimator)
 
         [Q, P, C] = self.obj.calcMatricies()
 
