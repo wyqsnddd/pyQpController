@@ -3,8 +3,8 @@
 		"box_bottom_friction_coeff": 0.1,
 		"box_coarse_surface_friction_coeff": 1.0,
 		"wall_friction_coeff": 0.8,
-		"wall_restitution_coeff": 1.0,
-		"palm_restitution_coeff": 1.0 
+		"wall_restitution_coeff": 1.26,
+		"palm_restitution_coeff": 1.26 
 	},
 	"jointVelocityController":{
 		"K_v": 1.0 
@@ -12,6 +12,12 @@
 	"impactEstimator":{
 		"enabled": true,
 		"bodyLinkNumber": -1
+	},    
+	"jointVelocityJumpEstimator":{
+		"enabled": true,
+		"bodyLinkNumber": -1,
+		"res_upper": 1.26,
+		"res_lower": 1.26 
 	},    
 	"jointPositionController":{
 		"K_v": 1.0,
@@ -43,9 +49,9 @@
 		},
 		"orientationTask":{
 			"enabled": true,
-			"stayStill": false,
+			"stayStill": true,
 			"taskWeight": 300.0,
-			"quaternion_scalar_weight": 1.0,
+			"quaternion_scalar_weight": 1.5,
 			"axis_selection":[1.0, 1.0, 1.0],
 			"setPoint-fake":[-0.70738827, 0.0, 0.0, -0.70682518],
 			"setPoint-fake":[-0.70738827, -0.70682518, 0.0, 0.0],
@@ -70,7 +76,7 @@
 			"enabled": true,
 			"taskWeight": 1000.0,
 			"axis_selection":[1.0, 0.0, 0.0],
-			"desiredVelocity": [0.2, 0.0, 0.0],
+			"desiredVelocity": [1.0, 0.0, 0.0],
 			"bodyLinkNumber": -1,
 			"Kp": 3000.0
 		},
