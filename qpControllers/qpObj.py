@@ -31,8 +31,8 @@ class qpObj:
             self.dofWeightMatrix[ii, ii] = jointUnitWeight
             
         for ii in range(self.dof, 2*self.dof):
-            #self.dofWeightMatrix[ii,ii] = (self.dof - ii)*jointUnitWeight
-            self.dofWeightMatrix[ii, ii] = jointUnitWeight
+            # We need to maximize the delta QP 
+            self.dofWeightMatrix[ii, ii] = -jointUnitWeight
             
 
     def numTasks(self):
