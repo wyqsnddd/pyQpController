@@ -21,24 +21,26 @@ class impactEstimator:
 
     def initializeLog(self):
 
-        self.predictionLog = namedtuple('log', ['impulsiveForce','deltaTorque','deltaDq'])
+        self.predictionLog = namedtuple('log', ['impulsiveForce','deltaTorque','deltaDq', 'averageDdq'])
         self.time = []
         self.predictionLog.impulsiveForce = []
         self.predictionLog.deltaTorque = []
         self.predictionLog.deltaDq = []
+        self.predictionLog.averageDdq = []
 
         self.actualLog = namedtuple('log', ['impulsiveForce','deltaTorque','deltaDq'])
         self.actualLog.impulsiveForce = []
         self.actualLog.deltaTorque = []
         self.actualLog.deltaDq = []
+        self.average_ddq = np.zeros((self.robot.ndofs, 1))
 
-
-    def saveLog(self, predictF, predictTau, predictDq, F, tau, dq):
+    def saveLog(self, predictF, predictTau, predictDq, averageDdq, F, tau, dq):
 
         self.time.append(self.robot.world.t)
         self.predictionLog.impulsiveForce.append(predictF)
         self.predictionLog.deltaTorque.append(predictTau)
         self.predictionLog.deltaDq.append(predictDq)
+        self.predictionLog.averageDdq.append(averageDdq)
 
         self.actualLog.impulsiveForce.append(F)
         self.actualLog.deltaTorque.append(tau)
@@ -78,7 +80,8 @@ class impactEstimator:
             return False
 
     def checkContactVelocityJump(self):
-        return self.robot.bodynodes[self.bodyNodeIndex].com_linear_velocity() - self.contactVelocity_last
+        #return self.robot.bodynodes[self.bodyNodeIndex].com_linear_velocity() - self.contactVelocity_last
+        return self.robot.bodynodes[self.bodyNodeIndex].com_linear_velocity()
 
 
     def calcImpulsiveQuantities(self):
@@ -97,8 +100,12 @@ class impactEstimator:
 
         delta_joint_v_simple = np.linalg.pinv(self.J_last).dot(delta_v)
 
-        return [impulsiveF, delta_torque, delta_joint_v, delta_joint_v_simple]
-
+        average_ddq = dt_inv*delta_joint_v
+        self.average_ddq =  average_ddq
+        return [impulsiveF, delta_torque, delta_joint_v, average_ddq, delta_joint_v_simple]
+    
+    def readAverageDdq(self):
+        return self.average_ddq
 
     def checkImpulsiveQuantities(self):
 
@@ -122,9 +129,9 @@ class impactEstimator:
 
     def update(self):
         if self.impactDetected():
-            [predicted_F, predicted_delta_tau, predicted_delta_dq, predicted_delta_dq_sim] = self.calcImpulsiveQuantities()
+            [predicted_F, predicted_delta_tau, predicted_delta_dq, predicted_average_ddq, predicted_delta_dq_sim] = self.calcImpulsiveQuantities()
             [real_F, real_delta_tau, real_delta_dq] = self.checkImpulsiveQuantities()
-            self.saveLog(predicted_F, predicted_delta_tau, predicted_delta_dq, real_F, real_delta_tau, real_delta_dq)
+            self.saveLog(predicted_F, predicted_delta_tau, predicted_delta_dq,  predicted_average_ddq, real_F, real_delta_tau, real_delta_dq)
 
             print "Impact detected."
             self.updateParameters()

@@ -288,8 +288,9 @@ class manipulatorQP:
 
 
             #sol = solve_qp(Q, P.T, G, H, solver='mosek')
-
-        return sol.reshape(self.robot.ndofs, 1)
+        # We only take the first 6 joint accelerations
+        solution = sol.reshape(2*self.robot.ndofs, 1)
+        return solution[:6]
 
 
     def cvxopt_matrix(self, M):
@@ -309,8 +310,13 @@ class manipulatorQP:
             if A is not None:
                 args.extend([self.cvxopt_matrix(A), self.cvxopt_matrix(b)])
 
+        try:
+            sol = qp(*args, initvals=initvals)
+        except ValueError:
+            logging.error("QP is infeasible ")
+            self.robot.controller.logData()
+            return None
 
-        sol = qp(*args, initvals=initvals)
         if 'optimal' not in sol['status']:
             logging.error("QP fails, the status are: %s", sol )
             logging.error("The s variable is, %s", sol['s'])

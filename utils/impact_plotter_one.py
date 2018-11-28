@@ -9,7 +9,8 @@ from matplotlib.font_manager import FontProperties
 if __name__ =="__main__":
     fileName =  sys.argv[1]
     loaded = np.load(fileName)
-    #loaded = np.load("../log/data/data_Sep_28_2018_10-39-46.npz")
+
+    #loaded = np.load("../log/data/data_Nov_22_2018_23-19-19.npz")
     #loaded = np.load("../log/data/data_Oct_23_2018_21-43-14.npz")
 
     time = loaded['time']
@@ -42,12 +43,12 @@ if __name__ =="__main__":
     fig12 = plt.figure()
 
     ax = fig12.gca()
-    ax.plot(time, error_x, label='Error x')
-    ax.plot(time, error_y, label='Error y')
-    ax.plot(time, error_z, label='Error z')
+    ax.plot(time, error_x, label='Error x', color='red')
+    ax.plot(time, error_y, label='Error y', color='green')
+    ax.plot(time, error_z, label='Error z', color='blue')
     ax.legend(frameon=False, loc='upper left', prop=fontP)
     plt.xlabel('Time [s]')
-    plt.ylabel('Task Error')
+    plt.ylabel('Translational velocity task Error [M/s] ')
     plt.grid(True)
     fig12.savefig("task_error.pdf", bbox_inches='tight')
 
@@ -152,7 +153,8 @@ if __name__ =="__main__":
     ax20.plot(time, q_4, label='q 4')
     ax20.plot(time, q_5, label='q 5')
     ax20.legend(frameon=False, loc='upper left', prop=fontP)
-    plt.ylabel('Joint positions [Radian]')
+    ax20.autoscale(enable=True, axis='x', tight=True)
+    plt.ylabel('Joint positions [Radion]')
     plt.xlabel('Time [s]')
     plt.grid(True)
     fig20.savefig("joint_positions.pdf", bbox_inches='tight')
@@ -168,6 +170,7 @@ if __name__ =="__main__":
     ax.plot(time, dq_4, label='dq 4')
     ax.plot(time, dq_5, label='dq 5')
     ax.legend(frameon=False, loc='upper left', prop=fontP)
+    ax.autoscale(enable=True, axis='x', tight=True)
     plt.ylabel('Joint velocities [Radion/s]')
     plt.xlabel('Time [s]')
     plt.grid(True)
@@ -183,6 +186,7 @@ if __name__ =="__main__":
     ax22.plot(time, acc_4, label='acc 4')
     ax22.plot(time, acc_5, label='acc 5')
     ax22.legend(frameon=False, loc='upper left', prop=fontP)
+    ax22.autoscale(enable=True, axis='x', tight=True)
     plt.ylabel('Joint accelerations [Radion/s^2]')
     plt.xlabel('Time [s]')
     plt.grid(True)
@@ -197,6 +201,7 @@ if __name__ =="__main__":
     ax23.plot(time[0:len(tau_0)], tau_4, label='tau 4')
     ax23.plot(time[0:len(tau_0)], tau_5, label='tau 5')
     ax23.legend(frameon=False, loc='upper left', prop=fontP)
+    ax23.autoscale(enable=True, axis='x', tight=True)
     plt.ylabel('Joint torque [Nm]')
     plt.xlabel('Time [s]')
     plt.grid(True)
@@ -211,6 +216,7 @@ if __name__ =="__main__":
     ax24.plot(time[0:len(tau_0)], sol_acc_4, label='sol 4')
     ax24.plot(time[0:len(tau_0)], sol_acc_5, label='sol 5')
     ax24.legend(frameon=False, loc='upper left', prop=fontP)
+    ax24.autoscale(enable=True, axis='x', tight=True)
     plt.ylabel('QP: Joint acceleration [Radion/s^2]')
     plt.xlabel('Time [s]')
     plt.grid(True)
@@ -225,6 +231,7 @@ if __name__ =="__main__":
     ax25.plot(time[0:len(tau_0)], sol_dq_4, label='sol 4')
     ax25.plot(time[0:len(tau_0)], sol_dq_5, label='sol 5')
     ax25.legend(frameon=False, loc='upper left', prop=fontP)
+    ax25.autoscale(enable=True, axis='x', tight=True)
 
     plt.ylabel('QP: Joint Velocity [Radion/s]')
     plt.xlabel('Time [s]')
@@ -240,6 +247,8 @@ if __name__ =="__main__":
     ax26.plot(time[0:len(tau_0)], sol_q_4, label='sol 4')
     ax26.plot(time[0:len(tau_0)], sol_q_5, label='sol 5')
     ax26.legend(frameon=False, loc='upper left', prop=fontP)
+    ax26.autoscale(enable=True, axis='x', tight=True)
+
     plt.ylabel('QP: Joint Position [Radion]')
     plt.xlabel('Time [s]')
     plt.grid(True)
@@ -255,6 +264,7 @@ if __name__ =="__main__":
     ax27.plot(time[0:len(tau_0)], sol_tau_4, label='sol 4')
     ax27.plot(time[0:len(tau_0)], sol_tau_5, label='sol 5')
     ax27.legend(frameon=False, loc='upper left', prop=fontP)
+    ax27.autoscale(enable=True, axis='x', tight=True)
     plt.ylabel('QP: Joint Torque [Nm]')
     plt.xlabel('Time [s]')
     plt.grid(True)

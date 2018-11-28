@@ -64,6 +64,16 @@ if __name__ == '__main__':
     #         print("%.4fs: The last cube COM = %s" % (world.t, str(skel.C)))
     #     world.step()
 
+    
+    frictionCoeff = qpData["simulationWorldParameters"]["wall_friction_coeff"]
+    restitutionCoeff = qpData["simulationWorldParameters"]["wall_restitution_coeff"]
+
+    palmRestitutionCoeff = qpData["simulationWorldParameters"]["palm_restitution_coeff"]
+
+    world.skeletons[1].bodynodes[0].set_friction_coeff(frictionCoeff)
+    world.skeletons[1].bodynodes[0].set_restitution_coeff(restitutionCoeff)
+    world.skeletons[-1].bodynode("palm").set_restitution_coeff(palmRestitutionCoeff)
+
     skel= world.skeletons[-1]
 
     print_skeleton.skeleton_printer(skel)

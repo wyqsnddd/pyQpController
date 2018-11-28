@@ -73,8 +73,14 @@ class translationVelocityTask:
 
 
         Q = newJacobian.T.dot(newJacobian)
+        Q = np.block([
+            [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
+            [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
+        ])
 
         P = 2*constant.T.dot(newJacobian)
+        zero_vector = np.zeros((1, self.robot.ndofs))
+        P = np.concatenate((P, zero_vector), axis=1)
 
         C = constant.T.dot(constant)
 

@@ -27,22 +27,28 @@ class jointLimitConstraints:
 
         self.upper = (self.robot.position_upper_limits()).reshape((self.robot.ndofs, 1))
         self.lower = (self.robot.position_lower_limits()).reshape((self.robot.ndofs, 1))
+        print "The joint upper limit is: ", self.upper.transpose()
+        print "The joint lower limit is: ", self.lower.transpose()
+
         self.dt = dt
 
     def upperRhs(self, q, dq):
         return (self.upper - q)*(1/(self.dt*self.dt)) - dq*(1/self.dt)
 
-    def update(self):
+    def update(self, impactEstimator):
         pass
 
     def lowerRhs(self, q, dq):
         return -((self.lower - q)*(1/(self.dt*self.dt)) - dq*(1/self.dt))
 
     def calcMatricies(self):
+        zero_block = np.zeros((2*self.robot.ndofs, self.robot.ndofs))
+        
         q = (self.robot.q).reshape((self.robot.ndofs,1))
         dq = (self.robot.dq).reshape((self.robot.ndofs, 1))
 
         G = np.concatenate((np.identity(self.robot.ndofs), -np.identity(self.robot.ndofs)), axis=0)
+        G = np.concatenate((G, zero_block), axis=1)
         h = np.concatenate(( self.upperRhs(q, dq), self.lowerRhs(q, dq)), axis=0)
 
         return [G, h]

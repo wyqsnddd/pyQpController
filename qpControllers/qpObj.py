@@ -23,12 +23,17 @@ class qpObj:
         #self.logger = logger
 
 
-        self.dofWeightMatrix = np.identity(self.dof)
+        self.dofWeightMatrix = np.identity(2*self.dof)
 
         # set the weights of the joint, descend from base to end
         for ii in range(0,self.dof):
             #self.dofWeightMatrix[ii,ii] = (self.dof - ii)*jointUnitWeight
             self.dofWeightMatrix[ii, ii] = jointUnitWeight
+            
+        for ii in range(self.dof, 2*self.dof):
+            #self.dofWeightMatrix[ii,ii] = (self.dof - ii)*jointUnitWeight
+            self.dofWeightMatrix[ii, ii] = jointUnitWeight
+            
 
     def numTasks(self):
         return len(self.tasks)
@@ -44,8 +49,8 @@ class qpObj:
 
     def calcMatricies(self):
 
-        Q = np.zeros((self.dof, self.dof))
-        P = np.zeros(( 1, self.dof))
+        Q = np.zeros((2*self.dof, 2*self.dof))
+        P = np.zeros(( 1, 2*self.dof))
         C = 0.0
         Q += self.dofWeightMatrix
 

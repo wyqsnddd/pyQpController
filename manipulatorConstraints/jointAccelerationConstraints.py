@@ -15,19 +15,31 @@ class jointAccelerationLimitConstraints:
         self.robot = skel
 
         self.upper = 5*np.array([0.87266, 0.87266, 0.87266, 1.466, 2.059, 2.094])
+        self.upper = np.reshape(self.upper, (self.robot.ndofs, 1))
         self.lower = -self.upper
-
+        
         print "The joint acc upper limit is: ", self.upper
         print "The joint acc lower limit is: ", self.lower
 
-    def update(self):
-        pass
-
+    def update(self, impactEstimator):
+        self.average_impact_acc = impactEstimator.readAverageDdq()
+        self.average_impact_acc = np.reshape(self.average_impact_acc, (self.robot.ndofs, 1))
+        
     def calcMatricies(self):
+        zero_block = np.zeros((2*self.robot.ndofs, self.robot.ndofs))
 
-        G = np.concatenate((np.identity(self.robot.ndofs), -np.identity(self.robot.ndofs)), axis=0)
-        h = np.reshape(np.concatenate((self.upper, -self.lower)),(12,1))
+        G_1 = np.concatenate((np.identity(self.robot.ndofs), -np.identity(self.robot.ndofs)), axis=0)
+        G_2 = np.concatenate((np.identity(self.robot.ndofs), -np.identity(self.robot.ndofs)), axis=0)
 
+        # G = np.concatenate((G_1, G_2), axis=0)
+        G = G_1
+        G = np.concatenate((G, zero_block), axis=1)
+
+        h_1 = np.reshape(np.concatenate((self.upper, -self.lower)),(12,1))
+        #h_2 = np.reshape(np.concatenate((self.upper - self.average_impact_acc, -self.lower + self.average_impact_acc)),(12, 1))
+                         
+        # h = np.reshape(np.concatenate((h_1, h_2)), (24,1))
+        h = h_1
         return [G, h]
 
 if __name__ == "__main__":

@@ -1,7 +1,9 @@
 {
 "simulationWorldParameters":{
         "box_bottom_friction_coeff": 0.1,
-        "box_coarse_surface_friction_coeff": 1.0 
+	"box_coarse_surface_friction_coeff": 0.5,
+	"box_surface_restitution_coeff": 0.20,
+	"box_weight": 1.0
 },
 "jointVelocityController":{
 	"K_v": 1.0 
@@ -26,26 +28,27 @@
 		"lower": [-50.0, -50.0, -50.0, -50.0, -50.0, -50.0 ]
 	},
 	"positionTask":{
-		"enabled": false,
+		"enabled": true,
 		"taskWeight": 200.0,
-		"setPoint":[0.1, 0.2, 0.1],
+		"setPoint":[0.12, 0.25, 0.3],
 		"axis_selection":[0.0, 1.0, 1.0],
 		"bodyLinkNumber": -1,
 		"Comment": "-1: end-effector, 4: elbow",
-		"Kp": 5.0,
-		"Kd": 1.0
+		"Kp": 100.0,
+		"Kd": 20.0
 	},
 	"orientationTask":{
 		"enabled": true,
 		"stayStill": true,
-		"taskWeight": 300.0,
+		"taskWeight": 100.0,
+		"quaternion_scalar_weight": 1.5,
 		"axis_selection":[1.0, 1.0, 1.0],
-		"setPoint_fake":[0.70738827,  -0.70682518, 0.0, 0.0],
-		"setPoint":[1.0,  0.0, 0.0, 0.0],
+		"setPoint":[0.7074,  -0.7074, 0.0, 0.0],
+		"setPoint-fake":[1.0,  0.0, 0.0, 0.0],
 		"bodyLinkNumber": -1,
 		"Comment": "-1: end-effector, 4: elbow",
-		"Kp": 10.0,
-		"Kd": 5.0
+		"Kp": 30.0,
+		"Kd": 10.0
 	},
 	"contactAdmittanceTask":{
 		"enabled": false,
@@ -72,9 +75,9 @@
 	},
 	"velocityTask":{
 		"enabled": true,
-		"taskWeight": 300.0,
-		"axis_selection":[1.0, 1.0, 1.0],
-		"desiredVelocity": [0.3, 0.0, 0.0],
+		"taskWeight": 1000.0,
+		"axis_selection":[1.0, 0.0, 0.0],
+		"desiredVelocity": [0.05, 0.0, 0.0],
 		"bodyLinkNumber": -1,
 		"Kp": 100.0
 	},

@@ -59,8 +59,12 @@ class jointVelocityJumpEstimator:
 
     def initializeLog(self):
 
-        self.predictionLog = namedtuple('log', ['delta_dq_lower','delta_dq_upper', 'ddqUpperBoundPosition', 'ddqLowerBoundPosition','ddqUpperBoundVelocity', 'ddqLowerBoundVelocity', 'real_ddqUpperBoundPosition', 'real_ddqLowerBoundPosition','real_ddqUpperBoundVelocity', 'real_ddqLowerBoundVelocity', 'real_ddqUpperBoundTau', 'real_ddqLowerBoundTau'])
+        self.predictionLog = namedtuple('log', ['dq','ddq','tau','delta_dq_lower','delta_dq_upper', 'ddqUpperBoundPosition', 'ddqLowerBoundPosition','ddqUpperBoundVelocity', 'ddqLowerBoundVelocity', 'real_ddqUpperBoundPosition', 'real_ddqLowerBoundPosition','real_ddqUpperBoundVelocity', 'real_ddqLowerBoundVelocity', 'real_ddqUpperBoundTau', 'real_ddqLowerBoundTau', 'predict_ddqUpperBoundTau', 'predict_ddqLowerBoundTau','predict_tauUpper', 'predict_tauLower'])
         self.time = []
+        self.predictionLog.ddq = []
+        self.predictionLog.dq = []
+        self.predictionLog.tau = []
+
         self.predictionLog.deltaDqLower = []
         self.predictionLog.deltaDqUpper = []
         
@@ -77,16 +81,27 @@ class jointVelocityJumpEstimator:
         self.predictionLog.real_ddqUpperBoundTau = []
         self.predictionLog.real_ddqLowerBoundTau = []
         
+        self.predictionLog.predict_ddqUpperBoundTau = []
+        self.predictionLog.predict_ddqLowerBoundTau = []
 
-    def saveLog(self, predictDeltaDqLower, predictDeltaDqUpper,
+        self.predictionLog.predict_tauUpper = []
+        self.predictionLog.predict_tauLower = []
+
+    def saveLog(self, dq, ddq, tau,
+                predictDeltaDqLower, predictDeltaDqUpper,
                 ddqLowerPosition, ddqUpperPosition,
                 real_ddqLowerPosition, real_ddqUpperPosition,
                 ddqLowerVelocity, ddqUpperVelocity,
                 real_ddqLowerVelocity, real_ddqUpperVelocity,
-                real_ddqLowerTau, real_ddqUpperTau):
+                real_ddqLowerTau, real_ddqUpperTau,
+                predict_ddqLowerTau, predict_ddqUpperTau,
+                predict_tauLower, predict_tauUpper):
 
 
         self.time.append(self.robot.world.t)
+        self.predictionLog.dq.append(dq)
+        self.predictionLog.ddq.append(ddq)
+        self.predictionLog.tau.append(tau)
 
         self.predictionLog.deltaDqLower.append(predictDeltaDqLower)
         self.predictionLog.deltaDqUpper.append(predictDeltaDqUpper)
@@ -102,7 +117,14 @@ class jointVelocityJumpEstimator:
         self.predictionLog.real_ddqLowerBoundVelocity.append(real_ddqLowerVelocity)
         self.predictionLog.real_ddqUpperBoundTau.append(real_ddqUpperTau)
         self.predictionLog.real_ddqLowerBoundTau.append(real_ddqLowerTau)
-        
+
+        self.predictionLog.predict_ddqUpperBoundTau.append(predict_ddqUpperTau)
+        self.predictionLog.predict_ddqLowerBoundTau.append(predict_ddqLowerTau)
+
+        self.predictionLog.predict_tauUpper.append(predict_tauUpper)
+        self.predictionLog.predict_tauLower.append(predict_tauLower)
+
+
     def updateParameters(self):
         self.dq_last = (self.robot.dq).reshape((self.robot.ndofs, 1))
         self.q_last = (self.robot.q).reshape((self.robot.ndofs, 1))
@@ -110,6 +132,10 @@ class jointVelocityJumpEstimator:
         self.N_last = (self.robot.coriolis_and_gravity_forces()).reshape((self.robot.ndofs, 1))
         
     def calcImpulsiveQuantities(self, sol_ddq):
+
+        N = (self.robot.coriolis_and_gravity_forces()).reshape((self.robot.ndofs, 1))
+
+        sol_tau = self.robot.M.dot(sol_ddq) + N
 
         M_inv = np.linalg.pinv(self.robot.M)
 
@@ -122,62 +148,97 @@ class jointVelocityJumpEstimator:
         constant = temp_1.dot(temp_2)
 
         dq =  (self.robot.dq).reshape((self.robot.ndofs, 1))
+        q = (self.robot.q).reshape((self.robot.ndofs, 1))
 
 
         baseOne = constant.dot(jacobian.dot( dq + self.dt*sol_ddq   ))
 
-        predicted_delta_dq_upper = self.resUpper*baseOne
-        predicted_delta_dq_lower = self.resLower*baseOne
+        predicted_delta_dq_upper = (- self.resUpper - 1)*baseOne
+        predicted_delta_dq_lower = (- self.resLower - 1)*baseOne
 
         ddq = (self.robot.ddq).reshape((self.robot.ndofs, 1))
         position = (self.robot.q).reshape((self.robot.ndofs, 1))
 
 
         ddq_upper_bound_position = (self.positionUpper - position + ddq*(self.dt*self.dt) + predicted_delta_dq_upper*self.dt)/(self.dt*self.dt)
-        ddq_lower_bound_position = (self.positionLower - position + ddq * (self.dt*self.dt) + predicted_delta_dq_upper * self.dt) / (
+        ddq_lower_bound_position = (self.positionLower - position + ddq * (self.dt*self.dt) + predicted_delta_dq_lower * self.dt) / (
         self.dt*self.dt)
 
         ddq_upper_bound_Velocity = -(self.velocityLower - dq - ddq * self.dt - predicted_delta_dq_upper) / self.dt
-        ddq_lower_bound_Velocity = -(self.velocityUpper - dq - ddq*self.dt - predicted_delta_dq_upper)/self.dt
+        ddq_lower_bound_Velocity = -(self.velocityUpper - dq - ddq*self.dt - predicted_delta_dq_lower)/self.dt
 
 
-        real_ddq_upper_bound_position =  (self.positionUpper - self.q_last - self.dq_last*self.dt)/(self.dt*self.dt)
-        real_ddq_lower_bound_position = (self.positionLower - self.q_last - self.dq_last*self.dt)/(self.dt*self.dt)
+        real_ddq_upper_bound_position =  (self.positionUpper - q - dq*self.dt)/(self.dt*self.dt)
+        real_ddq_lower_bound_position = (self.positionLower - q - dq*self.dt)/(self.dt*self.dt)
         
-        real_ddq_upper_bound_Velocity =  (self.velocityUpper - self.dq_last) / self.dt
-        real_ddq_lower_bound_Velocity =  (self.velocityLower - self.dq_last) / self.dt
+        real_ddq_upper_bound_Velocity =  (self.velocityUpper - dq) / self.dt
+        real_ddq_lower_bound_Velocity =  (self.velocityLower - dq) / self.dt
 
 
-        real_ddq_lower_bound_tau = self.M_inv_last.dot(self.tauUpper - self.N_last) 
-        real_ddq_upper_bound_tau = self.M_inv_last.dot(self.tauLower - self.N_last) 
 
+        real_ddq_lower_bound_tau = M_inv.dot(self.tauLower - N)
+        real_ddq_upper_bound_tau = M_inv.dot(self.tauUpper - N)
+
+        c_temp = (self.robot.coriolis_and_gravity_forces()).reshape((self.robot.ndofs, 1))
+        # Reset the states:
+        temp_v_upper = (predicted_delta_dq_upper + dq).flatten()
+        #temp_v_upper = (predicted_delta_dq_upper).flatten()
+
+        self.robot.set_velocities(temp_v_upper)
+        N_upper = (self.robot.coriolis_and_gravity_forces()).reshape((self.robot.ndofs, 1))
+        predict_ddq_upper_bound_tau = self.M_inv_last.dot(self.tauUpper - N_upper)
+
+        predict_tau_upper = self.robot.M.dot(sol_ddq) + N_upper
         
-        return [predicted_delta_dq_lower, predicted_delta_dq_upper,
+        temp_v_lower = (predicted_delta_dq_lower + dq).flatten()
+        #temp_v_lower = (predicted_delta_dq_lower).flatten()
+
+        self.robot.set_velocities(temp_v_lower)
+        N_lower = (self.robot.coriolis_and_gravity_forces()).reshape((self.robot.ndofs, 1))
+        predict_ddq_lower_bound_tau = self.M_inv_last.dot(self.tauLower - N_lower)
+
+        predict_tau_lower = self.robot.M.dot(sol_ddq) + N_lower
+
+        self.robot.set_velocities(dq.flatten())
+        
+        return [dq, sol_ddq, sol_tau,
+                predicted_delta_dq_lower, predicted_delta_dq_upper,
                 ddq_lower_bound_position, ddq_upper_bound_position,
                 real_ddq_lower_bound_position, real_ddq_upper_bound_position,
                 ddq_lower_bound_Velocity, ddq_upper_bound_Velocity,
                 real_ddq_lower_bound_Velocity, real_ddq_upper_bound_Velocity,
-                real_ddq_lower_bound_tau, real_ddq_upper_bound_tau]
+                real_ddq_lower_bound_tau, real_ddq_upper_bound_tau,
+                predict_ddq_lower_bound_tau, predict_ddq_upper_bound_tau,
+                predict_tau_lower, predict_tau_upper
+                ]
 
 
 
     def update(self, sol_ddq):
 
-        [predicted_delta_dq_lower, predicted_delta_dq_upper,
+        [dq, sol_ddq, sol_tau,
+         predicted_delta_dq_lower, predicted_delta_dq_upper,
          ddq_lower_bound_position, ddq_upper_bound_position,
          real_ddq_lower_bound_position, real_ddq_upper_bound_position,
          ddq_lower_bound_Velocity, ddq_upper_bound_Velocity,
          real_ddq_lower_bound_Velocity, real_ddq_upper_bound_Velocity,
-        real_ddq_lower_bound_tau, real_ddq_upper_bound_tau] = self.calcImpulsiveQuantities(sol_ddq)
+         real_ddq_lower_bound_tau, real_ddq_upper_bound_tau,
+         predict_ddq_lower_bound_tau, predict_ddq_upper_bound_tau,
+         predict_tau_lower, predict_tau_upper
+         ] = self.calcImpulsiveQuantities(sol_ddq)
+        
 
 
 
-        self.saveLog(predicted_delta_dq_lower, predicted_delta_dq_upper,
+        self.saveLog(dq, sol_ddq, sol_tau,
+                     predicted_delta_dq_lower, predicted_delta_dq_upper,
                      ddq_lower_bound_position, ddq_upper_bound_position,
                      real_ddq_lower_bound_position, real_ddq_upper_bound_position,
                      ddq_lower_bound_Velocity, ddq_upper_bound_Velocity,
                      real_ddq_lower_bound_Velocity, real_ddq_upper_bound_Velocity,
-                     real_ddq_lower_bound_tau, real_ddq_upper_bound_tau)
+                     real_ddq_lower_bound_tau, real_ddq_upper_bound_tau,
+                     predict_ddq_lower_bound_tau, predict_ddq_upper_bound_tau,
+                     predict_tau_lower, predict_tau_upper)
         
 
         self.updateParameters()

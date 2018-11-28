@@ -16,7 +16,7 @@ class orientationTask:
     We use unit quaternion and second order inverse dynamics to fulfill an orientation task
     """
 
-    def __init__(self, skel, desiredOrientation, taskWeight, selectionVector=None, Kd=None, Kp=None, bodyNodeIndex=None):
+    def __init__(self, skel, desiredOrientation, taskWeight, scalarWeight, selectionVector=None, Kd=None, Kp=None, bodyNodeIndex=None):
 
         logger = logging.getLogger(__name__)
         self.robot = skel
@@ -59,6 +59,7 @@ class orientationTask:
 
         self.quat_desired_m = self.Q_bar(self.desiredOrientation)
 
+        self.q_scalar_weight = scalarWeight
         # construct the quaternion multiplication matrix:
 
         # Error checking:
@@ -338,9 +339,13 @@ class orientationTask:
         #error = self.quat_desired_m.dot(current_quat_con)
         #error = (self.quat_desired_m.transpose()).dot(current_quat)
         error = self.quat_desired_m.dot(temp_id.dot(current_quat))
+        #error_setpoint = np.reshape([1.0, 0.0, 0.0, 0.0],(4,1))
+
         #error = self.Q(current_quat_con).dot(self.desiredOrientation)
-        error = np.reshape(error, (4,1))
-        # print "The current error is: ", '\n', error.transpose()
+        #error = np.reshape(error - error_setpoint, (4,1))
+        error = np.reshape(error, (4, 1))
+
+        print "The current error is: ", '\n', error.transpose()
         # test_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
         #
         # temp_id = -np.identity(4)
@@ -352,6 +357,8 @@ class orientationTask:
 
         print "The desired quaternion is: ", '\n', self.desiredOrientation
         print "The current quaternion is: ", '\n', current_quat.transpose()
+        #print "The desired quat matrix is: ", '\n',self.quat_desired_m
+        #print "The temp_id matrix is: ", '\n', temp_id
         print "The orientation task error is: ", '\n', error.transpose()
 
         error = self.selectionMatrix.dot(error)
@@ -370,13 +377,20 @@ class orientationTask:
         # constant = dimension_Matrix.dot(constant)
 
         dimension_Matrix = np.identity(4)
-        dimension_Matrix[0,0] = 0.8
+        dimension_Matrix[0,0] = self.q_scalar_weight
 
         newJacobian = dimension_Matrix.dot(newJacobian)
         constant = dimension_Matrix.dot(constant)
 
         Q = newJacobian.T.dot(newJacobian)
+        Q = np.block([
+            [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
+            [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
+        ])
         P = 2 * constant.T.dot(newJacobian)
+        zero_vector = np.zeros((1, self.robot.ndofs))
+        P = np.concatenate((P, zero_vector), axis=1)
+
         C = constant.T.dot(constant)
 
         # Q = np.identity(6)

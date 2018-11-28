@@ -111,8 +111,14 @@ class contactAdmittanceTask:
         self.forceErrorIntegral = self.forceErrorIntegral + self.Ki*forceError*self.robot.world.dt
 
         Q = newJacobian_linear.T.dot(newJacobian_linear)
+        Q = np.block([
+            [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
+            [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
+        ])
 
         P = 2 * constant.T.dot(newJacobian_linear)
+        zero_vector = np.zeros((1, self.robot.ndofs))
+        P = np.concatenate((P, zero_vector), axis=1)
 
         C = constant.T.dot(constant)
 

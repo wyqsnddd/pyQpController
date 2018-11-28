@@ -48,7 +48,8 @@ class torqueLimitConstraints:
 
         eeJacobian_T = self.robot.bodynodes[-1].world_jacobian().transpose()
 
-        #invM = np.linalg.inv(self.robot.M)
+        invM = np.linalg.inv(self.robot.M)
+        # print "Test: m*inv_m: ", self.robot.M*invM
 
         N_C = self.robot.coriolis_and_gravity_forces()
         #print "N_C is : ", N_C
@@ -59,13 +60,14 @@ class torqueLimitConstraints:
             upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1)) + np.reshape(F, (self.dof, 1))
             lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)) + np.reshape(F, (self.dof, 1)))
         else:
-            upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1))
+            upperRhs = (self.torqueUpper - np.reshape(N_C, (self.dof, 1)))
             lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)))
 
         #upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1))+ np.reshape(eeJacobian_T.dot(F), (self.dof, 1))
         #upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1))+ np.reshape(F, (self.dof, 1))
         #upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1)) #+ np.reshape(F, (self.dof, 1))
 
+        #upperRhs = invM.dot(np.reshape(upperRhs, (self.dof, 1)))
         upperRhs = np.reshape(upperRhs, (self.dof, 1))
 
         #lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)) + np.reshape(eeJacobian_T.dot(F), (self.dof, 1)))
@@ -73,6 +75,7 @@ class torqueLimitConstraints:
         #lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)) )# + np.reshape(F, (self.dof, 1))
 
         lowerRhs = np.reshape(lowerRhs, (self.dof, 1))
+        #lowerRhs = invM.dot(np.reshape(lowerRhs, (self.dof, 1)))
 
         #test_bound = upperRhs - lowerRhs
 
@@ -80,12 +83,15 @@ class torqueLimitConstraints:
 
 
         return [upperRhs, lowerRhs]
-    def update(self):
+    def update(self, impactEstimator):
         pass
 
     def calcMatricies(self):
+        zero_block = np.zeros((2*self.robot.ndofs, self.robot.ndofs))
 
         G = np.concatenate((self.robot.M.dot(np.identity(self.dof)), self.robot.M.dot(-np.identity(self.dof))), axis=0)
+        #G = np.concatenate((np.identity(self.dof), -np.identity(self.dof)), axis=0)
+        G = np.concatenate((G, zero_block), axis=1)
 
         [h_upp, h_lower] = self.rhsVectors()
 
@@ -117,5 +123,6 @@ if __name__ == "__main__":
     [G, h ] = test_tlc.calcMatricies()
     print "The G  is: ",'\n', G
     print "The h is: ",'\n', h
+
 
 

@@ -3,7 +3,7 @@ import pydart2 as pydart
 import numpy as np
 from qpControllers import manipulatorQP
 from manipulatorTasks import admittanceTask
-from impactTask import impactEstimator
+from impactTask import impactEstimator, jointVelocityJumpEstimator
 import executeACC
 
 import logging
@@ -61,7 +61,22 @@ class manipulatorController:
             bodyNodeLink = data["impactEstimator"]["bodyLinkNumber"]
             self.impactEstimator = impactEstimator.impactEstimator(self.skel, bodyNodeLink)
 
-        #self.dq_last = np.zeros((self.skel.ndofs, 1))
+        self.jointVelocityJumpEstimatorEnabled = data["jointVelocityJumpEstimator"]["enabled"]
+        if(self.jointVelocityJumpEstimatorEnabled):
+            bodyNodeLink = data["jointVelocityJumpEstimator"]["bodyLinkNumber"]
+            res_upper = data["jointVelocityJumpEstimator"]["res_upper"]
+            res_lower = data["jointVelocityJumpEstimator"]["res_lower"]
+
+            tauUpper = data["qpController"]["torqueLimits"]["upper"]
+            tauLower = data["qpController"]["torqueLimits"]["lower"]
+
+            tauLower = np.reshape(np.asarray(tauLower), (self.skel.num_dofs(), 1))
+            tauUpper = np.reshape(np.asarray(tauUpper), (self.skel.num_dofs(), 1))
+
+            self.jointVelocityJumpEstimator = jointVelocityJumpEstimator.jointVelocityJumpEstimator(self.skel, res_lower, res_upper, bodyNodeLink, tauUpper, tauLower)
+
+
+            #self.dq_last = np.zeros((self.skel.ndofs, 1))
     # def updateTarget(self, inputTargetPosition):
     #     self.targetPosition = inputTargetPosition
     #     # update the reference point of each task:
@@ -206,6 +221,29 @@ class manipulatorController:
             np.savez_compressed(impac_log_file_name, time=self.impactEstimator.time, predict_F=self.impactEstimator.predictionLog.impulsiveForce, predict_delta_tau=self.impactEstimator.predictionLog.deltaTorque, predict_delta_dq = self.impactEstimator.predictionLog.deltaDq, predict_average_acc = self.impactEstimator.predictionLog.averageDdq,
                                 actual_F = self.impactEstimator.actualLog.impulsiveForce, actual_delta_tau = self.impactEstimator.actualLog.deltaTorque, actual_delta_dq = self.impactEstimator.actualLog.deltaDq)
 
+        if(self.jointVelocityJumpEstimatorEnabled):
+            impac_log_file_name = os.path.join('./log/data', 'jointVelocityJump-data_' + time_now)
+            np.savez_compressed(impac_log_file_name, time=self.jointVelocityJumpEstimator.time,
+                                dq = self.jointVelocityJumpEstimator.predictionLog.dq,
+                                ddq = self.jointVelocityJumpEstimator.predictionLog.ddq,
+                                tau = self.jointVelocityJumpEstimator.predictionLog.tau,
+                                predict_jointVelocityJump_upper=self.jointVelocityJumpEstimator.predictionLog.deltaDqUpper,
+                                predict_jointVelocityJump_lower=self.jointVelocityJumpEstimator.predictionLog.deltaDqLower,
+                                ddqUpperBoundPosition=self.jointVelocityJumpEstimator.predictionLog.ddqUpperBoundPosition,
+                                ddqLowerBoundPosition=self.jointVelocityJumpEstimator.predictionLog.ddqLowerBoundPosition,
+                                ddqUpperBoundVelocity=self.jointVelocityJumpEstimator.predictionLog.ddqUpperBoundVelocity,
+                                ddqLowerBoundVelocity=self.jointVelocityJumpEstimator.predictionLog.ddqLowerBoundVelocity,
+                                real_ddqUpperBoundPosition=self.jointVelocityJumpEstimator.predictionLog.real_ddqUpperBoundPosition,
+                                real_ddqLowerBoundPosition=self.jointVelocityJumpEstimator.predictionLog.real_ddqLowerBoundPosition,
+                                real_ddqUpperBoundVelocity=self.jointVelocityJumpEstimator.predictionLog.real_ddqUpperBoundVelocity,
+                                real_ddqLowerBoundVelocity=self.jointVelocityJumpEstimator.predictionLog.real_ddqLowerBoundVelocity,
+                                real_ddqUpperBoundTau=self.jointVelocityJumpEstimator.predictionLog.real_ddqUpperBoundTau,
+                                real_ddqLowerBoundTau=self.jointVelocityJumpEstimator.predictionLog.real_ddqLowerBoundTau,
+                                predict_ddqUpperBoundTau = self.jointVelocityJumpEstimator.predictionLog.predict_ddqUpperBoundTau,
+                                predict_ddqLowerBoundTau = self.jointVelocityJumpEstimator.predictionLog.predict_ddqLowerBoundTau,
+                                predict_tauUpper=self.jointVelocityJumpEstimator.predictionLog.predict_tauUpper,
+                                predict_tauLower=self.jointVelocityJumpEstimator.predictionLog.predict_tauLower
+                                )
 
 
     #
@@ -235,6 +273,9 @@ class manipulatorController:
         self.solution = self.solveQP()
         logger = logging.getLogger(__name__)
         logger.debug('The generated joint acc is: %s ', self.solution)
+
+        if (self.jointVelocityJumpEstimatorEnabled):
+            self.jointVelocityJumpEstimator.update(self.solution)
 
         #print "The generated joint acc is: ", '\n', solution
         self.sol_acc_his.append(self.solution)

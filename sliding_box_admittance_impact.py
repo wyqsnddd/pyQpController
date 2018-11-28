@@ -66,6 +66,15 @@ if __name__ == '__main__':
 
     skel= world.skeletons[-1]
 
+
+    restitutionCoeff = qpData["simulationWorldParameters"]["box_surface_restitution_coeff"]
+    boxMass = qpData["simulationWorldParameters"]["box_weight"]
+    
+    # world.skeletons[1].bodynodes[0].set_friction_coeff(frictionCoeff)
+    # world.skeletons[1].bodynodes[0].set_restitution_coeff(restitutionCoeff)
+    world.skeletons[2].bodynodes[1].set_restitution_coeff(restitutionCoeff)
+    world.skeletons[2].bodynodes[0].set_mass(boxMass)
+
     print_skeleton.skeleton_printer(skel)
 
 

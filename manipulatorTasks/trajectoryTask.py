@@ -129,8 +129,14 @@ class trajectoryTask(positionTask.positionTask):
 
 
         Q = newJacobian.T.dot(newJacobian)
+        Q = np.block([
+            [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
+            [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
+        ])
 
         P = 2 * constant.T.dot(newJacobian)
+        zero_vector = np.zeros((1, self.robot.ndofs))
+        P = np.concatenate((P, zero_vector), axis=1)
 
         C = constant.T.dot(constant)
 
@@ -165,7 +171,7 @@ if __name__ == "__main__":
     # print "The jacobian is: ", '\n', jacobian
     # print "The jacobian derivative is: ", '\n', jacobian_dot
     print "The Q matrix is: ", '\n', Q
-    print "The P matrix is: ", '\n', P
+    print "The P matrix is: ", '\n', Pp
     print "The C matrix is: ", '\n', C
 
     test_obj = qpObj.qpObj(test_robot, 100)
