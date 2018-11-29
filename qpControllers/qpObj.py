@@ -10,7 +10,7 @@ from manipulatorTasks import positionTask
 
 
 class qpObj:
-    def __init__(self, skel, jointUnitWeight):
+    def __init__(self, skel, jointUnitWeight, deltaDqWeight):
 
         # if logger is None:
         #     raise Exception("Logger is not set")
@@ -32,7 +32,8 @@ class qpObj:
             
         for ii in range(self.dof, 2*self.dof):
             # We need to maximize the delta QP 
-            self.dofWeightMatrix[ii, ii] = -jointUnitWeight
+            # self.dofWeightMatrix[ii, ii] = -jointUnitWeight
+            self.dofWeightMatrix[ii, ii] = deltaDqWeight
             
 
     def numTasks(self):

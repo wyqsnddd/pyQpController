@@ -6,7 +6,7 @@ import numpy as np
 
 from cvxopt import matrix, solvers
 
-from manipulatorConstraints import jointPositionLimits, jointVelocityConstraints, jointAccelerationConstraints, torqueLimitConstraints
+from manipulatorConstraints import jointPositionLimits, jointVelocityConstraints, jointAccelerationConstraints, torqueLimitConstraints, impactConstraints
 
 from qpControllers import qpObj
 
@@ -79,12 +79,15 @@ class manipulatorQP:
 
         self.torqueLimitConstraints = torqueLimitConstraints.torqueLimitConstraints(self.robot, self.torqueUpper, self.torqueLower)
 
-        logger.info("initialized constraints ")
+        resCoe = data["simulationWorldParameters"]["palm_restitution_coeff"]
+        self.impactConstraints = impactConstraints.impactConstraints(self.robot, resCoe)
 
+        logger.info("initialized constraints ")
 
         # initialize objective function:
         test_jointUnitWeight = data["qpController"]["jointUnitWeight"]
-        self.obj = qpObj.qpObj(self.robot, test_jointUnitWeight)
+        test_deltaDqWeight = data["qpController"]["deltaDqUnitWeight"]
+        self.obj = qpObj.qpObj(self.robot, test_jointUnitWeight, test_deltaDqWeight)
         logger.info("initialized objective ")
         #print "initialized objective "
 
@@ -210,7 +213,7 @@ class manipulatorQP:
         else:
             logger.info("Trajectory task disabled")
 
-        self.equalityConstaints = []
+        self.equalityConstraints = []
         logger.info( "initialized equality constraints ")
 
         self.inequalityConstraints = []
@@ -228,6 +231,9 @@ class manipulatorQP:
 
         self.inequalityConstraints.append(self.torqueLimitConstraints)
         logger.info("initialized torque limits inequality constraints ")
+
+        self.equalityConstraints.append(self.impactConstraints)
+        logger.info("initialized impact equality constraints ")
 
     def transformToGlobalFrame(self, input, bodyNodeIndex):
 
@@ -254,8 +260,8 @@ class manipulatorQP:
         for ii in range(0, len(self.inequalityConstraints)):
             self.inequalityConstraints[ii].update(impactEstimator)
 
-        for ii in range(0, len(self.equalityConstaints)):
-            self.equalityConstaints[ii].update()
+        for ii in range(0, len(self.equalityConstraints)):
+            self.equalityConstraints[ii].update(impactEstimator)
 
         for ii in range(0,  len(self.obj.tasks)):
             self.obj.tasks[ii].update()
@@ -274,14 +280,14 @@ class manipulatorQP:
         #print "G is: ", '\n', G
         #print "H is: ", '\n', H
 
-        if len(self.equalityConstaints) > 0:
+        if len(self.equalityConstraints) > 0:
             [A, B] = self.equalityConstraints[0].calcMatricies()
-
-            for ii in range(1, len(self.equalityConstaints)):
-                [A_ii, B_ii] = self.equalityConstaints[ii].calcMatricies()
+                          
+            for ii in range(1, len(self.equalityConstraints)):
+                [A_ii, B_ii] = self.equalityConstraints[ii].calcMatricies()
                 A = np.concatenate((A, A_ii), axis=0)
                 B = np.concatenate((B, B_ii), axis=0)
-            sol = self.cvxopt_solve_qp(Q, P, G, H, A, B)
+            sol = self.cvxopt_solve_qp(Q, P.T, G, H, A, B)
 
         else:
             sol = self.cvxopt_solve_qp(Q, P.T, G, H)

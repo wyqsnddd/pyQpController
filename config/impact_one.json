@@ -3,8 +3,8 @@
 		"box_bottom_friction_coeff": 0.1,
 		"box_coarse_surface_friction_coeff": 1.0,
 		"wall_friction_coeff": 0.8,
-		"wall_restitution_coeff": 1.26,
-		"palm_restitution_coeff": 1.26 
+		"wall_restitution_coeff": 1.28,
+		"palm_restitution_coeff": 1.28 
 	},
 	"jointVelocityController":{
 		"K_v": 1.0 
@@ -16,8 +16,8 @@
 	"jointVelocityJumpEstimator":{
 		"enabled": true,
 		"bodyLinkNumber": -1,
-		"res_upper": 1.26,
-		"res_lower": 1.26 
+		"res_upper": 1.3,
+		"res_lower": 1.3 
 	},    
 	"jointPositionController":{
 		"K_v": 1.0,
@@ -25,6 +25,7 @@
 	},
 	"qpController":{ 
 		"jointUnitWeight": 10.0,
+		"deltaDqUnitWeight": 1000.0,
 		"constraintForceAware": false,
 		"showProgress": false,
 		"jointLimits":{
