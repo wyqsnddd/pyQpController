@@ -23,6 +23,8 @@ if __name__ =="__main__":
     tau = loaded['tau']
     predict_tauUpper = loaded['predict_tauUpper']
     predict_tauLower = loaded['predict_tauLower']
+    predict_impulseTau = loaded['predict_impulseTau']
+    impulseTau = loaded['impulseTau']
     
     predict_delta_dq_upper_0 = loaded['predict_jointVelocityJump_upper'][:,0]
     predict_delta_dq_upper_1 = loaded['predict_jointVelocityJump_upper'][:,1]
@@ -691,5 +693,81 @@ if __name__ =="__main__":
     plt.grid(True)
     fig7.savefig("Torque_impact_bounds.pdf", bbox_inches='tight')
 
+    fig8, (ax81, ax82, ax83, ax84, ax85, ax86) = plt.subplots(nrows=6, ncols=1)
+    lower_bound = -25*np.ones(len(ddq_5))
+    upper_bound = 25*np.ones(len(ddq_5))
+    
+    ax81 = plt.subplot(611)
+    ax81.set_ylabel('Torque 0')
+    ax81.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    plt.plot(time, predict_impulseTau[:,0], 'b--', label='Impulse torque')
+    plt.plot(time, impulseTau[:,0], 'b', label='QP solution torque')
+    # plt.plot(time, upper_bound - predict_tauUpper[:,0], 'r', label='Upper bound: Torque')
+    # plt.plot(time, lower_bound + predict_tauLower[:,0], 'g', label='Lower bound: Torque')
+    plt.plot(time, upper_bound, 'r', label='Upper impulse torque bound')
+    plt.plot(time, lower_bound, 'g', label='Lower impulse torque bound')
+
+    ax81.locator_params(nbins=6, axis='y')
+    ax81.autoscale(enable=True, axis='x', tight=True)
+    plt.setp(ax71.get_xticklabels(), visible=False)
+    plt.grid(True)
+    ax81.legend(frameon=False, loc='upper left', prop=fontP)
+    plt.title("Bounds on impulse joint torque [Nm]")
+
+    ax82 = plt.subplot(612)
+    plt.plot(time, predict_impulseTau[:,1], 'b--')
+    plt.plot(time, impulseTau[:,1], 'b')
+    plt.plot(time, upper_bound, 'r')
+    plt.plot(time, lower_bound, 'g')
+    ax82.set_ylabel('Torque 1')
+    ax82.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax82.autoscale(enable=True, axis='x', tight=True)
+    plt.setp(ax82.get_xticklabels(), visible=False)
+    plt.grid(True)
+
+    ax83 = plt.subplot(613)
+    plt.plot(time, predict_impulseTau[:,2], 'b--')
+    plt.plot(time, impulseTau[:,2], 'b')
+    plt.plot(time, upper_bound, 'r')
+    plt.plot(time, lower_bound, 'g')
+    ax83.set_ylabel('Torque 2')
+    ax83.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax83.autoscale(enable=True, axis='x', tight=True)
+    plt.setp(ax83.get_xticklabels(), visible=False)
+    plt.grid(True)
+
+    ax84 = plt.subplot(614)
+    plt.plot(time, predict_impulseTau[:,3], 'b--')
+    plt.plot(time, impulseTau[:,3], 'b')
+    plt.plot(time, upper_bound, 'r')
+    plt.plot(time, lower_bound, 'g')
+    ax84.set_ylabel('Torque 3')
+    ax84.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax84.autoscale(enable=True, axis='x', tight=True)
+    plt.setp(ax84.get_xticklabels(), visible=False)
+    plt.grid(True)
+
+    ax85 = plt.subplot(615)
+    plt.plot(time, predict_impulseTau[:,4], 'b--')
+    plt.plot(time, impulseTau[:,4], 'b')
+    plt.plot(time, upper_bound, 'r')
+    plt.plot(time, lower_bound, 'g')
+    ax85.set_ylabel('Torque 4')
+    ax85.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax85.autoscale(enable=True, axis='x', tight=True)
+    plt.setp(ax85.get_xticklabels(), visible=False)
+    plt.grid(True)
+
+    ax86 = plt.subplot(616)
+    plt.plot(time, predict_impulseTau[:,5], 'b--')
+    plt.plot(time, impulseTau[:,5], 'b')
+    plt.plot(time, upper_bound, 'r')
+    plt.plot(time, lower_bound, 'g')
+    ax86.set_ylabel('Torque 5')
+    plt.xlabel('Time [s]')
+    ax86.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax86.autoscale(enable=True, axis='x', tight=True)
+    plt.grid(True)
+    fig8.savefig("impulse_torque_bounds.pdf", bbox_inches='tight')
     
     plt.show()

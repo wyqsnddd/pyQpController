@@ -6,7 +6,7 @@ import numpy as np
 
 from cvxopt import matrix, solvers
 
-from manipulatorConstraints import jointPositionLimits, jointVelocityConstraints, jointAccelerationConstraints, torqueLimitConstraints, impactConstraints
+from manipulatorConstraints import jointPositionLimits, jointVelocityConstraints, jointAccelerationConstraints, torqueLimitConstraints, impactConstraints, impulseTorqueLimitConstraints, combinedTorqueConstraints
 
 from qpControllers import qpObj
 
@@ -79,6 +79,24 @@ class manipulatorQP:
 
         self.torqueLimitConstraints = torqueLimitConstraints.torqueLimitConstraints(self.robot, self.torqueUpper, self.torqueLower)
 
+        impulseUpper = data["qpController"]["impulseTorqueLimits"]["upper"]
+        impulseLower = data["qpController"]["impulseTorqueLimits"]["lower"]
+
+        self.impulseTorqueLower = np.reshape(np.asarray(impulseLower), (self.dof, 1))
+        self.impulseTorqueUpper = np.reshape(np.asarray(impulseUpper), (self.dof, 1))
+        
+        logger.info("impulse torque upper limit is: %s ",  self.impulseTorqueUpper)
+        logger.info("impulse torque lower limit is: %s ", self.impulseTorqueLower)
+
+        # print "torque upper limit is: ", self.torqueUpper
+        # print "torque lower limit is: ", self.torqueLower
+
+        # self.torqueLower = np.reshape(self.robot.tau_lower, (self.dof, 1))
+        # self.torqueUpper = np.reshape(self.robot.tau_upper, (self.dof, 1))
+
+        self.impulseTorqueLimitConstraints = impulseTorqueLimitConstraints.impulseTorqueLimitConstraints(self.robot, self.impulseTorqueUpper, self.impulseTorqueLower)
+        #self.impulseTorqueLimitConstraints = combinedTorqueConstraints.combinedTorqueLimitConstraints(self.robot, self.impulseTorqueUpper, self.impulseTorqueLower)
+        
         resCoe = data["simulationWorldParameters"]["palm_restitution_coeff"]
         self.impactConstraints = impactConstraints.impactConstraints(self.robot, resCoe)
 
@@ -231,6 +249,9 @@ class manipulatorQP:
 
         self.inequalityConstraints.append(self.torqueLimitConstraints)
         logger.info("initialized torque limits inequality constraints ")
+
+        self.inequalityConstraints.append(self.impulseTorqueLimitConstraints)
+        logger.info("initialized impulse torque limits inequality constraints ")
 
         self.equalityConstraints.append(self.impactConstraints)
         logger.info("initialized impact equality constraints ")

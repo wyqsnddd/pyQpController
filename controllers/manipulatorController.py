@@ -242,7 +242,9 @@ class manipulatorController:
                                 predict_ddqUpperBoundTau = self.jointVelocityJumpEstimator.predictionLog.predict_ddqUpperBoundTau,
                                 predict_ddqLowerBoundTau = self.jointVelocityJumpEstimator.predictionLog.predict_ddqLowerBoundTau,
                                 predict_tauUpper=self.jointVelocityJumpEstimator.predictionLog.predict_tauUpper,
-                                predict_tauLower=self.jointVelocityJumpEstimator.predictionLog.predict_tauLower
+                                predict_tauLower=self.jointVelocityJumpEstimator.predictionLog.predict_tauLower,
+                                predict_impulseTau=self.jointVelocityJumpEstimator.predictionLog.predict_impulseTau,
+                                impulseTau=self.jointVelocityJumpEstimator.predictionLog.impulseTau
                                 )
 
 

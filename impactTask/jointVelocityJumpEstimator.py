@@ -59,7 +59,8 @@ class jointVelocityJumpEstimator:
 
     def initializeLog(self):
 
-        self.predictionLog = namedtuple('log', ['dq','ddq','tau','delta_dq_lower','delta_dq_upper', 'ddqUpperBoundPosition', 'ddqLowerBoundPosition','ddqUpperBoundVelocity', 'ddqLowerBoundVelocity', 'real_ddqUpperBoundPosition', 'real_ddqLowerBoundPosition','real_ddqUpperBoundVelocity', 'real_ddqLowerBoundVelocity', 'real_ddqUpperBoundTau', 'real_ddqLowerBoundTau', 'predict_ddqUpperBoundTau', 'predict_ddqLowerBoundTau','predict_tauUpper', 'predict_tauLower'])
+        self.predictionLog = namedtuple('log', ['dq','ddq','tau','delta_dq_lower','delta_dq_upper', 'ddqUpperBoundPosition', 'ddqLowerBoundPosition','ddqUpperBoundVelocity', 'ddqLowerBoundVelocity', 'real_ddqUpperBoundPosition', 'real_ddqLowerBoundPosition','real_ddqUpperBoundVelocity', 'real_ddqLowerBoundVelocity', 'real_ddqUpperBoundTau', 'real_ddqLowerBoundTau', 'predict_ddqUpperBoundTau', 'predict_ddqLowerBoundTau','predict_tauUpper', 'predict_tauLower', 'predict_impulseTorque', 'impulseTorque'])
+        
         self.time = []
         self.predictionLog.ddq = []
         self.predictionLog.dq = []
@@ -86,6 +87,9 @@ class jointVelocityJumpEstimator:
 
         self.predictionLog.predict_tauUpper = []
         self.predictionLog.predict_tauLower = []
+        
+        self.predictionLog.predict_impulseTau = []
+        self.predictionLog.impulseTau = []
 
     def saveLog(self, dq, ddq, tau,
                 predictDeltaDqLower, predictDeltaDqUpper,
@@ -95,7 +99,9 @@ class jointVelocityJumpEstimator:
                 real_ddqLowerVelocity, real_ddqUpperVelocity,
                 real_ddqLowerTau, real_ddqUpperTau,
                 predict_ddqLowerTau, predict_ddqUpperTau,
-                predict_tauLower, predict_tauUpper):
+                predict_tauLower, predict_tauUpper,
+                predict_impulseTau, impulseTau
+    ):
 
 
         self.time.append(self.robot.world.t)
@@ -123,6 +129,9 @@ class jointVelocityJumpEstimator:
 
         self.predictionLog.predict_tauUpper.append(predict_tauUpper)
         self.predictionLog.predict_tauLower.append(predict_tauLower)
+        
+        self.predictionLog.predict_impulseTau.append(predict_impulseTau)
+        self.predictionLog.impulseTau.append(impulseTau)
 
 
     def updateParameters(self):
@@ -198,6 +207,9 @@ class jointVelocityJumpEstimator:
         predict_ddq_lower_bound_tau = self.M_inv_last.dot(self.tauLower - N_lower)
 
         predict_tau_lower = self.robot.M.dot(sol_ddq) + N_lower
+        
+        predict_impulse_tau = self.robot.M.dot(predicted_delta_dq_upper)/self.dt
+        impulse_tau = self.robot.constraint_forces()
 
         self.robot.set_velocities(dq.flatten())
         
@@ -209,7 +221,8 @@ class jointVelocityJumpEstimator:
                 real_ddq_lower_bound_Velocity, real_ddq_upper_bound_Velocity,
                 real_ddq_lower_bound_tau, real_ddq_upper_bound_tau,
                 predict_ddq_lower_bound_tau, predict_ddq_upper_bound_tau,
-                predict_tau_lower, predict_tau_upper
+                predict_tau_lower, predict_tau_upper,
+                predict_impulse_tau, impulse_tau
                 ]
 
 
@@ -224,7 +237,8 @@ class jointVelocityJumpEstimator:
          real_ddq_lower_bound_Velocity, real_ddq_upper_bound_Velocity,
          real_ddq_lower_bound_tau, real_ddq_upper_bound_tau,
          predict_ddq_lower_bound_tau, predict_ddq_upper_bound_tau,
-         predict_tau_lower, predict_tau_upper
+         predict_tau_lower, predict_tau_upper,
+         predict_impulse_tau, impulse_tau
          ] = self.calcImpulsiveQuantities(sol_ddq)
         
 
@@ -238,7 +252,8 @@ class jointVelocityJumpEstimator:
                      real_ddq_lower_bound_Velocity, real_ddq_upper_bound_Velocity,
                      real_ddq_lower_bound_tau, real_ddq_upper_bound_tau,
                      predict_ddq_lower_bound_tau, predict_ddq_upper_bound_tau,
-                     predict_tau_lower, predict_tau_upper)
+                     predict_tau_lower, predict_tau_upper,
+                     predict_impulse_tau, impulse_tau)
         
 
         self.updateParameters()
