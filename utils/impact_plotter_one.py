@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+from matplotlib.ticker import FormatStrFormatter
+
+impact_time_1 = [0.62, 0.635]
 
 
 if __name__ =="__main__":
@@ -179,17 +182,21 @@ if __name__ =="__main__":
 
     fig22 = plt.figure()
     ax22 = fig22.gca()
-    ax22.plot(time, acc_0, label='acc 0')
-    ax22.plot(time, acc_1, label='acc 1')
-    ax22.plot(time, acc_2, label='acc 2')
-    ax22.plot(time, acc_3, label='acc 3')
-    ax22.plot(time, acc_4, label='acc 4')
-    ax22.plot(time, acc_5, label='acc 5')
+    ax22.plot(time, acc_0, label='$\ddot{q}_0$')
+    ax22.plot(time, acc_1, label='$\ddot{q}_1$')
+    ax22.plot(time, acc_2, label='$\ddot{q}_2$')
+    ax22.plot(time, acc_3, label='$\ddot{q}_3$')
+    ax22.plot(time, acc_4, label='$\ddot{q}_4$')
+    ax22.plot(time, acc_5, label='$\ddot{q}_5$')
     ax22.legend(frameon=False, loc='upper left', prop=fontP)
     ax22.autoscale(enable=True, axis='x', tight=True)
-    plt.ylabel('Joint accelerations [Radion/s^2]')
+    plt.ylabel('Joint accelerations [$radion/s^2$]')
     plt.xlabel('Time [s]')
     plt.grid(True)
+    ax22.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax22.legend(loc='upper left', prop={'size':6}, fancybox=True, framealpha=0.3, shadow=False, borderpad=1 )
+    plt.axvspan(impact_time_1[0], impact_time_1[1], color='red', alpha=0.1)
+
     fig22.savefig("joint_accelerations.pdf", bbox_inches='tight')
 
     fig23 = plt.figure()
@@ -209,17 +216,28 @@ if __name__ =="__main__":
 
     fig24 = plt.figure()
     ax24 = fig24.gca()
-    ax24.plot(time[0:len(tau_0)], sol_acc_0, label='sol 0')
-    ax24.plot(time[0:len(tau_0)], sol_acc_1, label='sol 1')
-    ax24.plot(time[0:len(tau_0)], sol_acc_2, label='sol 2')
-    ax24.plot(time[0:len(tau_0)], sol_acc_3, label='sol 3')
-    ax24.plot(time[0:len(tau_0)], sol_acc_4, label='sol 4')
-    ax24.plot(time[0:len(tau_0)], sol_acc_5, label='sol 5')
+    ax24.plot(time[0:len(tau_0)], sol_acc_0, label='$\\dot{q}_0$')
+    ax24.plot(time[0:len(tau_0)], sol_acc_1, label='$\\dot{q}_1$')
+    ax24.plot(time[0:len(tau_0)], sol_acc_2, label='$\\dot{q}_2$')
+    ax24.plot(time[0:len(tau_0)], sol_acc_3, label='$\\dot{q}_3$')
+    ax24.plot(time[0:len(tau_0)], sol_acc_4, label='$\\dot{q}_4$')
+    ax24.plot(time[0:len(tau_0)], sol_acc_5, label='$\\dot{q}_5$')
     ax24.legend(frameon=False, loc='upper left', prop=fontP)
     ax24.autoscale(enable=True, axis='x', tight=True)
-    plt.ylabel('QP: Joint acceleration [Radion/s^2]')
-    plt.xlabel('Time [s]')
+    # ax24.autoscale(enable=True, axis='y', tight=True)
+    # plt.ylabel('QP: Joint accelerations [$radion/s^2$]')
+    plt.title("QP generated joint accelerations  [$radion/s^2$]")
+    plt.xlabel('Time [$s$]')
     plt.grid(True)
+    ax24.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    # ax24.autoscale(enable=True, axis='x', =True)
+    ax24.autoscale(enable=True, axis='x', tight=True)
+    ax24.set_aspect(0.003)
+    ax24.locator_params(nbins=7, axis='y')
+    ax24.set_ylim([-50, 50])
+    ax24.legend(loc='upper left', prop={'size':6}, fancybox=True, framealpha=0.3, shadow=False, borderpad=1 )
+    plt.axvspan(impact_time_1[0], impact_time_1[1], color='red', alpha=0.1)
+
     fig24.savefig("solution_acc.pdf", bbox_inches='tight')
 
     fig25 = plt.figure()

@@ -330,6 +330,8 @@ if __name__ =="__main__":
     ax41 = plt.subplot(311)
     plt.plot(impact_time, predict_F_0, label='Predicted contact force jump')
     plt.plot(impact_time, actual_F_0, label='Measured contact force jump')
+    # plt.plot(impact_time, predict_F_0, label='Predicted contact force jump')
+    # plt.plot(impact_time, actual_F_0, label='Measured contact force jump')
     # plt.axvspan(impact_time_1[0], impact_time_1[1], color='red', alpha=0.1)
     # plt.axvspan(impact_time_2[0], impact_time_2[1], color='red', alpha=0.1)
     # plt.axvspan(impact_time_3[0], impact_time_3[1], color='red', alpha=0.1)

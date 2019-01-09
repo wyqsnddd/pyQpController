@@ -135,18 +135,22 @@ class slidingBoxKR5World(pydart.World):
 
     def render_with_ri(self, ri):
         #ri.render_sphere(self.controller.qp.obj.tasks[0].desiredPosition, 0.05)
-        ri.render_axes([0, 0, 0], 0.2, True)
 
-        #desired_translation = self.controller.qp.obj.tasks[0].desiredPosition
-        # size = [0.01, 0.01, 0.01]
-        # ri.render_box(desired_translation, size)
-        #ri.render_sphere(desired_translation, 0.02)
+        # ri.render_axes([0, 0, 0], 0.2, True)
 
-        # transform = self.robot.bodynodes[-1].world_transform()
-        # robot_ee_translation = transform[:3, 3]
+        transform = self.robot.bodynodes[-1].world_transform()
+        robot_ee_translation = transform[:3, 3]
+
+        desired_translation = self.controller.qp.obj.tasks[0].desiredPosition
+
+        #ri.render_axes(desired_translation.transpose(), 0.1, True)
+        size = [0.01, 0.01, 0.01]
+        ri.render_box(desired_translation, size)
+        ri.render_sphere(desired_translation, 0.02)
+
         #
         #
-        # ri.render_axes(robot_ee_translation, 0.2, True)
+        ri.render_axes(robot_ee_translation, 0.1, True)
 
         #ri.render_sphere([0.1, 0.1, 0.1], 1.0)
     def draw_with_ri(self, ri):

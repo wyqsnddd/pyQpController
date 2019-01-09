@@ -22,15 +22,26 @@ class impactConstraints:
         pass
 
     def calcMatricies(self):
+
+        jacobian = self.robot.bodynodes[-1].linear_jacobian()
         M_inv = np.linalg.pinv(self.robot.M)
-        jacobian = self.robot.bodynodes[self.bodyNodeIndex].linear_jacobian()
-        temp_1 = M_inv.dot(jacobian.T)
-        temp_2 = np.linalg.pinv(jacobian.dot(temp_1))
-        constant = temp_1.dot(temp_2)
+        temp = np.linalg.pinv(jacobian.dot(M_inv).dot(jacobian.transpose()) )
+        J_dagger = jacobian.transpose().dot(temp)
+
+        
+        #M_inv = np.linalg.pinv(self.robot.M)
+        # jacobian = self.robot.bodynodes[self.bodyNodeIndex].linear_jacobian()
+        #jacobian = self.robot.bodynodes[self.bodyNodeIndex].jacobian()
+        #temp_1 = M_inv.dot(jacobian.T)
+        #temp_2 = np.linalg.pinv(jacobian.dot(temp_1))
+        #constant = temp_1.dot(temp_2)
 
         dq =  (self.robot.dq).reshape((self.robot.ndofs, 1))
 
-        temp_A = (self.res + 1)*constant.dot(jacobian)
+        # temp_A = (self.res + 1)*constant.dot(jacobian)
+        temp_A = (self.res + 1)*(M_inv.dot(J_dagger)).dot(jacobian)
+        #temp_A = (-self.res + 1)*(M_inv.dot(J_dagger)).dot(jacobian)
+        # temp_A = (self.res + 1)*(self.robot.M)
 
         A = np.block([
             [temp_A*self.robot.world.dt, np.identity(self.robot.ndofs)]

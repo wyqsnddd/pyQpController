@@ -272,16 +272,16 @@ class manipulatorController:
         #     print "Impact detected"
         #     self.logData()
 
-        self.solution = self.solveQP()
+        [self.sol_ddq, self.sol_delta_dq ]= self.solveQP()
         logger = logging.getLogger(__name__)
         logger.debug('The generated joint acc is: %s ', self.solution)
 
         if (self.jointVelocityJumpEstimatorEnabled):
-            self.jointVelocityJumpEstimator.update(self.solution)
+            self.jointVelocityJumpEstimator.update(self.sol_ddq, self.sol_delta_dq)
 
         #print "The generated joint acc is: ", '\n', solution
-        self.sol_acc_his.append(self.solution)
-        tau = self.jointAccToTau(self.solution)
+        self.sol_acc_his.append(self.sol_ddq)
+        tau = self.jointAccToTau(self.sol_ddq)
         #tau = self.jointVelocityControl(self.solution)
         self.tau_his.append(self.tau_last)
 

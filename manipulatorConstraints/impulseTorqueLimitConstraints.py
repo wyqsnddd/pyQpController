@@ -44,9 +44,28 @@ class impulseTorqueLimitConstraints:
         
         def calcMatricies(self):
             zero_block = np.zeros((2*self.robot.ndofs, self.robot.ndofs))
+            # instead of Mass matrix we need to use the weighted Jacobian pseudo inverse
+            jacobian = self.robot.bodynodes[-1].linear_jacobian()
 
-            G = np.concatenate((self.robot.M.dot(np.identity(self.dof)), self.robot.M.dot(-np.identity(self.dof))), axis=0)
+            M_inv = np.linalg.pinv(self.robot.M)
+            temp = np.linalg.pinv(jacobian.dot(M_inv).dot(jacobian.transpose()) )
+            J_dagger = jacobian.transpose().dot(temp)
+
+            # G = np.concatenate((J_dagger.dot(np.identity(self.dof)), J_dagger.dot(-np.identity(self.dof))),
+            #                    axis=0)
+
+            # G = np.concatenate((J_dagger.dot(np.identity(self.dof)), J_dagger.dot(-np.identity(self.dof))),
+            #                    axis=0)
+
+
+            component = J_dagger.dot(jacobian)
+            G = np.concatenate((component.dot(np.identity(self.dof)), component.dot(-np.identity(self.dof))),
+                                axis=0)
+
+            # G = np.concatenate((self.robot.M.dot(np.identity(self.dof)), self.robot.M.dot(-np.identity(self.dof))), axis=0)
+            
             #G = np.concatenate((np.identity(self.dof), -np.identity(self.dof)), axis=0)
+
             G = np.concatenate((zero_block, G*(1/self.robot.world.dt)), axis=1)
 
             [h_upp, h_lower] = self.rhsVectors()

@@ -6,7 +6,7 @@ import numpy as np
 
 from cvxopt import matrix, solvers
 
-from manipulatorConstraints import jointPositionLimits, jointVelocityConstraints, jointAccelerationConstraints, torqueLimitConstraints, impactConstraints, impulseTorqueLimitConstraints, combinedTorqueConstraints
+from manipulatorConstraints import jointPositionLimits, jointVelocityConstraints, jointAccelerationConstraints, torqueLimitConstraints, impactConstraints, impactBoundConstraints, impulseTorqueLimitConstraints, combinedTorqueConstraints
 
 from qpControllers import qpObj
 
@@ -99,6 +99,7 @@ class manipulatorQP:
         
         resCoe = data["simulationWorldParameters"]["palm_restitution_coeff"]
         self.impactConstraints = impactConstraints.impactConstraints(self.robot, resCoe)
+        #self.impactBoundConstraints = impactBoundConstraints.impactBoundConstraints(self.robot, resCoe)
 
         logger.info("initialized constraints ")
 
@@ -253,6 +254,9 @@ class manipulatorQP:
         self.inequalityConstraints.append(self.impulseTorqueLimitConstraints)
         logger.info("initialized impulse torque limits inequality constraints ")
 
+        #self.inequalityConstraints.append(self.impactBoundConstraints)
+        #logger.info("initialized impact inequality constraints ")
+        
         self.equalityConstraints.append(self.impactConstraints)
         logger.info("initialized impact equality constraints ")
 
@@ -317,7 +321,9 @@ class manipulatorQP:
             #sol = solve_qp(Q, P.T, G, H, solver='mosek')
         # We only take the first 6 joint accelerations
         solution = sol.reshape(2*self.robot.ndofs, 1)
-        return solution[:6]
+        sol_ddq = solution[:6]
+        sol_delta_dq = solution[6:]
+        return [sol_ddq, sol_delta_dq]
 
 
     def cvxopt_matrix(self, M):

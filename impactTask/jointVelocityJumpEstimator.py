@@ -140,7 +140,7 @@ class jointVelocityJumpEstimator:
         self.M_inv_last = np.linalg.pinv(self.robot.M)
         self.N_last = (self.robot.coriolis_and_gravity_forces()).reshape((self.robot.ndofs, 1))
         
-    def calcImpulsiveQuantities(self, sol_ddq):
+    def calcImpulsiveQuantities(self, sol_ddq, sol_delta_dq):
 
         N = (self.robot.coriolis_and_gravity_forces()).reshape((self.robot.ndofs, 1))
 
@@ -149,6 +149,7 @@ class jointVelocityJumpEstimator:
         M_inv = np.linalg.pinv(self.robot.M)
 
         jacobian = self.robot.bodynodes[self.bodyNodeIndex].linear_jacobian()
+        # jacobian = self.robot.bodynodes[self.bodyNodeIndex].jacobian()
 
         temp_1 = M_inv.dot(jacobian.T)
 
@@ -207,8 +208,16 @@ class jointVelocityJumpEstimator:
         predict_ddq_lower_bound_tau = self.M_inv_last.dot(self.tauLower - N_lower)
 
         predict_tau_lower = self.robot.M.dot(sol_ddq) + N_lower
+
+        Jacobian_linear = self.robot.bodynodes[-1].jacobian()
+        M_inv = np.linalg.pinv(self.robot.M)
+        temp = np.linalg.pinv(Jacobian_linear.dot(M_inv).dot(Jacobian_linear.transpose()) )
+        J_dagger = Jacobian_linear.transpose().dot(temp)
         
         predict_impulse_tau = self.robot.M.dot(predicted_delta_dq_upper)/self.dt
+        # predict_impulse_tau = J_dagger.dot(predicted_delta_dq_upper)/self.dt
+        # predict_impulse_tau = J_dagger.dot(sol_delta_dq)/self.dt
+        
         impulse_tau = self.robot.constraint_forces()
 
         self.robot.set_velocities(dq.flatten())
@@ -227,7 +236,7 @@ class jointVelocityJumpEstimator:
 
 
 
-    def update(self, sol_ddq):
+    def update(self, sol_ddq, sol_delta_dq):
 
         [dq, sol_ddq, sol_tau,
          predicted_delta_dq_lower, predicted_delta_dq_upper,
@@ -239,7 +248,7 @@ class jointVelocityJumpEstimator:
          predict_ddq_lower_bound_tau, predict_ddq_upper_bound_tau,
          predict_tau_lower, predict_tau_upper,
          predict_impulse_tau, impulse_tau
-         ] = self.calcImpulsiveQuantities(sol_ddq)
+         ] = self.calcImpulsiveQuantities(sol_ddq, sol_delta_dq)
         
 
 

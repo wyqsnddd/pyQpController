@@ -3,8 +3,8 @@
 		"box_bottom_friction_coeff": 0.1,
 		"box_coarse_surface_friction_coeff": 1.0,
 		"wall_friction_coeff": 0.8,
-		"wall_restitution_coeff": 0.1,
-		"palm_restitution_coeff": 0.1 
+		"wall_restitution_coeff": 0.2,
+		"palm_restitution_coeff": 0.2 
 	},
 	"jointVelocityController":{
 		"K_v": 1.0 
@@ -32,8 +32,8 @@
 			"dt": 0.01
 		},
 		"impulseTorqueLimits":{
-			"upper": [50.0, 50.0, 50.0, 50.0, 50.0, 50.0],
-			"lower": [-50.0, -50.0, -50.0, -50.0, -50.0, -50.0 ]
+			"upper": [200.0, 200.0, 200.0, 200.0, 200.0, 200.0],
+			"lower": [-200.0, -200.0, -200.0, -200.0, -200.0, -200.0 ]
 		},
 		"torqueLimits":{
 			"upper": [25.0, 25.0, 25.0, 25.0, 25.0, 25.0],
