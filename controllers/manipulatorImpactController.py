@@ -3,7 +3,7 @@ import pydart2 as pydart
 import numpy as np
 from qpControllers import manipulatorQP
 from manipulatorTasks import contactAdmittanceTask, admittanceTask, positionTask, orientationTask
-from manipulatorController import  manipulatorController
+from manipulatorController import  manipulatorController, jointVelocityJumpEstimator
 import executeACC
 
 from impactTask import impactEstimator
@@ -190,6 +190,8 @@ class manipulatorImpactController(manipulatorController):
         self.q_his.append(self.skel.q)
         self.acc_his.append(self.skel.ddq)
 
+        self.robot_c.append(self.skel.coriolis_and_gravity_forces())
+
         if (self.impactEstimatorEnabled):
             self.impactEstimator.update()
 
@@ -222,11 +224,17 @@ class manipulatorImpactController(manipulatorController):
         #         self.addOrientationTask()
 
 
-        self.solution = self.solveQP()
+        [self.sol_ddq, self.sol_delta_dq ]= self.solveQP()
+        self.solution = self.sol_ddq
+
         logger = logging.getLogger(__name__)
         logger.debug('The generated joint acc is: %s ', self.solution)
 
+
+
         #print "The generated joint acc is: ", '\n', solution
+        if (self.jointVelocityJumpEstimatorEnabled):
+            self.jointVelocityJumpEstimator.update(self.sol_ddq, self.sol_delta_dq)
 
         self.sol_acc_his.append(self.solution)
         tau = self.jointAccToTau(self.solution)
