@@ -16,8 +16,8 @@
 	"jointVelocityJumpEstimator":{
 		"enabled": true,
 		"bodyLinkNumber": -1,
-		"res_upper": 0.1,
-		"res_lower": 0.1 
+		"res_upper": 0.2,
+		"res_lower": 0.2 
 	},    
 	"jointPositionController":{
 		"K_v": 1.0,
@@ -77,8 +77,20 @@
 			"Ki": 100.0,
 			"Kd": 100.0
 		},
-		"velocityTask":{
+		"maxImpactForceTask":{
 			"enabled": true,
+			"taskWeight": 1000.0,
+			"direction":[1.0, 0.0, 0.0],
+			"bodyLinkNumber": -1
+		},
+		"maxVelocityTask":{
+			"enabled": false,
+			"taskWeight": 1000.0,
+			"direction":[1.0, 0.0, 0.0],
+			"bodyLinkNumber": -1
+		},
+		"velocityTask":{
+			"enabled": false,
 			"taskWeight": 1000.0,
 			"axis_selection":[1.0, 0.0, 0.0],
 			"desiredVelocity": [1.0, 0.0, 0.0],

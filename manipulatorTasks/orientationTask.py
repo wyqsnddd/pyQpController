@@ -212,7 +212,7 @@ class orientationTask:
 
         current_quat_d_calc = 0.5*(self.W(current_quat).transpose()).dot(angular_jac.dot(dq))
 
-        print "The calculated current end-effector quaternion rate is: ", '\n', current_quat_d_calc.transpose()
+        #print "The calculated current end-effector quaternion rate is: ", '\n', current_quat_d_calc.transpose()
 
         print "The current end-effector quaternion acc is: ", '\n', current_quat_dd.transpose()
 
@@ -345,7 +345,7 @@ class orientationTask:
         #error = np.reshape(error - error_setpoint, (4,1))
         error = np.reshape(error, (4, 1))
 
-        print "The current error is: ", '\n', error.transpose()
+        #print "The current error is: ", '\n', error.transpose()
         # test_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
         #
         # temp_id = -np.identity(4)
@@ -355,11 +355,11 @@ class orientationTask:
         #
         # print "The inferred  error is: ", '\n', temp_error.transpose()
 
-        print "The desired quaternion is: ", '\n', self.desiredOrientation
-        print "The current quaternion is: ", '\n', current_quat.transpose()
+        #print "The desired quaternion is: ", '\n', self.desiredOrientation
+        #print "The current quaternion is: ", '\n', current_quat.transpose()
         #print "The desired quat matrix is: ", '\n',self.quat_desired_m
         #print "The temp_id matrix is: ", '\n', temp_id
-        print "The orientation task error is: ", '\n', error.transpose()
+        #print "The orientation task error is: ", '\n', error.transpose()
 
         error = self.selectionMatrix.dot(error)
 

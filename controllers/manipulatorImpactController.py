@@ -196,32 +196,32 @@ class manipulatorImpactController(manipulatorController):
             self.impactEstimator.update()
 
 
-        # if self.impactDetected() & (self.switchedTasks == False):
-        #     print "Impact detected"
-        #     self.logData()
-        #     # turn off the x axis control
-        #     #self.qp.obj.tasks[0].selectionMatrix[0, 0] = 0.0
+        if self.impactDetected() & (self.switchedTasks == False):
+            print "Impact detected"
+            self.logData()
+            # turn off the x axis control
+            #self.qp.obj.tasks[0].selectionMatrix[0, 0] = 0.0
 
-        #     # remove all the tasks:
-        #     n_tasks =  len(self.qp.obj.tasks)
-        #     for ii in range(0, n_tasks):
-        #         self.qp.obj.tasks.remove(self.qp.obj.tasks[n_tasks - ii - 1])
+            # remove all the tasks:
+            n_tasks =  len(self.qp.obj.tasks)
+            for ii in range(0, n_tasks):
+                self.qp.obj.tasks.remove(self.qp.obj.tasks[n_tasks - ii - 1])
 
 
-        #     self.switchedTasks = True
+            self.switchedTasks = True
 
-        #     logger = logging.getLogger(__name__)
-        #     logger.info("translational velocity task is removed")
-        #     #print "The velocity task selection matrix is: ",'\n', self.qp.obj.tasks[0].selectionMatrix
-        #     #logger.info("The amount of tasks is: %d", len(self.qp.obj.tasks))
+            logger = logging.getLogger(__name__)
+            logger.info("translational velocity task is removed")
+            #print "The velocity task selection matrix is: ",'\n', self.qp.obj.tasks[0].selectionMatrix
+            #logger.info("The amount of tasks is: %d", len(self.qp.obj.tasks))
 
-        #     # self.addAdmittanceTask()
-        #     transform = self.skel.bodynodes[-1].world_transform()
-        #     translation = transform[[0, 1, 2], 3].reshape((3, 1))
-        #     self.addContactAdmittanceTask(ee_position=translation)
-        #     self.addPositionTask()
-        #     if(self.qp.data["qpController"]["orientationTask"]["enabled"]):
-        #         self.addOrientationTask()
+            # self.addAdmittanceTask()
+            transform = self.skel.bodynodes[-1].world_transform()
+            translation = transform[[0, 1, 2], 3].reshape((3, 1))
+            self.addContactAdmittanceTask(ee_position=translation)
+            self.addPositionTask()
+            if(self.qp.data["qpController"]["orientationTask"]["enabled"]):
+                self.addOrientationTask()
 
 
         [self.sol_ddq, self.sol_delta_dq ]= self.solveQP()

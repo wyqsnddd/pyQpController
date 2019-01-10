@@ -13,6 +13,8 @@ from qpControllers import qpObj
 from manipulatorTasks import positionTask
 from manipulatorTasks import orientationTask
 from manipulatorTasks import translationVelocityTask
+from manipulatorTasks import maxContactVelTask
+from manipulatorTasks import maxImpactForceTask
 from manipulatorTasks import trajectoryTask
 #from qpsolvers import solve_qp
 
@@ -195,6 +197,35 @@ class manipulatorQP:
             logger.info("initialized velocity task ")
         else:
             logger.info("Velocity task disabled")
+
+        test_maxVelocityTask = data["qpController"]["maxVelocityTask"]["enabled"]
+        if(test_maxVelocityTask):
+            test_desiredDirection = data["qpController"]["maxVelocityTask"]["direction"]
+            linkIndex = data["qpController"]["maxVelocityTask"]["bodyLinkNumber"]
+            test_weight = data["qpController"]["maxVelocityTask"]["taskWeight"]
+
+            newMaxVelocityTask = maxContactVelTask.maxContactVelTask(self.robot, test_desiredDirection, test_weight, linkIndex)
+
+            self.obj.addTask(newMaxVelocityTask)
+            logger.info("initialized maximizing velocity task ")
+
+        else:
+            logger.info("Maximizing velocity task disabled")
+
+        test_maxImpactForceTask = data["qpController"]["maxImpactForceTask"]["enabled"]
+        if(test_maxImpactForceTask):
+            test_desiredDirection = data["qpController"]["maxImpactForceTask"]["direction"]
+            linkIndex = data["qpController"]["maxImpactForceTask"]["bodyLinkNumber"]
+            test_weight = data["qpController"]["maxImpactForceTask"]["taskWeight"]
+
+            newMaxImpactForceTask = maxImpactForceTask.maxImpactForceTask(self.robot, test_desiredDirection, test_weight, linkIndex)
+
+            self.obj.addTask(newMaxImpactForceTask)
+            logger.info("initialized maximizing impact force task ")
+
+        else:
+            logger.info("Maximizing impact force task disabled")
+
 
         test_trajectoryTask = data["qpController"]["trajectoryTask"]["enabled"]
 
