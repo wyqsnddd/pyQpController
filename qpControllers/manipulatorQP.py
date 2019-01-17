@@ -6,7 +6,7 @@ import numpy as np
 
 from cvxopt import matrix, solvers
 
-from manipulatorConstraints import jointPositionLimits, jointVelocityConstraints, jointAccelerationConstraints, torqueLimitConstraints, impactConstraints, impactBoundConstraints, impulseTorqueLimitConstraints, combinedTorqueConstraints
+from manipulatorConstraints import jointPositionLimits, jointVelocityConstraints, jointAccelerationConstraints, torqueLimitConstraints, impactConstraints, impactBoundConstraints, impulseTorqueLimitConstraints, combinedTorqueConstraints, robustJointVelocityConstraints, robustJointPositionLimits
 
 from qpControllers import qpObj
 
@@ -56,9 +56,16 @@ class manipulatorQP:
         #dt = 0.01
         #dt = data["qpController"]["jointLimits"]["dt"]
         print "dt is:", dt
-        self.jointLimitConstraints = jointPositionLimits.jointLimitConstraints(self.robot, dt)
 
-        self.jointVelocityLimitConstraints = jointVelocityConstraints.jointVelocityLimitConstraints(self.robot, dt)
+        self.impactRobust = data["qpController"]["impactRobust"]
+        if (self.impactRobust):
+            self.jointVelocityLimitConstraints = robustJointVelocityConstraints.robustJointVelocityLimitConstraints(self.robot, dt)
+            self.jointLimitConstraints = robustJointPositionLimits.robustJointLimitConstraints(self.robot, dt)
+
+        else:
+            self.jointVelocityLimitConstraints = jointVelocityConstraints.jointVelocityLimitConstraints(self.robot, dt)
+            self.jointLimitConstraints = jointPositionLimits.jointLimitConstraints(self.robot, dt)
+
         self.jointAccelerationLimitConstraints = jointAccelerationConstraints.jointAccelerationLimitConstraints(self.robot)
 
         # The joint velocity limtis is not given by skeleton
@@ -271,6 +278,7 @@ class manipulatorQP:
 
         self.inequalityConstraints.append(self.jointLimitConstraints)
         logger.info("initialized joint position limits inequality constraints ")
+
 
         self.inequalityConstraints.append(self.jointVelocityLimitConstraints)
         logger.info("initialized joint velocity limits inequality constraints ")

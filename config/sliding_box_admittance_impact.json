@@ -30,6 +30,7 @@
 	"deltaDqUnitWeight": 1000.0,
 	"constraintForceAware": false,
 	"showProgress": false,
+	"impactRobust": true,
 	"jointLimits":{
 		"dt": 0.01
 	},

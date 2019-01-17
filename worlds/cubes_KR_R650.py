@@ -13,7 +13,9 @@ class cubeKR5World(pydart.World):
         self.set_gravity([0.0, -9.81, 0.0])
 
         logger.info('pydart create_world OK')
-        self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650.urdf")
+        # self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650.urdf")
+        # self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_palm.urdf")
+        self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_beam.urdf")
 
         logger.info('pydart add_skeleton OK')
 
