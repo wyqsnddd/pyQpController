@@ -14,8 +14,8 @@ class cubeKR5World(pydart.World):
 
         logger.info('pydart create_world OK')
         # self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650.urdf")
-        # self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_palm.urdf")
-        self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_beam.urdf")
+        self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_palm.urdf")
+        #self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_beam.urdf")
 
         logger.info('pydart add_skeleton OK')
 
@@ -107,7 +107,8 @@ class slidingBoxKR5World(pydart.World):
         self.set_gravity([0.0, -9.81, 0.0])
 
         logger.info('pydart create_world OK')
-        self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650.urdf")
+        #self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650.urdf")
+        self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_palm.urdf")
 
         logger.info('pydart add_skeleton OK')
 
@@ -410,7 +411,9 @@ class cubeKR5World_admittance_task(pydart.World):
 
         logger.info('pydart create_world OK')
         if robot_file == None:
-            self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650.urdf")
+            #self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650.urdf")
+            self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_palm.urdf")
+
         else:
             self.robot = self.add_skeleton(robot_file)
 
