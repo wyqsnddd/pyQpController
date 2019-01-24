@@ -65,6 +65,9 @@ class cubeKR5World(pydart.World):
 
         ri.draw_text([20, 40], "time = %.4fs" % self.t)
 
+
+
+
         # ri.draw_text([20, 70], "Controller = %s" %
         #              ("ON" if self.controller.enabled else "OFF"))
 
@@ -422,17 +425,10 @@ class cubeKR5World_admittance_task(pydart.World):
         self.force = None
         self.duration = 0
 
-
     def on_key_press(self, key):
-        if key == '1':
-            self.force = np.array([0.0, 100.0, 0.0])
-            self.duration = 100
-            print('push backward: f = %s' % self.force)
-        elif key == '2':
-            self.force = np.array([0.0, -100.0, 0.0])
-            self.duration = 100
-            print('push backward: f = %s' % self.force)
         if key == 'G':
+            logger = logging.getLogger(__name__)
+            logger.info('Toggle gravity controller ...')
             self.controller.enabled = not self.controller.enabled
 
     def on_step_event(self, ):
@@ -507,7 +503,33 @@ class cubeKR5World_admittance_task(pydart.World):
         ri.set_color(0, 0, 0)
 
         ri.draw_text([20, 40], "time = %.4fs" % self.t)
-        ri.draw_text([20, 70], "Controller = %s" %
-                     ("ON" if self.controller.enabled else "OFF"))
 
+        ri.draw_text([20, 60], "Controller = %s" %
+                     ("Admittance " if self.robot.controller.switchedTasks else "End-effector Velocity"))
+        if(self.robot.controller.switchedTasks):
+            ri.draw_text([20, 40], "time = %.4fs" % self.t)
+            ri.draw_text([20, 80],  "Desired Force = %.3f %.3f %.3f " %(self.robot.controller.qp.obj.tasks[0].desiredForce[0], self.robot.controller.qp.obj.tasks[0].desiredForce[1], self.robot.controller.qp.obj.tasks[0].desiredForce[2]))
+            ri.draw_text([20, 100], "Current Force = %.3f %.3f %.3f " %(self.robot.controller.qp.obj.tasks[0].equivalentForceVector[0], self.robot.controller.qp.obj.tasks[0].equivalentForceVector[1], self.robot.controller.qp.obj.tasks[0].equivalentForceVector[2]))
 
+        J = np.reshape(self.robot.bodynodes[-1].linear_jacobian(), (3, self.robot.ndofs))
+
+        velocity = J.dot(np.reshape(self.skeletons[-1].dq, (self.robot.ndofs, 1)))
+
+        ri.draw_text([350, 60], "Robot end-effector velocity = %.2f %.2f %.2f " % (
+        velocity[0],
+        velocity[1],
+        velocity[2]))
+        ri.draw_text([350, 30], "Robot weight = %.2f Kilos" % self.robot.world.skeletons[-1].mass())
+
+        ri.set_color(0, 0, 0)
+
+        ri.draw_text([20, 40], "time = %.4fs" %self.t )
+
+        ri.draw_text([900, 60], "Wall friction coefficient = %.2f" %self.robot.world.skeletons[1].bodynodes[0].friction_coeff())
+        ri.draw_text([900, 90], "Wall restitution coefficient = %.2f" %self.robot.world.skeletons[1].bodynodes[0].restitution_coeff())
+        ri.draw_text([900, 120], "Robot palm restitution coefficient = %.2f" %self.robot.world.skeletons[-1].bodynode("palm").restitution_coeff())
+
+            
+    def clear_captures(self):
+        command = "rm ./data/captures/robot*"
+        os.popen(command)

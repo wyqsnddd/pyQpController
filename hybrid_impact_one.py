@@ -53,6 +53,7 @@ if __name__ == '__main__':
     print "logger is set."
 
     world = cubes_KR_R650.cubeKR5World_admittance_task()
+    #world = cubes_KR_R650.cubeKR5World()
 
     print('pydart create_world OK')
 
@@ -63,6 +64,14 @@ if __name__ == '__main__':
     #         skel = world.skeletons[-1]
     #         print("%.4fs: The last cube COM = %s" % (world.t, str(skel.C)))
     #     world.step()
+    frictionCoeff = qpData["simulationWorldParameters"]["wall_friction_coeff"]
+    restitutionCoeff = qpData["simulationWorldParameters"]["wall_restitution_coeff"]
+
+    palmRestitutionCoeff = qpData["simulationWorldParameters"]["palm_restitution_coeff"]
+
+    world.skeletons[1].bodynodes[0].set_friction_coeff(frictionCoeff)
+    world.skeletons[1].bodynodes[0].set_restitution_coeff(restitutionCoeff)
+    world.skeletons[-1].bodynode("palm").set_restitution_coeff(palmRestitutionCoeff)
 
     skel= world.skeletons[-1]
 
@@ -101,9 +110,10 @@ if __name__ == '__main__':
     panel.add_label("Mode")
     panel.add_push_button("Hello", world.print_text, next_line=False)
     panel.add_push_button("Record Movie", world.produce_movie)
+    panel.add_push_button("Clear Captures", world.clear_captures, next_line=False)
     panel.add_combobox("Render", ["No", "Yes"], default=1, callback=world.print_text, label="MyRenderSetting")
     panel.add_double_spinbox("Step", 0, 10.0, step=2.5, callback=world.print_text)
-    panel.set_text("Mode", "Melo")
+
 
     win.add_right_panel(panel)
     win.run_application()
