@@ -16,6 +16,8 @@ from manipulatorTasks import translationVelocityTask
 from manipulatorTasks import maxContactVelTask
 from manipulatorTasks import maxImpactForceTask
 from manipulatorTasks import trajectoryTask
+from contact import qpContact
+
 #from qpsolvers import solve_qp
 
 from cvxopt import matrix, spmatrix
@@ -299,6 +301,9 @@ class manipulatorQP:
         self.equalityConstraints.append(self.impactConstraints)
         logger.info("initialized impact equality constraints ")
 
+        self.contact = qpContact.qpContact(self.robot)
+        logger.info("initialized QP contact ")
+
     def transformToGlobalFrame(self, input, bodyNodeIndex):
 
         transform = self.robot.bodynodes[bodyNodeIndex].world_transform()
@@ -329,6 +334,8 @@ class manipulatorQP:
 
         for ii in range(0,  len(self.obj.tasks)):
             self.obj.tasks[ii].update()
+        # update the contact:
+        self.contact.update()
 
     def solve(self, impactEstimator):
         self.update(impactEstimator)

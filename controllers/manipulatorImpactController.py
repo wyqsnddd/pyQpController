@@ -17,17 +17,12 @@ class manipulatorImpactController(manipulatorController):
     def __init__(self, inputSkel, data, dt):
         manipulatorController.__init__(self, inputSkel, data, dt)
 
-        # logger = logging.getLogger(__name__)
-        # logger.debug('manipulator controller created')
-        # self.errorZero = []
-        # self.time = []
-        # self.dq = []
-        # self.robot_c = []
-
-        #bodyNodeLink = data["impactEstimator"]["bodyLinkNumber"]
-        #self.impactEstimator = impactEstimator.impactEstimator(self.skel, bodyNodeLink)
 
         self.switchedTasks = False
+
+        # Container of contact
+        self.contacts = []
+
     # def updateTarget(self, inputTargetPosition):
     #     self.targetPosition = inputTargetPosition
     #     # update the reference point of each task:

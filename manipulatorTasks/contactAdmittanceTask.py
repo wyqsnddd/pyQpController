@@ -11,7 +11,7 @@ import logging
 
 class contactAdmittanceTask:
     """!@brief
-    It keeps a point contact and generates a desired force by generating joint acceleration.
+    It keeps a point contact and generates a desired force by generating joint acceleration. Different from a pure admittance task, we can also set a desired position. 
     """
     def __init__(self,skel, desiredForce, weight, desiredPosition, Kd, Kp, Kf, Ki, selectionVector=None, bodyNodeIndex=None):
 

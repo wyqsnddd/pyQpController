@@ -37,7 +37,7 @@
     <skeleton name="fixed_box_skeleton">
       <body name="fixed_box">
         <gravity>1</gravity>
-        <transformation>0.36 0.15 0.3 0 0 0</transformation>
+        <transformation>0.30 0.15 0.3 0 0 0</transformation>
         <inertia>
           <mass>200</mass>
           <offset>0 0 0</offset>
@@ -46,16 +46,16 @@
           <transformation>0 0 0 0 0 0</transformation>
           <geometry>
             <box>
-              <size>0.1 1.0 0.4</size>
+              <size>0.01 1.0 1.0</size>
             </box>
           </geometry>
-          <color>0.8 0.3 0.3</color>
+          <color>0.8 0.3 0.3 0.2</color>
         </visualization_shape>
         <collision_shape>
           <transformation>0 0 0 0 0 0</transformation>
           <geometry>
             <box>
-              <size>0.1 1.0 0.4</size>
+              <size>0.01 1.0 0.4</size>
             </box>
           </geometry>
         </collision_shape>                                
@@ -119,6 +119,7 @@
             </box>
           </geometry>
           <color>0.3 0.8 0.3</color>
+
         </visualization_shape>
         <collision_shape>
           <transformation>0 0 0 0 0 0</transformation>

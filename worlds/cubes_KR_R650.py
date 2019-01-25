@@ -13,9 +13,9 @@ class cubeKR5World(pydart.World):
         self.set_gravity([0.0, -9.81, 0.0])
 
         logger.info('pydart create_world OK')
-        # self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650.urdf")
-        self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_palm.urdf")
-        #self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_beam.urdf")
+        self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650.urdf")
+        # self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_palm.urdf")
+        # self.robot = self.add_skeleton("./data/KR5/KR5_sixx_R650_beam.urdf")
 
         logger.info('pydart add_skeleton OK')
 
@@ -467,12 +467,42 @@ class cubeKR5World_admittance_task(pydart.World):
 
     def render_with_ri(self, ri):
         ri.set_color(0, 0, 1)
+        scale = 0.1
+
+        #if(self.robot.controller.switchedTasks):
+        #self.render_palm_contact(ri)
+
+        p0 = self.controller.qp.contact.getContactPosition()
+
+        K = self.controller.qp.contact.getContactGenerationMatrix()
+        K_1 = K[:3, 0].reshape((3, 1))
+        K_2 = K[:3, 1].reshape((3, 1))
+        K_3 = K[:3, 2].reshape((3, 1))
+        K_4 = K[:3, 3].reshape((3, 1))
+
+        p1 = (p0 + K_1*scale)
+        p2 = (p0 + K_2*scale)
+        p3 = (p0 + K_3*scale)
+        p4 = (p0 + K_4*scale)
+
+        p0.reshape(3)
+
+        #ri.render_axes(p0.reshape(3), 0.15, True)
+
+        ri.set_color(0.0, 0.5, 0.5, 0.5)
+
+        ri.render_arrow(p0.reshape(3), p1.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+        ri.render_arrow(p0.reshape(3), p2.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+        ri.render_arrow(p0.reshape(3), p3.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+        ri.render_arrow(p0.reshape(3), p4.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
 
         if self.force is not None and self.duration >= 0:
             p0 = self.skeletons[-1].body('palm').C
-            p1 = p0 + 0.01 * self.force
-            ri.set_color(1.0, 0.0, 0.0)
-            ri.render_arrow(p0, p1, r_base=0.05, head_width=0.1, head_len=0.1)
+            print "p0 is: ", p0
+            p1 = p0 + 0.01*self.force
+            ri.set_color(0.0, 1.0, 0.0)
+            ri.render_arrow(p0.reshape(3), p1.reshape(3), r_base=0.05, head_width=0.1, head_len=0.1)
+
 
         # n = self.controller.qp.obj.tasks[0].controlPoints.shape[1]
         # for ii in range(0, n):
@@ -486,7 +516,7 @@ class cubeKR5World_admittance_task(pydart.World):
         # #ri.render_box(desired_translation, size)
         # ri.render_sphere(desired_translation, 0.02)
 
-        ri.render_axes([0, 0, 0], 0.2, True)
+        ri.render_axes([0, 0, 0], 0.1, True)
 
         #transform = self.robot.bodynodes[-1].world_transform()
         #robot_ee_translation = transform[:3, 3]
@@ -494,6 +524,37 @@ class cubeKR5World_admittance_task(pydart.World):
         #ri.render_axes(robot_ee_translation, 0.2, True)
 
         #ri.render_sphere([0.1, 0.1, 0.1], 1.0)
+    def render_palm_contact(self,ri):
+        p0 = self.controller.qp.contact.getContactPosition()
+        p0[1] = p0[1] + 10
+        K = self.controller.qp.contact.getContactGenerationMatrix()
+        K_1 = K[:3, 0].reshape((3, 1))
+        K_2 = K[:3, 1].reshape((3, 1))
+        K_3 = K[:3, 2].reshape((3, 1))
+        K_4 = K[:3, 3].reshape((3, 1))
+
+        p1 = (p0 + K_1)
+        p2 = (p0 + K_2)
+        p3 = (p0 + K_3)
+        p4 = (p0 + K_4)
+
+        p0.reshape(3)
+
+        ri.set_color(0.0, 9.0, 0.0, 0.5)
+        ri.render_arrow(p0.reshape(3), p1.reshape(3), r_base=0.5, head_width=0.1, head_len=0.1)
+        ri.render_arrow(p0.reshape(3), p2.reshape(3), r_base=0.5, head_width=0.1, head_len=0.1)
+        ri.render_arrow(p0.reshape(3), p3.reshape(3), r_base=0.5, head_width=0.1, head_len=0.1)
+        ri.render_arrow(p0.reshape(3), p4.reshape(3), r_base=0.5, head_width=0.1, head_len=0.1)
+
+        #ri.render_arrow(p0, p1, r_base=0.05, head_width=0.1, head_len=0.1)
+        #ri.render_arrow(p0.reshape(3), p2.reshape(3), r_base=0.02 )
+
+
+
+        #print "render_contact: p0 is: ", p0
+        #print "p1 is: ", p1
+
+
     def draw_with_ri(self, ri):
         ri.set_color(0, 0, 1)
 
@@ -506,10 +567,14 @@ class cubeKR5World_admittance_task(pydart.World):
 
         ri.draw_text([20, 60], "Controller = %s" %
                      ("Admittance " if self.robot.controller.switchedTasks else "End-effector Velocity"))
+
+
         if(self.robot.controller.switchedTasks):
             ri.draw_text([20, 40], "time = %.4fs" % self.t)
             ri.draw_text([20, 80],  "Desired Force = %.3f %.3f %.3f " %(self.robot.controller.qp.obj.tasks[0].desiredForce[0], self.robot.controller.qp.obj.tasks[0].desiredForce[1], self.robot.controller.qp.obj.tasks[0].desiredForce[2]))
             ri.draw_text([20, 100], "Current Force = %.3f %.3f %.3f " %(self.robot.controller.qp.obj.tasks[0].equivalentForceVector[0], self.robot.controller.qp.obj.tasks[0].equivalentForceVector[1], self.robot.controller.qp.obj.tasks[0].equivalentForceVector[2]))
+
+
 
         J = np.reshape(self.robot.bodynodes[-1].linear_jacobian(), (3, self.robot.ndofs))
 
