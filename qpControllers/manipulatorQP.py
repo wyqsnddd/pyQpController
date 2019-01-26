@@ -16,7 +16,7 @@ from manipulatorTasks import translationVelocityTask
 from manipulatorTasks import maxContactVelTask
 from manipulatorTasks import maxImpactForceTask
 from manipulatorTasks import trajectoryTask
-from contact import qpContact
+from contact import qpContact, contactEqualityConstraint
 
 #from qpsolvers import solve_qp
 
@@ -58,6 +58,17 @@ class manipulatorQP:
         #dt = 0.01
         #dt = data["qpController"]["jointLimits"]["dt"]
         print "dt is:", dt
+
+        self.contactAware = data["qpController"]["contact"]["enabled"]
+        self.contactWeight = data["qpController"]["contact"]["weight"]
+
+        self.contactStart = False
+        self.contact = qpContact.qpContact(self.robot)
+        #if(self.contactAware):
+            # We do not use the equality, instead, we use the robot dynamics.
+            #self.contactEqualityConstraint = contactEqualityConstraint.contactEqualityConstraint(self.robot, self.contact)
+
+        logger.info("initialized QP contact ")
 
         self.impactRobust = data["qpController"]["impactRobust"]
         if (self.impactRobust):
@@ -117,7 +128,9 @@ class manipulatorQP:
         # initialize objective function:
         test_jointUnitWeight = data["qpController"]["jointUnitWeight"]
         test_deltaDqWeight = data["qpController"]["deltaDqUnitWeight"]
-        self.obj = qpObj.qpObj(self.robot, test_jointUnitWeight, test_deltaDqWeight)
+        test_contactWeight = data["qpController"]["contactUnitWeight"]
+
+        self.obj = qpObj.qpObj(self.robot, test_jointUnitWeight, test_deltaDqWeight, test_contactWeight, self.contact)
         logger.info("initialized objective ")
         #print "initialized objective "
 
@@ -301,8 +314,15 @@ class manipulatorQP:
         self.equalityConstraints.append(self.impactConstraints)
         logger.info("initialized impact equality constraints ")
 
-        self.contact = qpContact.qpContact(self.robot)
-        logger.info("initialized QP contact ")
+
+    def getContactStatus(self):
+        return (self.contactStart and self.contactAware)
+
+
+    def setContactStatus(self):
+        self.contactStart = True
+    def resetContactstatus(self):
+        self.contactStart = False
 
     def transformToGlobalFrame(self, input, bodyNodeIndex):
 
@@ -325,6 +345,7 @@ class manipulatorQP:
         return output
 
     def update(self, impactEstimator):
+        self.contact.update()
 
         for ii in range(0, len(self.inequalityConstraints)):
             self.inequalityConstraints[ii].update(impactEstimator)
@@ -335,41 +356,177 @@ class manipulatorQP:
         for ii in range(0,  len(self.obj.tasks)):
             self.obj.tasks[ii].update()
         # update the contact:
-        self.contact.update()
+
+
+        #self.torqueLimitConstraints.update(impactEstimator)
+        # if self.getContactStatus():
+        #     update torque constraint normally
+        # else:
+        #     update torque constraint
+        #     pass # update torque constraint
+        # #     self.contactConstraint.update()
+
 
     def solve(self, impactEstimator):
         self.update(impactEstimator)
 
-        [Q, P, C] = self.obj.calcMatricies()
+        [Q, P, C] = self.obj.calcMatricies( self.getContactStatus(), self.contact)
 
-        [G, H] = self.inequalityConstraints[0].calcMatricies()
+        [G, H] = self.inequalityConstraints[0].calcMatricies(self.getContactStatus(), self.contact)
         for ii in range(1, len(self.inequalityConstraints)):
-            [G_ii, H_ii] = self.inequalityConstraints[ii].calcMatricies()
+            [G_ii, H_ii] = self.inequalityConstraints[ii].calcMatricies(self.getContactStatus(), self.contact)
             G = np.concatenate((G, G_ii), axis=0)
             H = np.concatenate((H, H_ii), axis=0)
+
 
         #print "G is: ", '\n', G
         #print "H is: ", '\n', H
 
+        # add joint torque as the decision variable
+
+        #  Modify the Q, P, C and inequality constraints:
+
+
+
+        # QP_size = len(Q)
+        # robot_dof = self.robot.ndofs
+        # contact_size = self.contact.Nc
+
+        # # 0.1. update Q to include torque
+        # new_Q = np.zeros((QP_size + robot_dof, QP_size + robot_dof))
+        # new_Q[:QP_size, :QP_size] = Q  # write the old info
+        # new_Q[QP_size:, QP_size:] = np.identity(robot_dof) * self.torqueWeigt
+        #n
+        # Q = new_Q
+        # QP_size_raw = QP_size
+        # QP_size = len(Q)
+        #
+        # # 0.2. update P to include torque
+        # new_P = np.zeros((1, QP_size + robot_dof))
+        # new_P[0, :QP_size] = P
+        #
+        # P = new_P
+        #
+        # # 0.3 update  inequalities:
+        # G_size = len(G)
+        # new_G = np.zeros((G_size, QP_size))
+        # new_G[:, :QP_size_raw] = G  # write the old info
+        # G = new_G
+        # # 2.2 H keeps the same
+
+        if(self.getContactStatus()):
+            [G_contact, H_contact] = self.contact.calcContactConstraintMatrices()
+
+            G = np.concatenate((G, G_contact), axis=0)
+            H = np.concatenate((H, H_contact), axis=0)
+
         if len(self.equalityConstraints) > 0:
-            [A, B] = self.equalityConstraints[0].calcMatricies()
+            [A, B] = self.equalityConstraints[0].calcMatricies(self.getContactStatus(), self.contact)
                           
             for ii in range(1, len(self.equalityConstraints)):
-                [A_ii, B_ii] = self.equalityConstraints[ii].calcMatricies()
+                [A_ii, B_ii] = self.equalityConstraints[ii].calcMatricies(self.getContactStatus(), self.contact)
                 A = np.concatenate((A, A_ii), axis=0)
                 B = np.concatenate((B, B_ii), axis=0)
-            sol = self.cvxopt_solve_qp(Q, P.T, G, H, A, B)
 
+            sol = self.cvxopt_solve_qp(Q, P.T, G, H, A, B)
         else:
             sol = self.cvxopt_solve_qp(Q, P.T, G, H)
+
+        #
+        # if self.getContactStatus():
+        # #if True:
+
+            # 1. Modify the Q, P, C matricies
+            #  1.1 Q
+            # new_Q  = np.zeros((QP_size + contact_size, QP_size + contact_size))
+            # new_Q[:QP_size, :QP_size] = Q # write the old info
+            # new_Q[QP_size:, QP_size:] = np.identity(contact_size)*self.contactWeight
+            #
+            # #  1.2 P
+            # new_P = np.zeros((1, QP_size + contact_size))
+            # new_P[0, :QP_size] = P
+            # # 1.3 C stay as before
+            # P = new_P
+            # Q = new_Q
+
+            # Add the contact force task
+            # [force_Q, force_P, force_C] =
+
+
+
+            # 2. Modify the inequality constraints
+            # 2.1 G
+            # G_size = len(G)
+            # new_G = np.zeros((G_size, QP_size + contact_size))
+            # new_G[:, :QP_size] = G # write the old info
+            # G = new_G
+            # 2.2 H keeps the same
+
+            # 3. Modify the equality constraints:
+            # if len(self.equalityConstraints) > 0:
+            #     # There was equality constraints:
+            #     A_size = A.shape[0]
+            #
+            #     new_A = np.zeros((A_size, QP_size + contact_size))
+            #     new_A[:, :QP_size] = A  # write the old info
+            #
+            #     A = new_A
+                #[A_ddq, A_torque, A_con, B_con] = self.contactEqualityConstraint.calcMatricies()
+
+                # temp_A = np.zeros((robot_dof, QP_size + robot_dof + contact_size))
+                # temp_A[:,:robot_dof] = A_ddq
+                # temp_A[:, QP_size:QP_size + robot_dof] = A_torque
+                # temp_A[:, QP_size + robot_dof:] = A_con
+
+                # A = np.concatenate((new_A, temp_A), axis=0)
+                # B = np.concatenate((B, B_con), axis=0)
+
+                # 4 Update the torque constraint with contact
+                # [G_torque, H_torque] = self.torqueLimitConstraints.calcContactMatricies(self.contact)
+                # G = np.concatenate((G, G_torque), axis=0)
+                # H = np.concatenate((H, H_torque), axis=0)
+
+                # [G_contact, H_contact] = self.contact.calcContactConstraintMatrices()
+                #
+                # G = np.concatenate((G, G_contact), axis=0)
+                # H = np.concatenate((H, H_contact), axis=0)
+
+        #
+        #
+        # if len(self.equalityConstraints) > 0:
+
+
+            # else:
+            #     # There was no equality constraints:
+            #     [A_ddq, A_torque, A_con, B] = self.equalityConstraints[ii].calcMatricies()
+            #     A_size = A_ddq.shape[0]
+            #     A = np.zeros((A_size, QP_size + robot_dof + contact_size))
+            #     A[:,:robot_dof] = A_ddq
+            #     A[:, QP_size:QP_size+robot_dof] = A_torque
+            #     A[:, QP_size + robot_dof:] = A_con
+
+
 
 
             #sol = solve_qp(Q, P.T, G, H, solver='mosek')
         # We only take the first 6 joint accelerations
-        solution = sol.reshape(2*self.robot.ndofs, 1)
-        sol_ddq = solution[:6]
-        sol_delta_dq = solution[6:]
-        return [sol_ddq, sol_delta_dq]
+        if  self.getContactStatus():
+        #if True:
+
+            solution = sol.reshape(2*self.robot.ndofs + self.contact.Nc, 1)
+            sol_ddq = solution[:self.robot.ndofs]
+            sol_delta_dq = solution[self.robot.ndofs:2*self.robot.ndofs] # How to extract middle ones?
+            sol_weights = solution[2*self.robot.ndofs:] # Take the last ones
+        else:
+
+            solution = sol.reshape(2 * self.robot.ndofs, 1)
+            sol_ddq = solution[:self.robot.ndofs]
+            sol_delta_dq = solution[self.robot.ndofs:]
+            sol_weights = np.zeros((self.contact.Nc, 1))
+
+        self.contact.updateWeights(sol_weights)
+
+        return [sol_ddq, sol_delta_dq, sol_weights]
 
 
     def cvxopt_matrix(self, M):

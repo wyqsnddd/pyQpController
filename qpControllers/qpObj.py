@@ -10,7 +10,7 @@ from manipulatorTasks import positionTask
 
 
 class qpObj:
-    def __init__(self, skel, jointUnitWeight, deltaDqWeight):
+    def __init__(self, skel, jointUnitWeight, deltaDqWeight, contactWeight, qpContact):
 
         # if logger is None:
         #     raise Exception("Logger is not set")
@@ -24,17 +24,25 @@ class qpObj:
 
 
         self.dofWeightMatrix = np.identity(2*self.dof)
+        self.contactDofWeightMatrix = np.identity(2 * self.dof + qpContact.Nc)
+
 
         # set the weights of the joint, descend from base to end
         for ii in range(0,self.dof):
             #self.dofWeightMatrix[ii,ii] = (self.dof - ii)*jointUnitWeight
             self.dofWeightMatrix[ii, ii] = jointUnitWeight
+            self.contactDofWeightMatrix[ii, ii] = jointUnitWeight
             
         for ii in range(self.dof, 2*self.dof):
             # We need to maximize the delta QP 
             # self.dofWeightMatrix[ii, ii] = -jointUnitWeight
             self.dofWeightMatrix[ii, ii] = deltaDqWeight
-            
+            self.contactDofWeightMatrix[ii, ii] = deltaDqWeight
+
+        for ii in range(2*self.dof, 2*self.dof + qpContact.Nc):
+            self.contactDofWeightMatrix[ii, ii] = contactWeight
+
+
 
     def numTasks(self):
         return len(self.tasks)
@@ -48,15 +56,23 @@ class qpObj:
     def removeTask(self, task):
         self.tasks.remove(task)
 
-    def calcMatricies(self):
+    def calcMatricies(self, useContactVariables, qpContact):
 
-        Q = np.zeros((2*self.dof, 2*self.dof))
-        P = np.zeros(( 1, 2*self.dof))
+        if useContactVariables:
+            qpSize = 2*self.dof + qpContact.Nc
+            dofWeightMatrix = self.contactDofWeightMatrix
+        else:
+            qpSize = 2*self.dof
+            dofWeightMatrix = self.dofWeightMatrix
+
+        Q = np.zeros((qpSize, qpSize))
+        P = np.zeros(( 1, qpSize))
         C = 0.0
-        Q += self.dofWeightMatrix
+
+        Q += dofWeightMatrix
 
         for ii in range(0, len(self.tasks)):
-            [Q_add, P_add, C_add ] = self.tasks[ii].calcMatricies()
+            [Q_add, P_add, C_add ] = self.tasks[ii].calcMatricies(useContactVariables, qpContact)
             Q += Q_add
             P += P_add
             C += C_add

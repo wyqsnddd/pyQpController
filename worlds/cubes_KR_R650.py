@@ -147,12 +147,12 @@ class slidingBoxKR5World(pydart.World):
         transform = self.robot.bodynodes[-1].world_transform()
         robot_ee_translation = transform[:3, 3]
 
-        desired_translation = self.controller.qp.obj.tasks[0].desiredPosition
+        #desired_translation = self.controller.qp.obj.tasks[0].desiredPosition
 
         #ri.render_axes(desired_translation.transpose(), 0.1, True)
         size = [0.01, 0.01, 0.01]
-        ri.render_box(desired_translation, size)
-        ri.render_sphere(desired_translation, 0.02)
+        #ri.render_box(desired_translation, size)
+        #ri.render_sphere(desired_translation, 0.02)
 
         #
         #
@@ -496,6 +496,17 @@ class cubeKR5World_admittance_task(pydart.World):
         ri.render_arrow(p0.reshape(3), p3.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
         ri.render_arrow(p0.reshape(3), p4.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
 
+        if self.controller.qp.getContactStatus():
+            scale2 = 0.001
+            p5 = p0 + self.controller.qp.obj.tasks[0].desiredForce*scale2
+            p6 = p0 + self.controller.qp.obj.tasks[0].currentForce*scale2
+
+            ri.set_color(1.0, 0.0, 0.0, 1.0)
+            ri.render_arrow(p0.reshape(3), p5.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+
+            ri.set_color(0.0, 1.0, 0.0, 1.0)
+            ri.render_arrow(p0.reshape(3), p6.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+
         if self.force is not None and self.duration >= 0:
             p0 = self.skeletons[-1].body('palm').C
             print "p0 is: ", p0
@@ -524,35 +535,7 @@ class cubeKR5World_admittance_task(pydart.World):
         #ri.render_axes(robot_ee_translation, 0.2, True)
 
         #ri.render_sphere([0.1, 0.1, 0.1], 1.0)
-    def render_palm_contact(self,ri):
-        p0 = self.controller.qp.contact.getContactPosition()
-        p0[1] = p0[1] + 10
-        K = self.controller.qp.contact.getContactGenerationMatrix()
-        K_1 = K[:3, 0].reshape((3, 1))
-        K_2 = K[:3, 1].reshape((3, 1))
-        K_3 = K[:3, 2].reshape((3, 1))
-        K_4 = K[:3, 3].reshape((3, 1))
 
-        p1 = (p0 + K_1)
-        p2 = (p0 + K_2)
-        p3 = (p0 + K_3)
-        p4 = (p0 + K_4)
-
-        p0.reshape(3)
-
-        ri.set_color(0.0, 9.0, 0.0, 0.5)
-        ri.render_arrow(p0.reshape(3), p1.reshape(3), r_base=0.5, head_width=0.1, head_len=0.1)
-        ri.render_arrow(p0.reshape(3), p2.reshape(3), r_base=0.5, head_width=0.1, head_len=0.1)
-        ri.render_arrow(p0.reshape(3), p3.reshape(3), r_base=0.5, head_width=0.1, head_len=0.1)
-        ri.render_arrow(p0.reshape(3), p4.reshape(3), r_base=0.5, head_width=0.1, head_len=0.1)
-
-        #ri.render_arrow(p0, p1, r_base=0.05, head_width=0.1, head_len=0.1)
-        #ri.render_arrow(p0.reshape(3), p2.reshape(3), r_base=0.02 )
-
-
-
-        #print "render_contact: p0 is: ", p0
-        #print "p1 is: ", p1
 
 
     def draw_with_ri(self, ri):

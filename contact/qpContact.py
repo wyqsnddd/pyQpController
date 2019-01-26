@@ -55,13 +55,25 @@ class qpContact:
 
     def updateWeights(self, input):
         self.weights = np.asarray(input).reshape((self.Nc, 1))
+        # print "The f_QP force is: ", self.getContactForce().transpose()
 
     def getWeights(self):
         return self.weights
 
+
+    def calcContactConstraintMatrices(self):
+        G = np.zeros((self.Nc, 2*self.robot.ndofs + self.Nc))
+        G[:, 2*self.robot.ndofs:] = -np.identity(self.Nc)
+        h = np.reshape( np.zeros((self.Nc, 1)) , (self.Nc, 1))
+        return [G, h]
+
+
     def getContactForce(self):
         return self.getContactGenerationMatrix().dot(self.getWeights())
 
+    def getJacobianTranspose(self):
+        return self.robot.bodynodes[-1].linear_jacobian().transpose()
+    
     def update(self):
 
         # (0) update the contact location

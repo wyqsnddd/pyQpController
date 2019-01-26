@@ -39,7 +39,7 @@ class maxImpactForceTask:
         #logger.warning("Kd is: %d", self.Kd)
     def update(self):
         pass
-    def calcMatricies(self):
+    def calcMatricies(self, useContactVariables, qpContact):
         
         dq = (self.robot.dq).reshape((self.robot.ndofs, 1))
 
@@ -63,6 +63,17 @@ class maxImpactForceTask:
         P = np.concatenate((P, zero_vector), axis=1)
 
         C = 1
-        Q = np.zeros((2*self.robot.ndofs, 2*self.robot.ndofs))
+        #Q = np.zeros((2*self.robot.ndofs, 2*self.robot.ndofs))
+
+        if(useContactVariables):
+            QP_size = 2*self.robot.ndofs
+            contact_size = qpContact.Nc
+            Q_new  = np.zeros((QP_size + contact_size, QP_size + contact_size))
+            #Q_new[:QP_size, :QP_size] = Q # write the old info
+            Q = Q_new
+
+            P_new = np.zeros((1, QP_size + contact_size))
+            P_new[0, :QP_size] = P
+            P = P_new
 
         return [Q, - self.taskWeight*P, - self.taskWeight*C]

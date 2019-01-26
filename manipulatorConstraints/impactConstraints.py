@@ -21,7 +21,7 @@ class impactConstraints:
     def update(self, impactEstimator):
         pass
 
-    def calcMatricies(self):
+    def calcMatricies(self, useContactVariables, qpContact):
 
         jacobian = self.robot.bodynodes[-1].linear_jacobian()
         M_inv = np.linalg.pinv(self.robot.M)
@@ -46,6 +46,7 @@ class impactConstraints:
         A = np.block([
             [temp_A*self.robot.world.dt, np.identity(self.robot.ndofs)]
         ])
+
         # A = np.block([
         #     [np.zeros((6,6)), np.zeros((6,6))]
         # ])
@@ -53,5 +54,16 @@ class impactConstraints:
 
         
         b  = -temp_A.dot(dq)
+
+
+        if(useContactVariables):
+            # Append more columns corresponding to the contact force varialbes
+            contact_size = qpContact.Nc
+            row_number = A.shape[0]
+            column_number = A.shape[1]
+            A_new = np.zeros((row_number, column_number + contact_size))
+            A_new[:, :column_number] = A  # write the old info
+            A = A_new
+
         
         return [A, b]

@@ -42,7 +42,7 @@ class impulseTorqueLimitConstraints:
             return [upperRhs, lowerRhs]
 
         
-        def calcMatricies(self):
+        def calcMatricies(self, useContactVariables, qpContact):
             zero_block = np.zeros((2*self.robot.ndofs, self.robot.ndofs))
             # instead of Mass matrix we need to use the weighted Jacobian pseudo inverse
             jacobian = self.robot.bodynodes[-1].linear_jacobian()
@@ -69,6 +69,16 @@ class impulseTorqueLimitConstraints:
             G = np.concatenate((zero_block, G*(1/self.robot.world.dt)), axis=1)
 
             [h_upp, h_lower] = self.rhsVectors()
+
+            if (useContactVariables):
+                # Append more columns corresponding to the contact force varialbes
+                contact_size = qpContact.Nc
+                row_number = G.shape[0]
+                column_number = G.shape[1]
+                G_new = np.zeros((row_number, column_number + contact_size))
+                G_new[:, :column_number] = G  # write the old info
+                G = G_new
+                # Keep h as it is.
 
             return [G, np.concatenate((h_upp, h_lower), axis=0)]
     

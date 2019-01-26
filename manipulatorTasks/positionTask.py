@@ -60,7 +60,7 @@ class positionTask:
         pass
 
 
-    def calcMatricies(self):
+    def calcMatricies(self, useContactVariables, qpContact):
 
         newJacobian = self.robot.bodynodes[self.bodyNodeIndex].linear_jacobian()
         newJacobian = self.selectionMatrix.dot(newJacobian)
@@ -100,6 +100,18 @@ class positionTask:
 
 
         C = constant.T.dot(constant)
+
+        if(useContactVariables):
+            QP_size = 2*self.robot.ndofs
+            contact_size = qpContact.Nc
+            Q_new  = np.zeros((QP_size + contact_size, QP_size + contact_size))
+            Q_new[:QP_size, :QP_size] = Q # write the old info
+            Q = Q_new
+
+            P_new = np.zeros((1, QP_size + contact_size))
+            P_new[0, :QP_size] = P
+            P = P_new
+
 
         #return [newJacobian, newJacobian_dot, Q, P, C]
         return [self.taskWeight*Q, self.taskWeight*P, self.taskWeight*C]

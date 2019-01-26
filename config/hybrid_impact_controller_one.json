@@ -25,10 +25,15 @@
 },
 "qpController":{ 
 	"jointUnitWeight": 10.0,
+	"contactUnitWeight": 100.0,
 	"deltaDqUnitWeight": 1000.0,
 	"constraintForceAware": false,
 	"showProgress": false,
 	"impactRobust": true,
+	"contact":{
+	"enabled": true,
+	"weight": 100 
+	},
 	"jointLimits":{
 		"dt": 0.01
 	},
@@ -79,13 +84,14 @@
 	"admittanceTask":{
 		"enabled": false,
 		"taskWeight": 30.0,
+		"qpForceRegulating": false,
 		"axis_selection":[1.0, 0.0, 0.0],
-		"desiredForce": [20.0, 0.0, 0.0],
+		"desiredForce": [300.0, 0.0, 0.0],
 		"desiredVelocity": [0.0, 0.0, 0.0],
 		"bodyLinkNumber": -1,
-		"Kf": 0.5,
-		"Ki": 1.0,
-		"Kd": 100.0
+		"Kf": 0.05,
+		"Ki": 5.0,
+		"Kd": 0.1
 	},
 	"maxImpactForceTask":{
 		"enabled": false,

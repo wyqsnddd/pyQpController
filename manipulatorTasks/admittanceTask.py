@@ -6,6 +6,7 @@ from numpy import array
 from worlds import cubes_KR_R650
 from controllers import gravityCompensationController
 from qpControllers import qpObj
+from contact import qpContact
 
 import logging
 
@@ -14,7 +15,7 @@ class admittanceTask:
     """!@brief
     It generates a desired force with joint acceleration.
     """
-    def __init__(self,skel, desiredForce, weight, selectionVector=None, velocityControl=False, desiredVelocity=None, Kd=None, Kf=None, Ki = None, bodyNodeIndex=None):
+    def __init__(self,skel, desiredForce, weight, selectionVector=None, velocityControl=False, desiredVelocity=None, Kd=None, Kf=None, Ki = None, bodyNodeIndex=None, qpForceRegulating=True):
         logger = logging.getLogger(__name__)
 
         self.robot = skel
@@ -73,13 +74,27 @@ class admittanceTask:
         self.forceErrorIntegral = np.zeros((3, 1))
         self.equivalentForceVector = np.zeros((3, 1))
 
+        # If we should use QP force to regulate the contact force task or not
+        self.qpForceRegulating = qpForceRegulating
+
+
     def update(self):
         # check if we are in contact
         #self.robot.world.contact
         pass
 
+    def calcQPRegulatingMatricies(self, qpContact):
+        # Minimize the error: ||f_qp - f_desired||_2
+        constant = 1.0
+        f_qp = -qpContact.getContactForce()
+        force_Q = constant*f_qp.transpose().dot(f_qp)
+        force_P = -2*constant* f_qp.transpose().dot(qpContact.getContactGenerationMatrix())
+        C = constant*f_qp.transpose().dot(f_qp)
 
-    def basicCase(self):
+        return [force_Q, force_P, C]
+
+
+    def basicCase(self, useContactVariables, qpContact):
         #newJacobian = self.robot.bodynodes[self.bodyNodeIndex].world_jacobian()
         newJacobian_linear = self.robot.bodynodes[self.bodyNodeIndex].linear_jacobian()
         newJacobian_linear = self.selectionMatrix.dot(newJacobian_linear)
@@ -89,14 +104,21 @@ class admittanceTask:
 
         # Calculating the equivalent end-effector force
         equivalentForce = np.linalg.pinv(newJacobian_linear.T).dot(self.robot.constraint_forces())
+        
 
 
         # I am not sure if this is the right way to do it.
         self.equivalentForceVector = - equivalentForce[0:3:1].reshape((3,1))
+        self.currentForce = self.equivalentForceVector
 
-        forceError = self.selectionMatrix.dot(self.equivalentForceVector - self.desiredForce)
+        if self.qpForceRegulating:
+            f_qp = -qpContact.getContactForce()
+            forceError = self.selectionMatrix.dot(self.equivalentForceVector - f_qp)
+        else:
+            forceError = self.selectionMatrix.dot(self.equivalentForceVector - self.desiredForce)
         print "The desired force is: ", self.desiredForce.T
-        print "The current force is: ", self.equivalentForceVector.T
+        print "The current QP force is: ", qpContact.getContactForce().transpose()
+        print "The current sensor force is: ", self.equivalentForceVector.T
         print "The force error is: ", forceError.T
 
         self.error = forceError
@@ -119,17 +141,38 @@ class admittanceTask:
 
         C = constant.T.dot(constant)
 
+        if(useContactVariables):
+
+            
+
+
+            QP_size = 2*self.robot.ndofs
+            contact_size = qpContact.Nc
+            Q_new  = np.zeros((QP_size + contact_size, QP_size + contact_size))
+            Q_new[:QP_size, :QP_size] = Q # write the old info
+            
+            P_new = np.zeros((1, QP_size + contact_size))
+            P_new[0, :QP_size] = P
+
+            if self.qpForceRegulating:
+                [force_Q, force_P, force_C] = self.calcQPRegulatingMatricies(qpContact)
+                Q_new[2 * self.robot.ndofs:, 2 * self.robot.ndofs:] = force_Q
+                P_new[:, 2 * self.robot.ndofs:] = force_P
+            
+            Q = Q_new
+            P = P_new
+
         return [self.weight*Q, self.weight*P, self.weight*C]
 
 
-    def motionCase(self):
+    def motionCase(self, useContactVariables, qpContact):
         pass
 
-    def calcMatricies(self):
+    def calcMatricies(self, useContactVariables, qpContact):
         if self.velocityControl:
-            return self.motionCase()
+            return self.motionCase(useContactVariables, qpContact)
         else:
-            return self.basicCase()
+            return self.basicCase(useContactVariables, qpContact)
 
 if __name__ == "__main__":
 

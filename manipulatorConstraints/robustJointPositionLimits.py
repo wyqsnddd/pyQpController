@@ -40,7 +40,7 @@ class robustJointLimitConstraints:
     def lowerRhs(self, q):
         return -(self.lower - q)*(1/self.dt)
 
-    def calcMatricies(self):
+    def calcMatricies(self, useContactVariables, qpContact):
         zero_block = np.zeros((2*self.robot.ndofs, self.robot.ndofs))
         
         q = (self.robot.q).reshape((self.robot.ndofs,1))
@@ -48,6 +48,16 @@ class robustJointLimitConstraints:
         G = np.concatenate((- np.identity(self.robot.ndofs), np.identity(self.robot.ndofs)), axis=0)
         G = np.concatenate((zero_block, G), axis=1)
         h = np.concatenate(( self.upperRhs(q), self.lowerRhs(q)), axis=0)
+
+        if (useContactVariables):
+            # Append more columns corresponding to the contact force varialbes
+            contact_size = qpContact.Nc
+            row_number = G.shape[0]
+            column_number = G.shape[1]
+            G_new = np.zeros((row_number, column_number + contact_size))
+            G_new[:, :column_number] = G  # write the old info
+            G = G_new
+            # Keep h as it is.
 
         return [G, h]
 

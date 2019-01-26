@@ -272,7 +272,9 @@ class manipulatorController:
         #     print "Impact detected"
         #     self.logData()
 
-        [self.sol_ddq, self.sol_delta_dq ]= self.solveQP()
+        [self.sol_ddq, self.sol_delta_dq, self.sol_weights ]= self.solveQP()
+        self.solution = self.sol_ddq
+
         logger = logging.getLogger(__name__)
         logger.debug('The generated joint acc is: %s ', self.solution)
 

@@ -56,13 +56,17 @@ class torqueLimitConstraints:
         F = self.robot.constraint_forces()
         #print "F is : ", F
 
-        if(self.robot.controller.constraintForceAware):
-            upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1)) + np.reshape(F, (self.dof, 1))
-            lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)) + np.reshape(F, (self.dof, 1)))
-        else:
-            upperRhs = (self.torqueUpper - np.reshape(N_C, (self.dof, 1)))
-            lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)))
+        # if(self.robot.controller.constraintForceAware):
+        #     upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1)) + np.reshape(F, (self.dof, 1))
+        #     lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)) + np.reshape(F, (self.dof, 1)))
+        # else:
+        #     upperRhs = (self.torqueUpper - np.reshape(N_C, (self.dof, 1)))
+        #     lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)))
 
+        upperRhs = (self.torqueUpper - np.reshape(N_C, (self.dof, 1)))
+        lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)))
+
+        
         #upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1))+ np.reshape(eeJacobian_T.dot(F), (self.dof, 1))
         #upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1))+ np.reshape(F, (self.dof, 1))
         #upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1)) #+ np.reshape(F, (self.dof, 1))
@@ -86,7 +90,7 @@ class torqueLimitConstraints:
     def update(self, impactEstimator):
         pass
 
-    def calcMatricies(self):
+    def calcMatricies(self, useContactVariables, qpContact):
         zero_block = np.zeros((2*self.robot.ndofs, self.robot.ndofs))
 
         G = np.concatenate((self.robot.M.dot(np.identity(self.dof)), self.robot.M.dot(-np.identity(self.dof))), axis=0)
@@ -95,7 +99,47 @@ class torqueLimitConstraints:
 
         [h_upp, h_lower] = self.rhsVectors()
 
+        if (useContactVariables):
+            # Append more columns corresponding to the contact force varialbes
+            # contact_size = qpContact.Nc
+            # row_number = G.shape[0]
+            # column_number = G.shape[1]
+            # G_new = np.zeros((row_number, column_number + contact_size))
+            # G_new[:, :column_number] = G  # write the old info
+            #
+            # G_new[:,column_number:] =
+            tempElement = qpContact.getJacobianTranspose().dot(qpContact.getContactGenerationMatrix())
+            G_con = np.concatenate(
+                (- tempElement,
+                 tempElement,
+                 ),
+                axis=0)
+            G = np.concatenate((G, G_con), axis=1)
+
+
+            # Keep h as it is.
+
         return [G, np.concatenate((h_upp, h_lower), axis=0)]
+    
+    # def calcContactMatricies(self, contact):
+    #     zero_block = np.zeros((2*self.robot.ndofs, self.robot.ndofs))
+    #
+    #     G = np.concatenate((self.robot.M.dot(np.identity(self.dof)), self.robot.M.dot(-np.identity(self.dof))), axis=0)
+    #     #G = np.concatenate((np.identity(self.dof), -np.identity(self.dof)), axis=0)
+    #     G = np.concatenate((G, zero_block), axis=1)
+    #
+    #     # torque constraint
+    #     tempElement = contact.getJacobianTranspose().dot(contact.getContactGenerationMatrix())
+    #     G_con = np.concatenate(
+    #         ( - tempElement,
+    #           tempElement,
+    #         ),
+    #         axis=0)
+    #     G = np.concatenate((G, G_con), axis=1)
+    #
+    #     [h_upp, h_lower] = self.rhsVectors()
+    #
+    #     return [G, np.concatenate((h_upp, h_lower), axis=0)]
 
 if __name__ == "__main__":
     print('Hello, PyDART!')

@@ -20,8 +20,6 @@ class manipulatorImpactController(manipulatorController):
 
         self.switchedTasks = False
 
-        # Container of contact
-        self.contacts = []
 
     # def updateTarget(self, inputTargetPosition):
     #     self.targetPosition = inputTargetPosition
@@ -55,6 +53,7 @@ class manipulatorImpactController(manipulatorController):
 
         test_desiredForce = self.qp.data["qpController"]["admittanceTask"]["desiredForce"]
         test_weight = self.qp.data["qpController"]["admittanceTask"]["taskWeight"]
+        qpRegulating = self.qp.data["qpController"]["admittanceTask"]["qpForceRegulating"]
 
         Kf = self.qp.data["qpController"]["admittanceTask"]["Kf"]
         Ki = self.qp.data["qpController"]["admittanceTask"]["Ki"]
@@ -72,7 +71,8 @@ class manipulatorImpactController(manipulatorController):
         # initialize the tasks:
         newAdmittanceTask = admittanceTask.admittanceTask(self.skel, test_desiredForce, test_weight,
                                                           test_selectionVector, Kf=Kf, Ki=Ki,
-                                                          bodyNodeIndex=linkIndex)
+                                                          bodyNodeIndex=linkIndex,
+                                                          qpForceRegulating=qpRegulating)
         self.qp.obj.addTask(newAdmittanceTask)
 
         logger.info("initialized admittance task ")
@@ -194,6 +194,10 @@ class manipulatorImpactController(manipulatorController):
         if self.impactDetected() & (self.switchedTasks == False):
             print "Impact detected"
             self.logData()
+
+            # Notify the QP that we are in the contact mode
+            self.qp.setContactStatus()
+
             # turn off the x axis control
             #self.qp.obj.tasks[0].selectionMatrix[0, 0] = 0.0
 
@@ -213,13 +217,17 @@ class manipulatorImpactController(manipulatorController):
             # self.addAdmittanceTask()
             transform = self.skel.bodynodes[-1].world_transform()
             translation = transform[[0, 1, 2], 3].reshape((3, 1))
-            self.addContactAdmittanceTask(ee_position=translation)
+
+            #self.addContactAdmittanceTask(ee_position=translation)
+
+            self.addAdmittanceTask()
+
             self.addPositionTask()
             if(self.qp.data["qpController"]["orientationTask"]["enabled"]):
                 self.addOrientationTask()
 
 
-        [self.sol_ddq, self.sol_delta_dq ]= self.solveQP()
+        [self.sol_ddq, self.sol_delta_dq, self.sol_weights ]= self.solveQP()
         self.solution = self.sol_ddq
 
         logger = logging.getLogger(__name__)
