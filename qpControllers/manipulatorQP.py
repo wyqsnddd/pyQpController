@@ -71,13 +71,13 @@ class manipulatorQP:
         logger.info("initialized QP contact ")
 
         self.impactRobust = data["qpController"]["impactRobust"]
-        if (self.impactRobust):
-            self.jointVelocityLimitConstraints = robustJointVelocityConstraints.robustJointVelocityLimitConstraints(self.robot, dt)
-            self.jointLimitConstraints = robustJointPositionLimits.robustJointLimitConstraints(self.robot, dt)
 
-        else:
-            self.jointVelocityLimitConstraints = jointVelocityConstraints.jointVelocityLimitConstraints(self.robot, dt)
-            self.jointLimitConstraints = jointPositionLimits.jointLimitConstraints(self.robot, dt)
+        self.robustJointVelocityLimitConstraints = robustJointVelocityConstraints.robustJointVelocityLimitConstraints(self.robot, dt)
+        self.robustJointLimitConstraints = robustJointPositionLimits.robustJointLimitConstraints(self.robot, dt)
+
+
+        self.jointVelocityLimitConstraints = jointVelocityConstraints.jointVelocityLimitConstraints(self.robot, dt)
+        self.jointLimitConstraints = jointPositionLimits.jointLimitConstraints(self.robot, dt)
 
         self.jointAccelerationLimitConstraints = jointAccelerationConstraints.jointAccelerationLimitConstraints(self.robot)
 
@@ -87,6 +87,14 @@ class manipulatorQP:
 
         upper = data["qpController"]["torqueLimits"]["upper"]
         lower = data["qpController"]["torqueLimits"]["lower"]
+
+        # if self.impactRobust:
+        #     upper = data["qpController"]["torqueLimits"]["upper"]
+        #     lower = data["qpController"]["torqueLimits"]["lower"]
+        # else:
+        #     upper = data["qpController"]["impulseTorqueLimits"]["upper"]
+        #     lower = data["qpController"]["impulseTorqueLimits"]["lower"]
+
 
         self.torqueLower = np.reshape(np.asarray(lower), (self.dof, 1))
         self.torqueUpper = np.reshape(np.asarray(upper), (self.dof, 1))
@@ -99,7 +107,7 @@ class manipulatorQP:
         # self.torqueLower = np.reshape(self.robot.tau_lower, (self.dof, 1))
         # self.torqueUpper = np.reshape(self.robot.tau_upper, (self.dof, 1))
 
-        self.torqueLimitConstraints = torqueLimitConstraints.torqueLimitConstraints(self.robot, self.torqueUpper, self.torqueLower)
+        self.torqueLimitConstraints = torqueLimitConstraints.torqueLimitConstraints(self.robot, self.impactRobust, self.torqueUpper, self.torqueLower)
 
         impulseUpper = data["qpController"]["impulseTorqueLimits"]["upper"]
         impulseLower = data["qpController"]["impulseTorqueLimits"]["lower"]
@@ -298,6 +306,10 @@ class manipulatorQP:
         self.inequalityConstraints.append(self.jointVelocityLimitConstraints)
         logger.info("initialized joint velocity limits inequality constraints ")
 
+        if self.impactRobust:
+            self.inequalityConstraints.append(self.robustJointLimitConstraints)
+            self.inequalityConstraints.append(self.robustJointVelocityLimitConstraints)
+
         #self.inequalityConstraints.append(self.jointAccelerationLimitConstraints)
         #logger.info("initialized joint acceleration limits inequality constraints ")
 
@@ -305,8 +317,9 @@ class manipulatorQP:
         self.inequalityConstraints.append(self.torqueLimitConstraints)
         logger.info("initialized torque limits inequality constraints ")
 
-        self.inequalityConstraints.append(self.impulseTorqueLimitConstraints)
-        logger.info("initialized impulse torque limits inequality constraints ")
+        if self.impactRobust:
+            self.inequalityConstraints.append(self.impulseTorqueLimitConstraints)
+            logger.info("initialized impulse torque limits inequality constraints ")
 
         #self.inequalityConstraints.append(self.impactBoundConstraints)
         #logger.info("initialized impact inequality constraints ")
@@ -432,6 +445,9 @@ class manipulatorQP:
         else:
             sol = self.cvxopt_solve_qp(Q, P.T, G, H)
 
+        if sol is -1:
+            return [-1, -1, -1]
+
         #
         # if self.getContactStatus():
         # #if True:
@@ -551,13 +567,15 @@ class manipulatorQP:
         except ValueError:
             logging.error("QP is infeasible ")
             self.robot.controller.logData()
-            return None
+            temp = np.zeros((q.shape[0],1))
+            return temp
 
         if 'optimal' not in sol['status']:
             logging.error("QP fails, the status are: %s", sol )
             logging.error("The s variable is, %s", sol['s'])
             self.robot.controller.logData()
-            return None
+            temp = np.zeros((q.shape[0], 1))
+            return temp
         return np.array(sol['x']).reshape((q.shape[0],))
 
 

@@ -24,7 +24,7 @@
 		"K_p": 1.0 
 	},
 	"qpController":{ 
-		"jointUnitWeight": 10.0,
+		"jointUnitWeight": 20.0,
 		"contactUnitWeight": 1000.0,
 		"deltaDqUnitWeight": 1000.0,
 		"constraintForceAware": false,
@@ -36,6 +36,10 @@
 		},
 		"jointLimits":{
 			"dt": 0.01
+		},
+		"old_torqueLimits":{
+			"upper": [200.0, 200.0, 200.0, 200.0, 200.0, 200.0],
+			"lower": [-200.0, -200.0, -200.0, -200.0, -200.0, -200.0 ]
 		},
 		"impulseTorqueLimits":{
 			"upper": [200.0, 200.0, 200.0, 200.0, 200.0, 200.0],
@@ -61,7 +65,7 @@
 		"orientationTask":{
 			"enabled": true,
 			"stayStill": true,
-			"taskWeight": 300.0,
+			"taskWeight": 500.0,
 			"quaternion_scalar_weight": 1.5,
 			"axis_selection":[1.0, 1.0, 1.0],
 			"setPoint-fake":[-0.70738827, 0.0, 0.0, -0.70682518],
@@ -99,8 +103,8 @@
 		"velocityTask":{
 			"enabled": true,
 			"taskWeight": 1000.0,
-			"axis_selection":[1.0, 0.0, 0.0],
-			"desiredVelocity": [1.0, 0.0, 0.0],
+			"axis_selection":[0.6, 0.0, 0.0],
+			"desiredVelocity": [2.0, 0.0, 0.0],
 			"bodyLinkNumber": -1,
 			"Kp": 3000.0
 		},

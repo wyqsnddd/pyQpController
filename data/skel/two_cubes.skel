@@ -67,76 +67,76 @@
       </joint>
     </skeleton>	
 
-    <skeleton name="fixed_box_skeleton_two">
-      <body name="fixed_box_two">
-        <gravity>1</gravity>
-        <transformation>-0.1 -0.125 -0.6 0 0 0</transformation>
-        <inertia>
-          <mass>200</mass>
-          <offset>0 0 0</offset>
-        </inertia>
-        <visualization_shape>
-          <transformation>0 0 0 0 0 0</transformation>
-          <geometry>
-            <box>
-              <size>0.4 0.5 1.0</size>
-            </box>
-          </geometry>
-          <color>0.1 0.3 0.7</color>
-        </visualization_shape>
-        <collision_shape>
-          <transformation>0 0 0 0 0 0</transformation>
-          <geometry>
-            <box>
-              <size>0.4 0.5 1.0</size>
-            </box>
-          </geometry>
-        </collision_shape>                                
-      </body>
+    <!-- <skeleton name="fixed_box_skeleton_two"> -->
+    <!--   <body name="fixed_box_two"> -->
+    <!--     <gravity>1</gravity> -->
+    <!--     <transformation>-0.1 -0.125 -0.6 0 0 0</transformation> -->
+    <!--     <inertia> -->
+    <!--       <mass>200</mass> -->
+    <!--       <offset>0 0 0</offset> -->
+    <!--     </inertia> -->
+    <!--     <visualization_shape> -->
+    <!--       <transformation>0 0 0 0 0 0</transformation> -->
+    <!--       <geometry> -->
+    <!--         <box> -->
+    <!--           <size>0.4 0.5 1.0</size> -->
+    <!--         </box> -->
+    <!--       </geometry> -->
+    <!--       <color>0.1 0.3 0.7</color> -->
+    <!--     </visualization_shape> -->
+    <!--     <collision_shape> -->
+    <!--       <transformation>0 0 0 0 0 0</transformation> -->
+    <!--       <geometry> -->
+    <!--         <box> -->
+    <!--           <size>0.4 0.5 1.0</size> -->
+    <!--         </box> -->
+    <!--       </geometry> -->
+    <!--     </collision_shape>                                 -->
+    <!--   </body> -->
       
-      <joint type="weld" name="joint_fix">
-        <parent>world</parent>
-        <child>fixed_box_two</child>
-      </joint>
-    </skeleton>	
+    <!--   <joint type="weld" name="joint_fix"> -->
+    <!--     <parent>world</parent> -->
+    <!--     <child>fixed_box_two</child> -->
+    <!--   </joint> -->
+    <!-- </skeleton>	 -->
     
 
 
     
-    <skeleton name="floating_box_skeleton">
-      <body name="floating_box">
-        <gravity>1</gravity>
-	<transformation>-0.1 0.22 -0.35 0 0 0</transformation>
-        <inertia>
-          <mass>60</mass>
-          <offset>0 0 0</offset>
-        </inertia>
-        <visualization_shape>
-          <transformation>0 0 0 0 0 0</transformation>
-          <geometry>
-            <box>
-              <size>0.3 0.2 0.5</size>
-            </box>
-          </geometry>
-          <color>0.3 0.8 0.3</color>
+    <!-- <skeleton name="floating_box_skeleton"> -->
+    <!--   <body name="floating_box"> -->
+    <!--     <gravity>1</gravity> -->
+    <!-- 	<transformation>-0.1 0.22 -0.35 0 0 0</transformation> -->
+    <!--     <inertia> -->
+    <!--       <mass>60</mass> -->
+    <!--       <offset>0 0 0</offset> -->
+    <!--     </inertia> -->
+    <!--     <visualization_shape> -->
+    <!--       <transformation>0 0 0 0 0 0</transformation> -->
+    <!--       <geometry> -->
+    <!--         <box> -->
+    <!--           <size>0.3 0.2 0.5</size> -->
+    <!--         </box> -->
+    <!--       </geometry> -->
+    <!--       <color>0.3 0.8 0.3</color> -->
 
-        </visualization_shape>
-        <collision_shape>
-          <transformation>0 0 0 0 0 0</transformation>
-          <geometry>
-            <box>
-              <size>0.3 0.2 0.5</size>
-            </box>
-          </geometry>
-        </collision_shape>
-      </body>
+    <!--     </visualization_shape> -->
+    <!--     <collision_shape> -->
+    <!--       <transformation>0 0 0 0 0 0</transformation> -->
+    <!--       <geometry> -->
+    <!--         <box> -->
+    <!--           <size>0.3 0.2 0.5</size> -->
+    <!--         </box> -->
+    <!--       </geometry> -->
+    <!--     </collision_shape> -->
+    <!--   </body> -->
       
-      <joint type="free" name="joint_float">
-        <parent>world</parent>
-        <child>floating_box</child>
-    	<dynamics friction="0.1"/>
-      </joint>
-    </skeleton>
+    <!--   <joint type="free" name="joint_float"> -->
+    <!--     <parent>world</parent> -->
+    <!--     <child>floating_box</child> -->
+    <!-- 	<dynamics friction="0.1"/> -->
+    <!--   </joint> -->
+    <!-- </skeleton> -->
     
 
     

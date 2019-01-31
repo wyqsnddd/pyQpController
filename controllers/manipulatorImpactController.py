@@ -21,24 +21,25 @@ class manipulatorImpactController(manipulatorController):
         self.switchedTasks = False
 
 
+
     # def updateTarget(self, inputTargetPosition):
     #     self.targetPosition = inputTargetPosition
     #     # update the reference point of each task:
-
-    def logData(self):
-        time_now = time.strftime("%b_%d_%Y_%H-%M-%S", time.gmtime())
-
-        log_file_name = os.path.join('./log/data', 'data_' + time_now )
-
-        np.savez_compressed(log_file_name, error=self.errorZero, time=self.time, dq=self.dq_his, robot_c=self.robot_c,
-                            acc=self.acc_his, q=self.q_his, tau=self.tau_his, sol_q=self.sol_q_his,
-                            sol_dq=self.sol_dq_his, sol_acc=self.sol_acc_his, sol_tau=self.sol_tau_his)
-
-        if(self.impactEstimatorEnabled):
-            impac_log_file_name = os.path.join('./log/data', 'impact-data_' + time_now)
-            np.savez_compressed(impac_log_file_name, time=self.impactEstimator.time, predict_F=self.impactEstimator.predictionLog.impulsiveForce, predict_delta_tau=self.impactEstimator.predictionLog.deltaTorque, predict_delta_dq = self.impactEstimator.predictionLog.deltaDq,
-                                actual_F = self.impactEstimator.actualLog.impulsiveForce, actual_delta_tau = self.impactEstimator.actualLog.deltaTorque, actual_delta_dq = self.impactEstimator.actualLog.deltaDq)
-
+    #
+    # def logData(self):
+    #     time_now = time.strftime("%b_%d_%Y_%H-%M-%S", time.gmtime())
+    #
+    #     log_file_name = os.path.join('./log/data', 'data_' + time_now )
+    #
+    #     np.savez_compressed(log_file_name, error=self.errorZero, time=self.time, dq=self.dq_his, robot_c=self.robot_c,
+    #                         acc=self.acc_his, q=self.q_his, tau=self.tau_his, sol_q=self.sol_q_his,
+    #                         sol_dq=self.sol_dq_his, sol_acc=self.sol_acc_his, sol_tau=self.sol_tau_his)
+    #
+    #     if(self.impactEstimatorEnabled):
+    #         impac_log_file_name = os.path.join('./log/data', 'impact-data_' + time_now)
+    #         np.savez_compressed(impac_log_file_name, time=self.impactEstimator.time, predict_F=self.impactEstimator.predictionLog.impulsiveForce, predict_delta_tau=self.impactEstimator.predictionLog.deltaTorque, predict_delta_dq = self.impactEstimator.predictionLog.deltaDq,
+    #                             actual_F = self.impactEstimator.actualLog.impulsiveForce, actual_delta_tau = self.impactEstimator.actualLog.deltaTorque, actual_delta_dq = self.impactEstimator.actualLog.deltaDq)
+    #
 
 
     def impactDetected(self):
@@ -178,8 +179,15 @@ class manipulatorImpactController(manipulatorController):
         """!@brief
         Would be called automatically by "step()" function of the world object
         """
+
+
+        jacobian = self.skel.bodynodes[-1].linear_jacobian()
+
+
         self.errorZero.append(self.qp.obj.tasks[0].error)
         self.time.append(self.skel.world.t)
+        self.ee_v_his.append(jacobian.dot(self.skel.dq))
+        self.ee_f_his.append(np.linalg.pinv(jacobian.T).dot(self.skel.constraint_forces()))
         self.dq_his.append(self.skel.dq)
         self.robot_c.append(self.skel.coriolis_and_gravity_forces())
         self.q_his.append(self.skel.q)
@@ -242,6 +250,11 @@ class manipulatorImpactController(manipulatorController):
         self.sol_acc_his.append(self.solution)
         tau = self.jointAccToTau(self.solution)
         self.tau_his.append(self.tau_last)
+
+        self.sol_lambda_his.append(self.sol_weights)
+        # self.f_QP_his.append( self.qp.contact.getContactGenerationMatrix().dot(np.reshape(self.sol_weights, (self.qp.contact.Nc, 1))))
+        self.f_QP_his.append(np.reshape(self.qp.contact.getContactGenerationMatrix().dot(self.sol_weights), (3, 1)))
+
         return tau
         #return self.gravityCompensationTau()
 

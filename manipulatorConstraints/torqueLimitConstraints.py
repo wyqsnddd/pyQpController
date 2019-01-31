@@ -7,7 +7,7 @@ from numpy import array
 
 class torqueLimitConstraints:
 
-    def __init__(self, robot, upper=None, lower=None):
+    def __init__(self, robot, impactRobust=False, upper=None, lower=None):
         self.robot = robot
         self.dof = self.robot.ndofs
 
@@ -39,7 +39,7 @@ class torqueLimitConstraints:
             else:
                 raise Exception("lower size does not match")
 
-
+        self.impactRobust = impactRobust
 
         #print "tau_upper is : ", self.torqueUpper
         #print "tau_lower is : ", self.torqueLower
@@ -53,18 +53,22 @@ class torqueLimitConstraints:
 
         N_C = self.robot.coriolis_and_gravity_forces()
         #print "N_C is : ", N_C
-        F = self.robot.constraint_forces()
+
         #print "F is : ", F
 
         # if(self.robot.controller.constraintForceAware):
         #     upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1)) + np.reshape(F, (self.dof, 1))
         #     lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)) + np.reshape(F, (self.dof, 1)))
         # else:
-        #     upperRhs = (self.torqueUpper - np.reshape(N_C, (self.dof, 1)))
-        #     lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)))
-
-        upperRhs = (self.torqueUpper - np.reshape(N_C, (self.dof, 1)))
-        lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)))
+        # upperRhs = (self.torqueUpper - np.reshape(N_C, (self.dof, 1)))
+        # lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)))
+        if(self.impactRobust):
+            upperRhs = (self.torqueUpper - np.reshape(N_C, (self.dof, 1)) )
+            lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)) )
+        else:
+            F = self.robot.constraint_forces()
+            upperRhs = (self.torqueUpper - np.reshape(N_C, (self.dof, 1))  + np.reshape(F, (self.dof, 1)) )
+            lowerRhs = -(self.torqueLower - np.reshape(N_C, (self.dof, 1)) + np.reshape(F, (self.dof, 1)))
 
         
         #upperRhs = self.torqueUpper - np.reshape(N_C, (self.dof, 1))+ np.reshape(eeJacobian_T.dot(F), (self.dof, 1))

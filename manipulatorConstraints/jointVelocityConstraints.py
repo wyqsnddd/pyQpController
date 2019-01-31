@@ -58,7 +58,7 @@ class jointVelocityLimitConstraints:
 
         G = np.concatenate((np.identity(self.robot.ndofs), -np.identity(self.robot.ndofs)), axis=0)
         G = np.concatenate((G, zero_block), axis=1)
-        G = np.concatenate((G, zero_block), axis=1)
+        #G = np.concatenate((G, zero_block), axis=1)
         h = np.concatenate(( self.upperRhs(q, dq), self.lowerRhs(q, dq)), axis=0)
 
         if (useContactVariables):
