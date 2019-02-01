@@ -1,8 +1,8 @@
 {
 "simulationWorldParameters":{
         "box_bottom_friction_coeff": 0.1,
-	"box_coarse_surface_friction_coeff": 0.5,
-	"box_surface_restitution_coeff": 0.20,
+	"box_coarse_surface_friction_coeff": 0.7,
+	"box_surface_restitution_coeff": 0.80,
 	"box_weight": 100.0,
 	"wall_friction_coeff": 0.8,
 	"wall_restitution_coeff": 0.8,
@@ -85,7 +85,7 @@
 	"admittanceTask":{
 		"enabled": false,
 		"taskWeight": 30.0,
-		"qpForceRegulating": false,
+		"qpForceRegulating": true,
 		"axis_selection":[1.0, 0.0, 0.0],
 		"desiredForce": [50.0, 0.0, 0.0],
 		"desiredVelocity": [0.0, 0.0, 0.0],

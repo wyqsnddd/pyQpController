@@ -82,4 +82,4 @@ class maxContactVelTask:
             P_new[0, :QP_size] = P
             P = P_new
 
-        return [Q, - self.taskWeight*P, - self.taskWeight*C]
+        return [- Q, - self.taskWeight*P, - self.taskWeight*C]

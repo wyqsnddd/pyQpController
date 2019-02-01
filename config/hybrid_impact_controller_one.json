@@ -1,7 +1,7 @@
 {
 "simulationWorldParameters":{
         "box_bottom_friction_coeff": 0.1,
-        "box_coarse_surface_friction_coeff": 1.0,
+        "box_coarse_surface_friction_coeff": 0.7,
 	"wall_friction_coeff": 0.8,
 	"wall_restitution_coeff": 0.8,
 	"palm_restitution_coeff": 0.8 
@@ -97,21 +97,21 @@
 		"Kd": 0.1
 	},
 	"maxImpactForceTask":{
-		"enabled": false,
-		"taskWeight": 1000.0,
+		"enabled": true,
+		"taskWeight": 200.0,
 		"direction":[1.0, 0.0, 0.0],
 		"bodyLinkNumber": -1
 	},
 	"maxVelocityTask":{
 		"enabled": false,
-		"taskWeight": 1000.0,
+		"taskWeight": 200.0,
 		"direction":[1.0, 0.0, 0.0],
 		"bodyLinkNumber": -1
 	},
 	"velocityTask":{
 		"enabled": true,
 		"taskWeight": 1000.0,
-		"axis_selection":[1.0, 0.0, 0.0],
+		"axis_selection":[0.0, 0.0, 0.0],
 		"desiredVelocity": [2.0, 0.0, 0.0],
 		"bodyLinkNumber": -1,
 		"Kp": 3000.0

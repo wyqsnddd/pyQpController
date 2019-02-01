@@ -63,7 +63,7 @@ class maxImpactForceTask:
         P = np.concatenate((P, zero_vector), axis=1)
 
         C = 1
-        #Q = np.zeros((2*self.robot.ndofs, 2*self.robot.ndofs))
+        Q = np.zeros((2*self.robot.ndofs, 2*self.robot.ndofs))
 
         if(useContactVariables):
             QP_size = 2*self.robot.ndofs
