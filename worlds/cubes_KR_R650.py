@@ -19,6 +19,26 @@ class cubeKR5World(pydart.World):
 
         logger.info('pydart add_skeleton OK')
 
+        self.jvUpper = []
+        for ii in range(0, self.robot.ndofs):
+            dof = self.robot.dof(ii)
+            self.jvUpper.append(dof.velocity_upper_limit())
+
+        self.tau_upper = np.ones((self.robot.ndofs, 1))*25
+        self.impulse_upper = 200
+        self.impulse_force_record = np.zeros((self.robot.ndofs, 1))
+
+        self.jv_unitLength = 75
+        self.tau_unitLength = 75
+        self.impulse_unitLength = 75
+
+        self.jv_pos = [80, 300]
+        self.tau_pos = [250, 300]
+        self.constraint_force_pos = [400, 300]
+
+        self.impulse_pos = [900, 300]
+        self.predict_jv_pos = [900, 500]
+
     def print_text(self, txt=None):
         print("Print: " + str(txt))
 
@@ -49,8 +69,35 @@ class cubeKR5World(pydart.World):
         # size = [0.01, 0.01, 0.01]
         # ri.render_box(desired_translation, size)
         #ri.render_sphere(desired_translation, 0.02)
+#if(self.robot.controller.switchedTasks):
+        #self.render_palm_contact(ri)
 
-        # transform = self.robot.bodynodes[-1].world_transform()
+        # p0 = self.controller.qp.contact.getContactPosition()
+        #
+        #
+        #
+        # K = self.controller.qp.contact.getContactGenerationMatrix()
+        # K_1 = K[:3, 0].reshape((3, 1))
+        # K_2 = K[:3, 1].reshape((3, 1))
+        # K_3 = K[:3, 2].reshape((3, 1))
+        # K_4 = K[:3, 3].reshape((3, 1))
+        #
+        # p1 = (p0 + K_1*scale)
+        # p2 = (p0 + K_2*scale)
+        # p3 = (p0 + K_3*scale)
+        # p4 = (p0 + K_4*scale)
+        #
+        # p0.reshape(3)
+        #
+        # #ri.render_axes(p0.reshape(3), 0.15, True)
+        #
+        # ri.set_color(0.0, 0.5, 0.5, 0.5)
+        #
+        # ri.render_arrow(p0.reshape(3), p1.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+        # ri.render_arrow(p0.reshape(3), p2.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+        # ri.render_arrow(p0.reshape(3), p3.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+        # ri.render_arrow(p0.reshape(3), p4.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+        # # transform = self.robot.bodynodes[-1].world_transform()
         # robot_ee_translation = transform[:3, 3]
         #
         #
@@ -89,7 +136,78 @@ class cubeKR5World(pydart.World):
         ri.draw_text([900, 90], "Wall restitution coefficient = %.2f" %self.robot.world.skeletons[1].bodynodes[0].restitution_coeff())
         ri.draw_text([900, 120], "Robot palm restitution coefficient = %.2f" %self.robot.world.skeletons[-1].bodynode("palm").restitution_coeff())
 
-        
+
+
+        ri.draw_text([self.jv_pos[0] - self.jv_unitLength*2/3, self.jv_pos[1] - 20], "Joint velocities:")
+        for ii in range (0, self.robot.ndofs):
+            # This is the unit length
+            ri.draw_text([self.jv_pos[0] -60, self.jv_pos[1] + ii*32], "%i"%ii)
+            ri.draw_box(self.jv_unitLength, 20, [self.jv_pos[0], self.jv_pos[1] + ii*30], fill=False)
+            # This is the current value
+            currentLength = (abs(self.robot.dq[ii])/self.jvUpper[ii])*self.jv_unitLength
+            #ri.draw_box(currentLength, 20, [50 - 30, 50 + ii*30], fill=True)
+            dis = (self.jv_unitLength - currentLength)/2
+            ri.draw_box(currentLength, 20, [self.jv_pos[0] - dis, self.jv_pos[1] + ii * 30], fill=True)
+
+        ri.draw_text([self.tau_pos[0] - self.tau_unitLength*2/3, self.tau_pos[1] - 20], "Motor torques:")
+        for ii in range (0, self.robot.ndofs):
+            # This is the unit length
+            ri.draw_text([self.tau_pos[0] -60, self.tau_pos[1] + ii*32], "%i"%ii)
+            ri.draw_box(self.tau_unitLength, 20, [self.tau_pos[0], self.tau_pos[1] + ii*30], fill=False)
+            # This is the current value
+            currentLength = (abs(self.controller.tau_last[ii])/self.tau_upper[ii])*self.tau_unitLength
+            #ri.draw_box(currentLength, 20, [50 - 30, 50 + ii*30], fill=True)
+            dis = (self.tau_unitLength - currentLength)/2
+            ri.draw_box(currentLength, 20, [self.tau_pos[0] - dis, self.tau_pos[1] + ii * 30], fill=True)
+
+        ri.draw_text([self.constraint_force_pos[0] - self.impulse_unitLength*2/3, self.constraint_force_pos[1] - 20], "Constraint torques:")
+
+        for ii in range(0, self.robot.ndofs):
+            # This is the unit length
+            ri.draw_text([self.constraint_force_pos[0] - 60, self.constraint_force_pos[1] + ii * 32], "%i" % ii)
+            ri.draw_box(self.impulse_unitLength, 20, [self.constraint_force_pos[0], self.constraint_force_pos[1] + ii * 30], fill=False)
+            # This is the current value
+
+            constraint_tau = abs(self.controller.jointVelocityJumpEstimator.impulse_tau[ii])
+            if constraint_tau > self.impulse_force_record[ii]:
+                self.impulse_force_record[ii] = constraint_tau
+
+            currentForceLength = (abs(self.impulse_force_record[ii]) / self.impulse_upper) * self.impulse_unitLength
+
+            dis = (self.impulse_unitLength - currentForceLength) / 2
+            current_force_origin = [self.constraint_force_pos[0] - dis, self.constraint_force_pos[1] + ii * 30]
+            ri.draw_box(currentForceLength, 21, current_force_origin, fill=True)
+
+        ri.draw_text(
+            [self.impulse_pos[0] - self.impulse_unitLength * 2 / 3, self.impulse_pos[1] - 20],
+            "Predicted impulse torques:")
+
+        for ii in range (0, self.robot.ndofs):
+            # This is the unit length
+            ri.draw_text([self.impulse_pos[0] -60, self.impulse_pos[1] + ii*32], "%i"%ii)
+            ri.draw_box(self.impulse_unitLength, 20, [self.impulse_pos[0], self.impulse_pos[1] + ii*30], fill=False)
+            # This is the current value
+            currentLength = (abs(self.controller.jointVelocityJumpEstimator.predict_impulse_tau[ii])/self.impulse_upper)*self.impulse_unitLength
+            #ri.draw_box(currentLength, 20, [50 - 30, 50 + ii*30], fill=True)
+            dis = (self.impulse_unitLength - currentLength)/2
+            current_box_origin = [self.impulse_pos[0] - dis, self.impulse_pos[1] + ii * 30]
+            ri.draw_box(currentLength, 20, current_box_origin, fill=True)
+
+        ri.draw_text(
+            [self.predict_jv_pos[0] - self.jv_unitLength * 2 / 3, self.predict_jv_pos[1] - 20],
+            "Predicted joint velocities after impact:")
+
+        for ii in range (0, self.robot.ndofs):
+            # This is the unit length
+            ri.draw_text([self.predict_jv_pos[0] -60, self.predict_jv_pos[1] + ii*32], "%i"%ii)
+            ri.draw_box(self.jv_unitLength, 20, [self.predict_jv_pos[0], self.predict_jv_pos[1] + ii*30], fill=False)
+            # This is the current value
+            currentLength = (abs(self.controller.jointVelocityJumpEstimator.temp_v_upper[ii])/self.jvUpper[ii])*self.jv_unitLength
+            #ri.draw_box(currentLength, 20, [50 - 30, 50 + ii*30], fill=True)
+            dis = (self.jv_unitLength - currentLength)/2
+            current_box_origin = [self.predict_jv_pos[0] - dis, self.predict_jv_pos[1] + ii * 30]
+            ri.draw_box(currentLength+0.01, 20, current_box_origin, fill=True)
+
 
     def clear_captures(self):
         command = "rm ./data/captures/robot*"
