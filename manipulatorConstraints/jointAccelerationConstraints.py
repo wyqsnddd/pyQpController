@@ -25,7 +25,7 @@ class jointAccelerationLimitConstraints:
         self.average_impact_acc = impactEstimator.readAverageDdq()
         self.average_impact_acc = np.reshape(self.average_impact_acc, (self.robot.ndofs, 1))
         
-    def calcMatricies(self):
+    def calcMatricies(self, useContactVariables, qpContact):
         zero_block = np.zeros((2*self.robot.ndofs, self.robot.ndofs))
 
         G_1 = np.concatenate((np.identity(self.robot.ndofs), -np.identity(self.robot.ndofs)), axis=0)
@@ -40,6 +40,16 @@ class jointAccelerationLimitConstraints:
                          
         # h = np.reshape(np.concatenate((h_1, h_2)), (24,1))
         h = h_1
+
+        if (useContactVariables):
+            # Append more columns corresponding to the contact force varialbes
+            contact_size = qpContact.Nc
+            row_number = G.shape[0]
+            column_number = G.shape[1]
+            G_new = np.zeros((row_number, column_number + contact_size))
+            G_new[:, :column_number] = G  # write the old info
+            G = G_new
+
         return [G, h]
 
 if __name__ == "__main__":
