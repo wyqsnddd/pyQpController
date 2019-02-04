@@ -39,6 +39,8 @@ class cubeKR5World(pydart.World):
         self.impulse_pos = [900, 300]
         self.predict_jv_pos = [900, 500]
 
+        self.f_max = np.zeros((3,1))
+
     def print_text(self, txt=None):
         print("Print: " + str(txt))
 
@@ -69,10 +71,56 @@ class cubeKR5World(pydart.World):
         # size = [0.01, 0.01, 0.01]
         # ri.render_box(desired_translation, size)
         #ri.render_sphere(desired_translation, 0.02)
-#if(self.robot.controller.switchedTasks):
-        #self.render_palm_contact(ri)
+        ri.set_color(0, 0, 1)
+        scale = 0.1
 
-        # p0 = self.controller.qp.contact.getContactPosition()
+        p0 = self.controller.qp.contact.getContactPosition()
+
+        K = self.controller.qp.contact.getContactGenerationMatrix()
+        K_1 = K[:3, 0].reshape((3, 1))
+        K_2 = K[:3, 1].reshape((3, 1))
+        K_3 = K[:3, 2].reshape((3, 1))
+        K_4 = K[:3, 3].reshape((3, 1))
+
+        p1 = (p0 + K_1*scale)
+        p2 = (p0 + K_2*scale)
+        p3 = (p0 + K_3*scale)
+        p4 = (p0 + K_4*scale)
+
+        p0.reshape(3)
+
+        #ri.render_axes(p0.reshape(3), 0.15, True)
+
+        ri.set_color(0.0, 0.5, 0.5, 0.5)
+
+        # render the friction cone:
+        tau = self.robot.constraint_forces()
+        J = np.reshape(self.robot.bodynodes[-1].linear_jacobian(), (3, self.robot.ndofs))
+        force = np.linalg.pinv(J.transpose()).dot(tau)
+
+        if (np.linalg.norm(force) > np.linalg.norm(self.f_max)):
+            self.f_max = force
+
+
+
+        if np.linalg.norm(self.f_max) >0 :
+            ri.render_arrow(p0.reshape(3), p1.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+            ri.render_arrow(p0.reshape(3), p2.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+            ri.render_arrow(p0.reshape(3), p3.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+            ri.render_arrow(p0.reshape(3), p4.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+
+            scale2 = 0.001
+            # p5 = p0 + self.controller.qp.obj.tasks[0].desiredForce*scale2
+            p6 = p0 - np.reshape(self.f_max, (3,1))*scale2
+
+#            ri.set_color(1.0, 0.0, 0.0, 1.0)
+            # render the desired force:
+            # ri.render_arrow(p0.reshape(3), p5.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+            # # render the current force:
+            ri.set_color(0.0, 1.0, 0.0, 1.0)
+            ri.render_arrow(p0.reshape(3), p6.reshape(3), r_base=0.003, head_width=0.015, head_len=0.01)
+
+         # p0 = self.controller.qp.contact.getContactPosition()
         #
         #
         #
@@ -127,6 +175,10 @@ class cubeKR5World(pydart.World):
         velocity[1],
         velocity[2]))
         ri.draw_text([300, 30], "Robot weight = %.2f Kilos" % self.robot.world.skeletons[-1].mass())
+
+        if np.linalg.norm(self.f_max) >0 :
+            ri.draw_text([20, 100], "Impulse Force = %.3f %.3f %.3f " %(-self.f_max[0], -self.f_max[1], -self.f_max[2]))
+
 
         ri.set_color(0, 0, 0)
 
@@ -567,6 +619,8 @@ class cubeKR5World_admittance_task(pydart.World):
         self.impulse_pos = [900, 300]
         self.predict_jv_pos = [900, 500]
 
+        self.f_max = np.zeros((3, 1))
+
 
     def on_key_press(self, key):
         if key == 'G':
@@ -703,7 +757,16 @@ class cubeKR5World_admittance_task(pydart.World):
             ri.draw_text([20, 80],  "Desired Force = %.3f %.3f %.3f " %(self.robot.controller.qp.obj.tasks[0].desiredForce[0], self.robot.controller.qp.obj.tasks[0].desiredForce[1], self.robot.controller.qp.obj.tasks[0].desiredForce[2]))
             ri.draw_text([20, 100], "Current Force = %.3f %.3f %.3f " %(self.robot.controller.qp.obj.tasks[0].equivalentForceVector[0], self.robot.controller.qp.obj.tasks[0].equivalentForceVector[1], self.robot.controller.qp.obj.tasks[0].equivalentForceVector[2]))
 
+        # render the friction cone:
+        tau = self.robot.constraint_forces()
+        J = np.reshape(self.robot.bodynodes[-1].linear_jacobian(), (3, self.robot.ndofs))
+        force = np.linalg.pinv(J.transpose()).dot(tau)
 
+        if (np.linalg.norm(force) > np.linalg.norm(self.f_max)):
+            self.f_max = force
+
+        if np.linalg.norm(self.f_max) >0 :
+            ri.draw_text([20, 120], "Impulse Force = %.3f %.3f %.3f " %(-self.f_max[0], -self.f_max[1], -self.f_max[2]))
 
         J = np.reshape(self.robot.bodynodes[-1].linear_jacobian(), (3, self.robot.ndofs))
 

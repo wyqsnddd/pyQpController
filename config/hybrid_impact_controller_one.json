@@ -82,11 +82,11 @@
 		"Kp": 0.5
 	},
 	"admittanceTask":{
-		"enabled": false,
+		"enabled": true,
 		"taskWeight": 30.0,
 		"qpForceRegulating": true,
 		"axis_selection":[1.0, 0.0, 0.0],
-		"desiredForce": [27.0, 0.0, 0.0],
+		"desiredForce": [200.0, 0.0, 0.0],
 		"desiredVelocity": [0.0, 0.0, 0.0],
 		"bodyLinkNumber": -1,
 		"Kf_old": 0.05,
@@ -98,7 +98,7 @@
 	},
 	"maxImpactForceTask":{
 		"enabled": true,
-		"taskWeight": 200.0,
+		"taskWeight": 250.0,
 		"direction":[1.0, 0.0, 0.0],
 		"bodyLinkNumber": -1
 	},
