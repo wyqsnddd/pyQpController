@@ -286,39 +286,38 @@ class manipulatorController:
         if (self.impactEstimatorEnabled):
             self.impactEstimator.update()
 
-        # if self.skel.constraint_forces().sum() != 0.0:
-        #     print "Impact detected"
-        #     self.logData()
+        if self.skel.constraint_forces().sum() != 0.0:
+             print "Impact detected"
+
+             #self.logData()
 
 
         [self.sol_ddq, self.sol_delta_dq, self.sol_weights ]= self.solveQP()
 
-        # if self.sol_ddq is -1:
-        #     self.continueComputing = False
+        if self.sol_ddq is -1:
+             self.continueComputing = False
 
-        self.solution = self.sol_ddq
-
-
-        logger = logging.getLogger(__name__)
-        logger.debug('The generated joint acc is: %s ', self.solution)
-
-        if (self.jointVelocityJumpEstimatorEnabled):
-            self.jointVelocityJumpEstimator.update(self.sol_ddq, self.sol_delta_dq)
-
-        #print "The generated joint acc is: ", '\n', solution
-        self.sol_acc_his.append(self.sol_ddq)
-        self.sol_lambda_his.append(self.sol_weights)
-        #self.f_QP_his.append( self.qp.contact.getContactGenerationMatrix().dot(np.reshape(self.sol_weights, (self.qp.contact.Nc, 1))))
-        self.f_QP_his.append( np.reshape(self.qp.contact.getContactGenerationMatrix().dot(self.sol_weights), (3,1)) )
-
-        
-        tau = self.jointAccToTau(self.sol_ddq)
-
-
-        #tau = self.jointVelocityControl(self.solution)
-        self.tau_his.append(self.tau_last)
 
         if self.continueComputing:
+
+            self.solution = self.sol_ddq
+
+            logger = logging.getLogger(__name__)
+            logger.debug('The generated joint acc is: %s ', self.solution)
+
+            if (self.jointVelocityJumpEstimatorEnabled):
+                self.jointVelocityJumpEstimator.update(self.sol_ddq, self.sol_delta_dq)
+
+            # print "The generated joint acc is: ", '\n', solution
+            self.sol_acc_his.append(self.sol_ddq)
+            self.sol_lambda_his.append(self.sol_weights)
+            # self.f_QP_his.append( self.qp.contact.getContactGenerationMatrix().dot(np.reshape(self.sol_weights, (self.qp.contact.Nc, 1))))
+            self.f_QP_his.append(np.reshape(self.qp.contact.getContactGenerationMatrix().dot(self.sol_weights), (3, 1)))
+
+            tau = self.jointAccToTau(self.sol_ddq)
+
+            # tau = self.jointVelocityControl(self.solution)
+            self.tau_his.append(self.tau_last)
             return tau
         else:
             return np.zeros((self.skel.ndofs, 1)).flatten()

@@ -29,7 +29,7 @@
 		"deltaDqUnitWeight": 100.0,
 		"constraintForceAware": false,
 		"showProgress": false,
-		"impactRobust": true,
+		"impactRobust": false,
 		"contact":{
 			"enabled": true,
 			"weight": 100
@@ -101,7 +101,7 @@
 			"bodyLinkNumber": -1
 		},
 		"velocityTask":{
-			"enabled": false,
+			"enabled": true,
 			"taskWeight": 1000.0,
 			"axis_selection":[1.0, 0.0, 0.0],
 			"desiredVelocity": [1.0, 0.0, 0.0],

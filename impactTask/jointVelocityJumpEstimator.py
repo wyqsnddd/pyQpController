@@ -38,6 +38,8 @@ class jointVelocityJumpEstimator:
         self.velocityUpper = np.reshape(self.velocityUpper, (self.robot.ndofs, 1))
         self.velocityLower = np.reshape(self.velocityLower, (self.robot.ndofs, 1))
 
+        self.predict_impulse_tau = np.zeros((self.robot.ndofs, 1))
+        self.impulse_tau = np.zeros((self.robot.ndofs, 1))
 
         if tauUpper is None:
             self.tauUpper = self.robot.tau_upper.reshape((self.robot.num_dofs(), 1))
@@ -56,6 +58,8 @@ class jointVelocityJumpEstimator:
                 raise Exception("Lower torque limit size does not match")
         
         self.dt = self.robot.world.dt
+
+        self.temp_v_upper = np.zeros((self.robot.ndofs, 1))
 
     def initializeLog(self):
 
@@ -191,10 +195,10 @@ class jointVelocityJumpEstimator:
 
         c_temp = (self.robot.coriolis_and_gravity_forces()).reshape((self.robot.ndofs, 1))
         # Reset the states:
-        temp_v_upper = (predicted_delta_dq_upper + dq).flatten()
+        self.temp_v_upper = (predicted_delta_dq_upper + dq).flatten()
         #temp_v_upper = (predicted_delta_dq_upper).flatten()
 
-        self.robot.set_velocities(temp_v_upper)
+        self.robot.set_velocities(self.temp_v_upper)
         N_upper = (self.robot.coriolis_and_gravity_forces()).reshape((self.robot.ndofs, 1))
         predict_ddq_upper_bound_tau = self.M_inv_last.dot(self.tauUpper - N_upper)
 
@@ -214,11 +218,12 @@ class jointVelocityJumpEstimator:
         temp = np.linalg.pinv(Jacobian_linear.dot(M_inv).dot(Jacobian_linear.transpose()) )
         J_dagger = Jacobian_linear.transpose().dot(temp)
         
-        predict_impulse_tau = self.robot.M.dot(predicted_delta_dq_upper)/self.dt
+        self.predict_impulse_tau = self.robot.M.dot(predicted_delta_dq_upper)/self.dt
+
         # predict_impulse_tau = J_dagger.dot(predicted_delta_dq_upper)/self.dt
         # predict_impulse_tau = J_dagger.dot(sol_delta_dq)/self.dt
         
-        impulse_tau = self.robot.constraint_forces()
+        self.impulse_tau = self.robot.constraint_forces()
 
         self.robot.set_velocities(dq.flatten())
         
@@ -231,7 +236,7 @@ class jointVelocityJumpEstimator:
                 real_ddq_lower_bound_tau, real_ddq_upper_bound_tau,
                 predict_ddq_lower_bound_tau, predict_ddq_upper_bound_tau,
                 predict_tau_lower, predict_tau_upper,
-                predict_impulse_tau, impulse_tau
+                self.predict_impulse_tau, self.impulse_tau
                 ]
 
 

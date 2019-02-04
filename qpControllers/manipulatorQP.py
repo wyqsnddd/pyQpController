@@ -310,8 +310,8 @@ class manipulatorQP:
             self.inequalityConstraints.append(self.robustJointLimitConstraints)
             self.inequalityConstraints.append(self.robustJointVelocityLimitConstraints)
 
-        #self.inequalityConstraints.append(self.jointAccelerationLimitConstraints)
-        #logger.info("initialized joint acceleration limits inequality constraints ")
+        self.inequalityConstraints.append(self.jointAccelerationLimitConstraints)
+        logger.info("initialized joint acceleration limits inequality constraints ")
 
 
         self.inequalityConstraints.append(self.torqueLimitConstraints)
@@ -368,16 +368,6 @@ class manipulatorQP:
 
         for ii in range(0,  len(self.obj.tasks)):
             self.obj.tasks[ii].update()
-        # update the contact:
-
-
-        #self.torqueLimitConstraints.update(impactEstimator)
-        # if self.getContactStatus():
-        #     update torque constraint normally
-        # else:
-        #     update torque constraint
-        #     pass # update torque constraint
-        # #     self.contactConstraint.update()
 
 
     def solve(self, impactEstimator):
@@ -391,41 +381,6 @@ class manipulatorQP:
             G = np.concatenate((G, G_ii), axis=0)
             H = np.concatenate((H, H_ii), axis=0)
 
-
-        #print "G is: ", '\n', G
-        #print "H is: ", '\n', H
-
-        # add joint torque as the decision variable
-
-        #  Modify the Q, P, C and inequality constraints:
-
-
-
-        # QP_size = len(Q)
-        # robot_dof = self.robot.ndofs
-        # contact_size = self.contact.Nc
-
-        # # 0.1. update Q to include torque
-        # new_Q = np.zeros((QP_size + robot_dof, QP_size + robot_dof))
-        # new_Q[:QP_size, :QP_size] = Q  # write the old info
-        # new_Q[QP_size:, QP_size:] = np.identity(robot_dof) * self.torqueWeigt
-        #n
-        # Q = new_Q
-        # QP_size_raw = QP_size
-        # QP_size = len(Q)
-        #
-        # # 0.2. update P to include torque
-        # new_P = np.zeros((1, QP_size + robot_dof))
-        # new_P[0, :QP_size] = P
-        #
-        # P = new_P
-        #
-        # # 0.3 update  inequalities:
-        # G_size = len(G)
-        # new_G = np.zeros((G_size, QP_size))
-        # new_G[:, :QP_size_raw] = G  # write the old info
-        # G = new_G
-        # # 2.2 H keeps the same
 
         if(self.getContactStatus()):
             [G_contact, H_contact] = self.contact.calcContactConstraintMatrices()
@@ -447,80 +402,6 @@ class manipulatorQP:
 
         if sol is -1:
             return [-1, -1, -1]
-
-        #
-        # if self.getContactStatus():
-        # #if True:
-
-            # 1. Modify the Q, P, C matricies
-            #  1.1 Q
-            # new_Q  = np.zeros((QP_size + contact_size, QP_size + contact_size))
-            # new_Q[:QP_size, :QP_size] = Q # write the old info
-            # new_Q[QP_size:, QP_size:] = np.identity(contact_size)*self.contactWeight
-            #
-            # #  1.2 P
-            # new_P = np.zeros((1, QP_size + contact_size))
-            # new_P[0, :QP_size] = P
-            # # 1.3 C stay as before
-            # P = new_P
-            # Q = new_Q
-
-            # Add the contact force task
-            # [force_Q, force_P, force_C] =
-
-
-
-            # 2. Modify the inequality constraints
-            # 2.1 G
-            # G_size = len(G)
-            # new_G = np.zeros((G_size, QP_size + contact_size))
-            # new_G[:, :QP_size] = G # write the old info
-            # G = new_G
-            # 2.2 H keeps the same
-
-            # 3. Modify the equality constraints:
-            # if len(self.equalityConstraints) > 0:
-            #     # There was equality constraints:
-            #     A_size = A.shape[0]
-            #
-            #     new_A = np.zeros((A_size, QP_size + contact_size))
-            #     new_A[:, :QP_size] = A  # write the old info
-            #
-            #     A = new_A
-                #[A_ddq, A_torque, A_con, B_con] = self.contactEqualityConstraint.calcMatricies()
-
-                # temp_A = np.zeros((robot_dof, QP_size + robot_dof + contact_size))
-                # temp_A[:,:robot_dof] = A_ddq
-                # temp_A[:, QP_size:QP_size + robot_dof] = A_torque
-                # temp_A[:, QP_size + robot_dof:] = A_con
-
-                # A = np.concatenate((new_A, temp_A), axis=0)
-                # B = np.concatenate((B, B_con), axis=0)
-
-                # 4 Update the torque constraint with contact
-                # [G_torque, H_torque] = self.torqueLimitConstraints.calcContactMatricies(self.contact)
-                # G = np.concatenate((G, G_torque), axis=0)
-                # H = np.concatenate((H, H_torque), axis=0)
-
-                # [G_contact, H_contact] = self.contact.calcContactConstraintMatrices()
-                #
-                # G = np.concatenate((G, G_contact), axis=0)
-                # H = np.concatenate((H, H_contact), axis=0)
-
-        #
-        #
-        # if len(self.equalityConstraints) > 0:
-
-
-            # else:
-            #     # There was no equality constraints:
-            #     [A_ddq, A_torque, A_con, B] = self.equalityConstraints[ii].calcMatricies()
-            #     A_size = A_ddq.shape[0]
-            #     A = np.zeros((A_size, QP_size + robot_dof + contact_size))
-            #     A[:,:robot_dof] = A_ddq
-            #     A[:, QP_size:QP_size+robot_dof] = A_torque
-            #     A[:, QP_size + robot_dof:] = A_con
-
 
 
 
@@ -567,15 +448,16 @@ class manipulatorQP:
         except ValueError:
             logging.error("QP is infeasible ")
             self.robot.controller.logData()
-            temp = np.zeros((q.shape[0],1))
-            return temp
+            #temp = np.zeros((q.shape[0],1))
+            return -1
 
         if 'optimal' not in sol['status']:
             logging.error("QP fails, the status are: %s", sol )
             logging.error("The s variable is, %s", sol['s'])
             self.robot.controller.logData()
             temp = np.zeros((q.shape[0], 1))
-            return temp
+            return -1
+
         return np.array(sol['x']).reshape((q.shape[0],))
 
 

@@ -160,7 +160,7 @@ class cubeKR5World(pydart.World):
             dis = (self.tau_unitLength - currentLength)/2
             ri.draw_box(currentLength, 20, [self.tau_pos[0] - dis, self.tau_pos[1] + ii * 30], fill=True)
 
-        ri.draw_text([self.constraint_force_pos[0] - self.impulse_unitLength*2/3, self.constraint_force_pos[1] - 20], "Constraint torques:")
+        ri.draw_text([self.constraint_force_pos[0] - self.impulse_unitLength*2/3, self.constraint_force_pos[1] - 20], "Impulse torques:")
 
         for ii in range(0, self.robot.ndofs):
             # This is the unit length
@@ -168,7 +168,10 @@ class cubeKR5World(pydart.World):
             ri.draw_box(self.impulse_unitLength, 20, [self.constraint_force_pos[0], self.constraint_force_pos[1] + ii * 30], fill=False)
             # This is the current value
 
-            constraint_tau = abs(self.controller.jointVelocityJumpEstimator.impulse_tau[ii])
+            #constraint_tau = abs(self.controller.jointVelocityJumpEstimator.impulse_tau[ii])
+            F = self.robot.constraint_forces()
+            constraint_tau = abs(F[ii])
+
             if constraint_tau > self.impulse_force_record[ii]:
                 self.impulse_force_record[ii] = constraint_tau
 
