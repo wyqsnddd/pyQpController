@@ -165,8 +165,8 @@ class admittanceTask:
             forceError = self.selectionMatrix.dot(self.equivalentForceVector - self.desiredForce)
 
         print "The desired force is: ", self.desiredForce.T
-        print "The current QP force is: ", qpContact.getContactForce().T
-        print "The current target force is: ", f_qp.T
+        # print "The current QP force is: ", qpContact.getContactForce().T
+        # print "The current target force is: ", f_qp.T
 #        print "The current target force is: ", f_target.T
         print "The current sensor force is: ", self.equivalentForceVector.T
         print "The force error is: ", forceError.T

@@ -14,7 +14,7 @@ class jointAccelerationLimitConstraints:
     def __init__(self, skel):
         self.robot = skel
 
-        self.upper = 10*np.array([0.87266, 0.87266, 0.87266, 1.466, 2.059, 2.094])
+        self.upper = 12*np.array([0.87266, 0.87266, 0.87266, 1.466, 2.059, 2.094])
         self.upper = np.reshape(self.upper, (self.robot.ndofs, 1))
         self.lower = -self.upper
         
