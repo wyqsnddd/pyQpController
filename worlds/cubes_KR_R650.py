@@ -289,6 +289,27 @@ class slidingBoxKR5World(pydart.World):
         logger.info('pydart add_skeleton OK')
 
 
+        self.jvUpper = []
+        for ii in range(0, self.robot.ndofs):
+            dof = self.robot.dof(ii)
+            self.jvUpper.append(dof.velocity_upper_limit())
+
+        self.tau_upper = np.ones((self.robot.ndofs, 1))*25
+        self.impulse_upper = 200
+        self.impulse_force_record = np.zeros((self.robot.ndofs, 1))
+
+        self.jv_unitLength = 75
+        self.tau_unitLength = 75
+        self.impulse_unitLength = 75
+
+        self.jv_pos = [80, 300]
+        self.tau_pos = [250, 300]
+        self.constraint_force_pos = [400, 300]
+
+        self.impulse_pos = [80, 500]
+        self.predict_jv_pos = [400, 500]
+
+        self.f_max = np.zeros((3, 1))
 
     def print_text(self, txt=None):
         print("Print: " + str(txt))
@@ -342,9 +363,15 @@ class slidingBoxKR5World(pydart.World):
         ri.draw_text([20, 60], "Controller = %s" %
                      ("Admittance " if self.robot.controller.switchedTasks else "End-effector Velocity"))
         if(self.robot.controller.switchedTasks):
+
             ri.draw_text([20, 40], "time = %.4fs" % self.t)
             ri.draw_text([20, 80],  "Desired Force = %.3f %.3f %.3f " %(self.robot.controller.qp.obj.tasks[0].desiredForce[0], self.robot.controller.qp.obj.tasks[0].desiredForce[1], self.robot.controller.qp.obj.tasks[0].desiredForce[2]))
             ri.draw_text([20, 100], "Current Force = %.3f %.3f %.3f " %(self.robot.controller.qp.obj.tasks[0].equivalentForceVector[0], self.robot.controller.qp.obj.tasks[0].equivalentForceVector[1], self.robot.controller.qp.obj.tasks[0].equivalentForceVector[2]))
+            #ri.draw_text([20, 120], "box positions = %.3f %.3f %.3f" %(self.skeletons[2].bodynodes[0].C[0], self.skeletons[2].bodynodes[0].C[1], self.skeletons[2].bodynodes[0].C[2]))
+
+        if self.skeletons[2].bodynodes[0].C[0]> 0.55:
+            self.reset()
+
 
         J = np.reshape(self.robot.bodynodes[-1].linear_jacobian(), (3, self.robot.ndofs))
 
@@ -362,6 +389,82 @@ class slidingBoxKR5World(pydart.World):
 
         ri.draw_text([800, 120],
                       "box side restitution coefficient = %.2f" % self.robot.world.skeletons[2].bodynodes[1].restitution_coeff())
+
+
+
+        ri.draw_text([self.jv_pos[0] - self.jv_unitLength*2/3, self.jv_pos[1] - 20], "Joint velocities:")
+        for ii in range (0, self.robot.ndofs):
+            # This is the unit length
+            ri.draw_text([self.jv_pos[0] -60, self.jv_pos[1] + ii*32], "%i"%ii)
+            ri.draw_box(self.jv_unitLength, 20, [self.jv_pos[0], self.jv_pos[1] + ii*30], fill=False)
+            # This is the current value
+            currentLength = (abs(self.robot.dq[ii])/self.jvUpper[ii])*self.jv_unitLength
+            #ri.draw_box(currentLength, 20, [50 - 30, 50 + ii*30], fill=True)
+            dis = (self.jv_unitLength - currentLength)/2
+            ri.draw_box(currentLength, 20, [self.jv_pos[0] - dis, self.jv_pos[1] + ii * 30], fill=True)
+
+        ri.draw_text([self.tau_pos[0] - self.tau_unitLength*2/3, self.tau_pos[1] - 20], "Motor torques:")
+        for ii in range (0, self.robot.ndofs):
+            # This is the unit length
+            ri.draw_text([self.tau_pos[0] -60, self.tau_pos[1] + ii*32], "%i"%ii)
+            ri.draw_box(self.tau_unitLength, 20, [self.tau_pos[0], self.tau_pos[1] + ii*30], fill=False)
+            # This is the current value
+            currentLength = (abs(self.controller.tau_last[ii])/self.tau_upper[ii])*self.tau_unitLength
+            #ri.draw_box(currentLength, 20, [50 - 30, 50 + ii*30], fill=True)
+            dis = (self.tau_unitLength - currentLength)/2
+            ri.draw_box(currentLength, 20, [self.tau_pos[0] - dis, self.tau_pos[1] + ii * 30], fill=True)
+
+        ri.draw_text([self.constraint_force_pos[0] - self.impulse_unitLength*2/3, self.constraint_force_pos[1] - 20], "Impulse torques:")
+
+        for ii in range(0, self.robot.ndofs):
+            # This is the unit length
+            ri.draw_text([self.constraint_force_pos[0] - 60, self.constraint_force_pos[1] + ii * 32], "%i" % ii)
+            ri.draw_box(self.impulse_unitLength, 20, [self.constraint_force_pos[0], self.constraint_force_pos[1] + ii * 30], fill=False)
+            # This is the current value
+
+            #constraint_tau = abs(self.controller.jointVelocityJumpEstimator.impulse_tau[ii])
+            F = self.robot.constraint_forces()
+            constraint_tau = abs(F[ii])
+
+            if constraint_tau > self.impulse_force_record[ii]:
+                self.impulse_force_record[ii] = constraint_tau
+
+            currentForceLength = (abs(self.impulse_force_record[ii]) / self.impulse_upper) * self.impulse_unitLength
+
+            dis = (self.impulse_unitLength - currentForceLength) / 2
+            current_force_origin = [self.constraint_force_pos[0] - dis, self.constraint_force_pos[1] + ii * 30]
+            ri.draw_box(currentForceLength, 21, current_force_origin, fill=True)
+
+        ri.draw_text(
+            [self.impulse_pos[0] - self.impulse_unitLength * 2 / 3, self.impulse_pos[1] - 20],
+            "Predicted impulse torques:")
+
+        for ii in range (0, self.robot.ndofs):
+            # This is the unit length
+            ri.draw_text([self.impulse_pos[0] -60, self.impulse_pos[1] + ii*32], "%i"%ii)
+            ri.draw_box(self.impulse_unitLength, 20, [self.impulse_pos[0], self.impulse_pos[1] + ii*30], fill=False)
+            # This is the current value
+            currentLength = (abs(self.controller.jointVelocityJumpEstimator.predict_impulse_tau[ii])/self.impulse_upper)*self.impulse_unitLength
+            #ri.draw_box(currentLength, 20, [50 - 30, 50 + ii*30], fill=True)
+            dis = (self.impulse_unitLength - currentLength)/2
+            current_box_origin = [self.impulse_pos[0] - dis, self.impulse_pos[1] + ii * 30]
+            ri.draw_box(currentLength, 20, current_box_origin, fill=True)
+
+        ri.draw_text(
+            [self.predict_jv_pos[0] - self.jv_unitLength * 2 / 3, self.predict_jv_pos[1] - 20],
+            "Predicted joint velocities after impact:")
+
+        for ii in range (0, self.robot.ndofs):
+            # This is the unit length
+            ri.draw_text([self.predict_jv_pos[0] -60, self.predict_jv_pos[1] + ii*32], "%i"%ii)
+            ri.draw_box(self.jv_unitLength, 20, [self.predict_jv_pos[0], self.predict_jv_pos[1] + ii*30], fill=False)
+            # This is the current value
+            currentLength = (abs(self.controller.jointVelocityJumpEstimator.temp_v_upper[ii])/self.jvUpper[ii])*self.jv_unitLength
+            #ri.draw_box(currentLength, 20, [50 - 30, 50 + ii*30], fill=True)
+            dis = (self.jv_unitLength - currentLength)/2
+            current_box_origin = [self.predict_jv_pos[0] - dis, self.predict_jv_pos[1] + ii * 30]
+            ri.draw_box(currentLength+0.01, 20, current_box_origin, fill=True)
+
 
     def set_big_box_friction(self, coe):
         self.robot.world.skeletons[2].bodynodes[0].set_friction_coeff(coe)

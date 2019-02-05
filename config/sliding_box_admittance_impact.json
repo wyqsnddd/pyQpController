@@ -3,7 +3,7 @@
         "box_bottom_friction_coeff": 0.1,
 	"box_coarse_surface_friction_coeff": 0.7,
 	"box_surface_restitution_coeff": 0.80,
-	"box_weight": 100.0,
+	"box_weight": 10.0,
 	"wall_friction_coeff": 0.8,
 	"wall_restitution_coeff": 0.8,
 	"palm_restitution_coeff": 0.8 
@@ -84,10 +84,10 @@
 	},
 	"admittanceTask":{
 		"enabled": false,
-		"taskWeight": 30.0,
+		"taskWeight": 300.0,
 		"qpForceRegulating": true,
 		"axis_selection":[1.0, 0.0, 0.0],
-		"desiredForce": [50.0, 0.0, 0.0],
+		"desiredForce": [20.0, 0.0, 0.0],
 		"desiredVelocity": [0.0, 0.0, 0.0],
 		"bodyLinkNumber": -1,
 		"Kf": 0.05,
@@ -96,21 +96,21 @@
 	},
 	"maxImpactForceTask":{
 		"enabled": false,
-		"taskWeight": 1000.0,
+		"taskWeight": 500.0,
 		"direction":[1.0, 0.0, 0.0],
 		"bodyLinkNumber": -1
 	},
 	"maxVelocityTask":{
-		"enabled": true,
+		"enabled": false,
 		"taskWeight": 1000.0,
 		"direction":[1.0, 0.0, 0.0],
 		"bodyLinkNumber": -1
 	},
 	"velocityTask":{
-		"enabled": false,
+		"enabled": true,
 		"taskWeight": 1000.0,
 		"axis_selection":[1.0, 0.0, 0.0],
-		"desiredVelocity": [0.05, 0.0, 0.0],
+		"desiredVelocity": [1.0, 0.0, 0.0],
 		"bodyLinkNumber": -1,
 		"Kp": 100.0
 	},
