@@ -6,6 +6,11 @@ from numpy import array
 
 
 class impulseTorqueLimitConstraints:
+        """!@brief
+                @class impulseTorqueLimitConstraints
+                defined for acc variables
+                We generate right hand side 'B' for constraints in the form: Ax <= B
+        """
 
         def __init__(self, robot, upper=None, lower=None):
             self.robot = robot

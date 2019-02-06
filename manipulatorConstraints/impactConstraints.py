@@ -6,8 +6,13 @@ from numpy import array
 
 
 class impactConstraints:
-
+    """!@brief
+        @class impactConstraints
+        Based on the impact dynamics model, we use the joint accelerations( to be decided by the QP in the CURRENT step) to predict the joint velocity jumps for the NEXT step
+        We generate 'A' and 'B' matricies for constraints in the form: Ax <= B
+    """
     def __init__(self, robot, res = 1.0, bodyNodeIndex=None):
+        """!@brief The constructor."""
         self.robot = robot
         self.dof = self.robot.ndofs
         self.res = res
@@ -19,40 +24,28 @@ class impactConstraints:
 
 
     def update(self, impactEstimator):
+        """Place holder."""
         pass
 
     def calcMatricies(self, useContactVariables, qpContact):
+        """!@brief is called in every step to construct the QP
+        @param useContactVariables, if true, we fit the dims for weights of the generating matricies.
+        @return the matrices A, B for the equality constraint Ax <= B
+        """
 
         jacobian = self.robot.bodynodes[-1].linear_jacobian()
         M_inv = np.linalg.pinv(self.robot.M)
         temp = np.linalg.pinv(jacobian.dot(M_inv).dot(jacobian.transpose()) )
         J_dagger = jacobian.transpose().dot(temp)
 
-        
-        #M_inv = np.linalg.pinv(self.robot.M)
-        # jacobian = self.robot.bodynodes[self.bodyNodeIndex].linear_jacobian()
-        #jacobian = self.robot.bodynodes[self.bodyNodeIndex].jacobian()
-        #temp_1 = M_inv.dot(jacobian.T)
-        #temp_2 = np.linalg.pinv(jacobian.dot(temp_1))
-        #constant = temp_1.dot(temp_2)
-
         dq =  (self.robot.dq).reshape((self.robot.ndofs, 1))
 
-        # temp_A = (self.res + 1)*constant.dot(jacobian)
         temp_A = (self.res + 1)*(M_inv.dot(J_dagger)).dot(jacobian)
-        #temp_A = (-self.res + 1)*(M_inv.dot(J_dagger)).dot(jacobian)
-        # temp_A = (self.res + 1)*(self.robot.M)
 
         A = np.block([
             [temp_A*self.robot.world.dt, np.identity(self.robot.ndofs)]
         ])
 
-        # A = np.block([
-        #     [np.zeros((6,6)), np.zeros((6,6))]
-        # ])
-        
-
-        
         b  = -temp_A.dot(dq)
 
 

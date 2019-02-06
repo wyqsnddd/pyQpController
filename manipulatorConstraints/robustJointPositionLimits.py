@@ -8,8 +8,10 @@ from cvxopt import matrix, solvers
 
 class robustJointLimitConstraints:
     """!@brief
-        Limit the joint velocity jump variables such that the joint position bounds are fulfilled. 
+        Limit the joint velocity jump variables such that the joint position bounds are fulfilled.
+        @class robustJointLimitConstraints
     """
+
 
     def __init__(self, skel, dt):
         self.robot = skel

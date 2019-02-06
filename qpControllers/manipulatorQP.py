@@ -185,7 +185,12 @@ class manipulatorQP:
                 rotation = transform[:3, :3]
                 test_desiredOrientation = pydart.utils.transformations.quaternion_from_matrix(rotation)
             else:
-                test_desiredOrientation = data["qpController"]["orientationTask"]["setPoint"]
+                test_desiredOrientation_EulerAngle = data["qpController"]["orientationTask"]["setPoint-EulerAngle"]
+
+
+
+
+
             test_weight = data["qpController"]["orientationTask"]["taskWeight"]
 
 

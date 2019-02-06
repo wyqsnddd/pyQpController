@@ -9,6 +9,7 @@ import logging
 
 class maxImpactForceTask:
     """!@brief
+    @class maxImpactForceTask
     Maximize the impact force along an given unit direction 
     """
     def __init__(self, skel, desiredDirection, taskWeight, bodyNodeIndex=None):

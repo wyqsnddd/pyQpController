@@ -86,7 +86,7 @@
 		"taskWeight": 30.0,
 		"qpForceRegulating": true,
 		"axis_selection":[1.0, 0.0, 0.0],
-		"desiredForce": [200.0, 0.0, 0.0],
+		"desiredForce": [47.0, 0.0, 0.0],
 		"desiredVelocity": [0.0, 0.0, 0.0],
 		"bodyLinkNumber": -1,
 		"Kf_old": 0.05,

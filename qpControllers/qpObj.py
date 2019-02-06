@@ -10,7 +10,14 @@ from manipulatorTasks import positionTask
 
 
 class qpObj:
+    """!@brief
+        @class qpObj
+        Based on the impact dynamics model, we use the joint accelerations( to be decided by the QP in the CURRENT step) to predict the joint velocity jumps for the NEXT step
+        We generate 'A' and 'B' matricies for constraints in the form: Ax <= B
+    """
+    ## The constructor
     def __init__(self, skel, jointUnitWeight, deltaDqWeight, contactWeight, qpContact):
+        """!@brief The constructor."""
 
         # if logger is None:
         #     raise Exception("Logger is not set")
@@ -54,6 +61,9 @@ class qpObj:
         self.tasks.append(task)
 
     def removeTask(self, task):
+        """!@brief Remove the task.
+        @param task to be removed
+        """
         self.tasks.remove(task)
 
     def calcMatricies(self, useContactVariables, qpContact):

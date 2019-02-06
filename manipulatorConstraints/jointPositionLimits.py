@@ -8,6 +8,7 @@ from cvxopt import matrix, solvers
 
 class jointLimitConstraints:
     """!@brief
+        @class jointLimitConstraints
         defined for acc variables
         We generate right hand side 'B' for constraints in the form: Ax <= B
     """

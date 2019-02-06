@@ -13,6 +13,7 @@ import logging
 
 class admittanceTask:
     """!@brief
+    @class admittanceTask
     It generates a desired force with joint acceleration.
     """
     def __init__(self,skel, desiredForce, weight, selectionVector=None, velocityControl=False, desiredVelocity=None, Kd=None, Kf=None, Ki = None, bodyNodeIndex=None, qpForceRegulating=True):

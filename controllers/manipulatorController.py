@@ -268,8 +268,8 @@ class manipulatorController:
 
         jacobian = self.skel.bodynodes[-1].linear_jacobian()
 
-        self.errorZero.append(self.qp.obj.tasks[2].error)
-        #self.errorZero.append(self.qp.obj.tasks[1].error)
+        #self.errorZero.append(self.qp.obj.tasks[2].error)
+        self.errorZero.append(self.qp.obj.tasks[1].error)
         self.time.append(self.skel.world.t)
         self.ee_v_his.append(jacobian.dot(self.skel.dq))
         self.ee_f_his.append(np.linalg.pinv(jacobian.T).dot(self.skel.constraint_forces()))

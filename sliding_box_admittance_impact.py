@@ -1,3 +1,7 @@
+##
+# @file sliding_box_admittance_impact.py
+#
+
 import pydart2 as pydart
 import numpy as np
 

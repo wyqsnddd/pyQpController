@@ -8,6 +8,7 @@ from cvxopt import matrix, solvers
 
 class robustJointVelocityLimitConstraints:
     """!@brief
+    @class robustJointVelocityLimitConstraints
     We use Euler forward to approximate the derivative and introduce the impact robust joint velocity constraints. 
     """
 
