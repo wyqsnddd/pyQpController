@@ -48,12 +48,12 @@ class orientationTask:
 
         if selectionVector is None:
             logger.warning("Selection matrix is identity")
-            self.selectionMatrix = np.identity(4)
+            self.selectionMatrix = np.identity(3)
         else:
-            self.selectionMatrix = np.identity(4)
-            self.selectionMatrix[1, 1] = selectionVector[0]
-            self.selectionMatrix[2, 2] = selectionVector[1]
-            self.selectionMatrix[3, 3] = selectionVector[2]
+            self.selectionMatrix = np.identity(3)
+            self.selectionMatrix[0, 0] = selectionVector[0]
+            self.selectionMatrix[1, 1] = selectionVector[1]
+            self.selectionMatrix[2, 2] = selectionVector[2]
 
         self.error = np.zeros((3, 1))
 
@@ -322,23 +322,33 @@ class orientationTask:
         #current_quat_con = pydart.utils.transformations.quaternion_conjugate(current_quat)
         #current_quat_con = np.reshape(current_quat_con, (4,1))
 
-        temp_id = -np.identity(4)
-        temp_id[0, 0] = 1
+        # temp_id = -np.identity(4)
+        # temp_id[0, 0] = 1
+        # temp_id = np.identity(4)
 
-        block_one = (self.quat_desired_m.dot(temp_id)).dot(self.W(current_quat).transpose())
+        deletion_matrix = np.zeros([3,4])
+        deletion_matrix[:,1:] = np.identity(3)
+
+        block_one = deletion_matrix.dot(self.quat_desired_m.dot(self.W(current_quat).transpose()))
         #block_one = (self.quat_desired_m.transpose()).dot(self.W(current_quat).transpose())
-
-        newJacobian = 0.5*block_one.dot(self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian())
-        newJacobian = self.selectionMatrix.dot(newJacobian)
 
         angular_jacobian = self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian()
         angular_jacobian_dot = self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian_deriv()
         dq = (self.robot.dq).reshape((self.robot.ndofs, 1))
 
+        newJacobian = 0.5*block_one.dot(angular_jacobian)
+        newJacobian = self.selectionMatrix.dot(newJacobian)
 
-        #error = self.quat_desired_m.dot(current_quat_con)
+
+
+        #error = self.quat_desired_m.dot(current_quat)
         #error = (self.quat_desired_m.transpose()).dot(current_quat)
-        error = self.quat_desired_m.dot(temp_id.dot(current_quat))
+        # error = self.quat_desired_m.dot(temp_id.dot(current_quat))
+
+
+        #error = self.Q_bar(self.desiredOrientation).dot(current_quat)
+        error = self.quat_desired_m.dot(current_quat)
+
         #error_setpoint = np.reshape([1.0, 0.0, 0.0, 0.0],(4,1))
 
         #error = self.Q(current_quat_con).dot(self.desiredOrientation)
@@ -355,20 +365,24 @@ class orientationTask:
         #
         # print "The inferred  error is: ", '\n', temp_error.transpose()
 
-        #print "The desired quaternion is: ", '\n', self.desiredOrientation
-        #print "The current quaternion is: ", '\n', current_quat.transpose()
+        print "The desired quaternion is: ", '\n', self.desiredOrientation
+        print "The current quaternion is: ", '\n', current_quat.transpose()
         #print "The desired quat matrix is: ", '\n',self.quat_desired_m
         #print "The temp_id matrix is: ", '\n', temp_id
-        #print "The orientation task error is: ", '\n', error.transpose()
 
-        error = self.selectionMatrix.dot(error)
+        print "The orientation task error is: ", '\n', error.transpose()
+        # test_error = np.reshape(self.Q_bar(temp_id.dot(current_quat)).dot(self.desiredOrientation), (4,1))
+        # print "The test error is: ", '\n', self.Q_bar(temp_id.dot(current_quat)).dot(self.desiredOrientation)
 
-        self.error[0] = error[1]
-        self.error[1] = error[2]
-        self.error[2] = error[3]
+        # error = test_error
 
+        error = self.selectionMatrix.dot(deletion_matrix.dot(error))
 
-        constant = (0.5*block_one.dot(angular_jacobian_dot + self.Kd*angular_jacobian)).dot(dq) + self.Kp*(error)
+        # self.error[0] = error[1]
+        # self.error[1] = error[2]
+        # self.error[2] = error[3]
+
+        constant = (0.5 * block_one.dot(angular_jacobian_dot + self.Kd * angular_jacobian)).dot(dq) + self.Kp * (error)
 
         # dimension_Matrix = np.zeros([3,4])
         # dimension_Matrix[:, 1:4] = np.identity(3)
@@ -376,11 +390,11 @@ class orientationTask:
         # newJacobian = dimension_Matrix.dot(newJacobian)
         # constant = dimension_Matrix.dot(constant)
 
-        dimension_Matrix = np.identity(4)
-        dimension_Matrix[0,0] = self.q_scalar_weight
-
-        newJacobian = dimension_Matrix.dot(newJacobian)
-        constant = dimension_Matrix.dot(constant)
+        # dimension_Matrix = np.identity(4)
+        # dimension_Matrix[0,0] = self.q_scalar_weight
+        #
+        # newJacobian = dimension_Matrix.dot(newJacobian)
+        # constant = dimension_Matrix.dot(constant)
 
         Q = newJacobian.T.dot(newJacobian)
         Q = np.block([

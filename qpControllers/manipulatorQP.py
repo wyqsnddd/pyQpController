@@ -1,7 +1,7 @@
 import pydart2 as pydart
 
 import _pydart2_api as papi
-
+from utils import orientationTools
 import numpy as np
 
 from cvxopt import matrix, solvers
@@ -185,8 +185,20 @@ class manipulatorQP:
                 rotation = transform[:3, :3]
                 test_desiredOrientation = pydart.utils.transformations.quaternion_from_matrix(rotation)
             else:
-                test_desiredOrientation_EulerAngle = data["qpController"]["orientationTask"]["setPoint-EulerAngle"]
 
+                # Take the current orientation:
+                transform = self.robot.bodynodes[linkIndex].world_transform()
+                currentRotation = transform[:3, :3]
+
+                # Add the orientation:
+                test_desiredOrientation_EulerAngle = np.reshape(data["qpController"]["orientationTask"]["setPoint-EulerAngle"], (3,1))
+                # change it into radions:
+                test_desiredOrientation_EulerAngle = test_desiredOrientation_EulerAngle*(np.pi/180)
+
+                #orientationMatrix = pydart.utils.euler_matrix(test_desiredOrientation_EulerAngle[0], test_desiredOrientation_EulerAngle[1], test_desiredOrientation_EulerAngle[2])
+                orientationMatrix = orientationTools.eulerAnglesToRotationMatrix(test_desiredOrientation_EulerAngle[0], test_desiredOrientation_EulerAngle[1], test_desiredOrientation_EulerAngle[2])
+                # Set the desired orientation:
+                test_desiredOrientation = pydart.utils.transformations.quaternion_from_matrix(currentRotation.dot(orientationMatrix))
 
 
 
