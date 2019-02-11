@@ -52,7 +52,7 @@
 		"positionTask":{
 			"enabled": true,
 			"taskWeight": 200.0,
-			"axis_selection":[1.0, 1.0, 1.0],
+			"axis_selection":[0.0, 1.0, 1.0],
 			"setPoint_still":[0.12, 0.3, 0.3],
 			"setPoint_fake":[0.1, 0.2, 0.1],
 			"setPoint_fake":[0.12, 0.2, 0.2],
@@ -65,13 +65,13 @@
 		"orientationTask":{
 			"enabled": true,
 			"stayStill": true,
-			"taskWeight": 2000.0,
+			"taskWeight": 500.0,
 			"quaternion_scalar_weight": 1.5,
 			"axis_selection":[1.0, 1.0, 1.0],
 			"setPoint-fake":[-0.70738827, 0.0, 0.0, -0.70682518],
 			"setPoint-fake":[0.70738827, -0.70682518, 0.0, 0.0],
 			"setPoint":[1.0,  0.0, 0.0, 0.0],
-			"setPoint-EulerAngle":[10.0, 0.0, 0.0],
+			"setPoint-EulerAngle":[20.0, 0.0, 0.0],
 			"bodyLinkNumber": -1,
 			"Comment": "-1: end-effector, 4: elbow",
 			"Kp": 100.0,
@@ -102,7 +102,7 @@
 			"bodyLinkNumber": -1
 		},
 		"velocityTask":{
-			"enabled": false,
+			"enabled": true,
 			"taskWeight": 1000.0,
 			"axis_selection":[1.0, 0.0, 0.0],
 			"desiredVelocity": [2.0, 0.0, 0.0],
