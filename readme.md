@@ -15,7 +15,7 @@ The similar results could be found for the equality constraint (21). Each task i
 
 |Equations in the paper  | Simulation code |
 | ------------- | :-------------: |
-| Joint position limits (6) | [jointPositionLimits.py]( ./manipulatorConstraints/jointPositions.py) |
+| Joint position limits (6) | [jointPositionLimits.py]( manipulatorConstraints/jointPositionLimits.py) |
 | Joint velocity limits (7)  |  [jointVelocityConstraints.py]( ../manipulatorConstraints/jointVelocityConstraints.py)|
 | Joint torque limits (8)  |  [torqueLimitConstraints.py](manipulatorConstraints/torqueLimitConstraints.py)|
 | impact joint position limits (15) |  [robustJointPositionLimits.py](manipulatorConstraints/robustJointLimitConstraints.py) |
