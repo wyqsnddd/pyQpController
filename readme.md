@@ -12,7 +12,7 @@ Interested readers can find the implementation details from the following python
     
 
 
-   |Equations in the paper  | Simulation code |
+    |Equations in the paper  | Simulation code |
     | ------ | ------ |
     | Joint position limits (6) | [jointPositionLimits.py]( @ref jointLimitConstraints) |
     | Joint velocity limits (7)  |  [jointVelocityConstraints.py]( @ref jointVelocityLimitConstraints)|
