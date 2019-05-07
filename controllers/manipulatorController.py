@@ -4,7 +4,7 @@ import numpy as np
 from qpControllers import manipulatorQP
 from manipulatorTasks import admittanceTask
 from impactTask import impactEstimator, jointVelocityJumpEstimator
-import executeACC
+from controllers import executeACC
 
 import logging
 import time
@@ -161,7 +161,7 @@ class manipulatorController:
 
         velocityError = dq - predict_dq
 
-        tau = - self.joint_p_K_v * velocityError - self.joint_p_K_p * positionError
+        tau = - self.joint_p_K_v * velocityError - self.joipnt_p_K_p * positionError
 
         tau = tau.flatten()
 
@@ -287,7 +287,7 @@ class manipulatorController:
             self.impactEstimator.update()
 
         if self.skel.constraint_forces().sum() != 0.0:
-             print "Impact detected"
+             print ("Impact detected")
 
              #self.logData()
 

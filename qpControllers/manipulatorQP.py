@@ -57,7 +57,7 @@ class manipulatorQP:
         #self.jointsLower = np.reshape(self.robot.q_lower(), (self.dof,1))
         #dt = 0.01
         #dt = data["qpController"]["jointLimits"]["dt"]
-        print "dt is:", dt
+        print ("dt is:", dt)
 
         self.contactAware = data["qpController"]["contact"]["enabled"]
         self.contactWeight = data["qpController"]["contact"]["weight"]
@@ -517,8 +517,8 @@ if __name__ == "__main__":
     test_qp = manipulatorQP(test_robot, qpData)
 
     solution = test_qp.solve()
-    print "The solution is: ", '\n', solution
+    print ("The solution is: ", '\n', solution)
 
     test_tau = jointAccToTau(test_robot, solution)
 
-    print "The torque should be: ", '\n', test_tau
+    print ("The torque should be: ", '\n', test_tau)

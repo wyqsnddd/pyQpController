@@ -170,13 +170,13 @@ if __name__ == "__main__":
 
     test_rhs = test_tlc.rhsVectors()
 
-    print "The test upper is: ", test_rhs[0]
+    print ("The test upper is: ", test_rhs[0])
 
-    print "The test lower is: ", test_rhs[1]
+    print ("The test lower is: ", test_rhs[1])
 
     [G, h ] = test_tlc.calcMatricies()
-    print "The G  is: ",'\n', G
-    print "The h is: ",'\n', h
+    print ("The G  is: ",'\n', G)
+    print ("The h is: ",'\n', h)
 
 
 

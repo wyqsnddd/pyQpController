@@ -129,10 +129,16 @@ class trajectoryTask(positionTask.positionTask):
 
 
         Q = newJacobian.T.dot(newJacobian)
-        Q = np.block([
-            [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
-            [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
-        ])
+        
+        Q_size = Q.shape[0]
+        Q_new  = np.zeros((Q_size + self.robot.ndofs, Q_size + self.robot.ndofs))
+        Q_new[:Q_size, :Q_size] = Q
+
+        Q = Q_new        
+        # Q = np.block([
+        #     [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
+        #     [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
+        # ])
 
         P = 2 * constant.T.dot(newJacobian)
         zero_vector = np.zeros((1, self.robot.ndofs))
@@ -170,19 +176,19 @@ if __name__ == "__main__":
 
     # print "The jacobian is: ", '\n', jacobian
     # print "The jacobian derivative is: ", '\n', jacobian_dot
-    print "The Q matrix is: ", '\n', Q
-    print "The P matrix is: ", '\n', Pp
-    print "The C matrix is: ", '\n', C
+   #  print "The Q matrix is: ", '\n', Q
+   #  print "The P matrix is: ", '\n', Pp
+   #  print "The C matrix is: ", '\n', C
 
     test_obj = qpObj.qpObj(test_robot, 100)
     test_obj.addTask(test_task)
 
 
-    print "The weight matrix is: ", '\n', test_obj.dofWeightMatrix
-    print "The numer of tasks is: ", test_obj.numTasks()
+   # print "The weight matrix is: ", '\n', test_obj.dofWeightMatrix
+   # print "The numer of tasks is: ", test_obj.numTasks()
 
 
     [Q_obj, P_obj, C_obj] = test_obj.calcMatricies()
-    print "The Q_obj matrix is: ", '\n', Q_obj
-    print "The P_obj matrix is: ", '\n', P_obj
-    print "The C_obj matrix is: ", '\n', C_obj
+    # print "The Q_obj matrix is: ", '\n', Q_obj
+    # print "The P_obj matrix is: ", '\n', P_obj
+    # print "The C_obj matrix is: ", '\n', C_obj

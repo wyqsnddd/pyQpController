@@ -192,7 +192,7 @@ class orientationTask:
 
         current_quat_dd = (current_quat_d - self.current_quat_d_last) / self.robot.world.dt
 
-        print "The current end-effector quaternion rate is: ", '\n', current_quat_d.transpose()
+        print ("The current end-effector quaternion rate is: ", '\n', current_quat_d.transpose())
 
         test_dimension_Matrix = np.zeros((4,3))
         test_dimension_Matrix[1:4, :] = np.identity(3)
@@ -208,25 +208,25 @@ class orientationTask:
         temp_1 = test_Q.dot(test_dimension_Matrix)
 
         current_quat_d_calc = temp_1.dot(angular_jac.dot(dq))
-        print "The calculated current end-effector quaternion rate is: ", '\n', current_quat_d_calc.transpose()
+        print ("The calculated current end-effector quaternion rate is: ", '\n', current_quat_d_calc.transpose())
 
         current_quat_d_calc = 0.5*(self.W(current_quat).transpose()).dot(angular_jac.dot(dq))
 
         #print "The calculated current end-effector quaternion rate is: ", '\n', current_quat_d_calc.transpose()
 
-        print "The current end-effector quaternion acc is: ", '\n', current_quat_dd.transpose()
+        print ("The current end-effector quaternion acc is: ", '\n', current_quat_dd.transpose())
 
         ddq = (self.robot.ddq).reshape((self.robot.ndofs, 1))
 
         angular_jac_dot = self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian_deriv()
         current_quat_dd_calc = temp_1.dot(angular_jac_dot.dot(dq) + angular_jac.dot(ddq))
-        print "The calculated current end-effector quaternion acc is: ", '\n', current_quat_dd_calc.transpose()
+        print ("The calculated current end-effector quaternion acc is: ", '\n', current_quat_dd_calc.transpose())
         current_quat_dd_calc = 0.5*(self.W(current_quat).transpose()).dot(angular_jac_dot.dot(dq) + angular_jac.dot(ddq))
-        print "The calculated current end-effector quaternion acc is: ", '\n', current_quat_dd_calc.transpose()
+        print ("The calculated current end-effector quaternion acc is: ", '\n', current_quat_dd_calc.transpose())
 
         current_quat_con = pydart.utils.transformations.quaternion_conjugate(current_quat)
-        print "Test conjugate: ", (self.Q(current_quat_con).dot(current_quat)).transpose()
-        print "Test conjugate: ", (self.Q_bar(current_quat).dot(current_quat)).transpose()
+        print ("Test conjugate: ", (self.Q(current_quat_con).dot(current_quat)).transpose())
+        print ("Test conjugate: ", (self.Q_bar(current_quat).dot(current_quat)).transpose())
 
         self.current_quat_last = current_quat
         self.current_quat_d_last = current_quat_d
@@ -248,22 +248,22 @@ class orientationTask:
         rotation_rate = (rotation - self.rotation_last)/self.robot.world.dt
 
         body_velocity_skew = (rotation.transpose()).dot(rotation_rate)
-        print "the body velocity is: ", '\n', self.vee(body_velocity_skew).transpose()
+        print ("the body velocity is: ", '\n', self.vee(body_velocity_skew).transpose())
 
         spatial_velocity_skew = rotation_rate.dot(rotation.transpose())
-        print "the spatial velocity is: ", '\n', self.vee(spatial_velocity_skew).transpose()
+        print ("the spatial velocity is: ", '\n', self.vee(spatial_velocity_skew).transpose())
 
         angular_jacobian = self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian()
         dq = (self.robot.dq).reshape((self.robot.ndofs, 1))
 
         calc_w = angular_jacobian.dot(dq)
-        print "the calculated angular velocity is: ", '\n', calc_w.transpose()
+        print ("the calculated angular velocity is: ", '\n', calc_w.transpose())
 
         current_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
 
         current_quat_d = (current_quat - self.current_quat_last) / self.robot.world.dt
         self.current_quat_last = current_quat
-        print "the predicted spatial velocity is: ", '\n', 2*self.Q(current_quat).transpose().dot(current_quat_d)
+        print ("the predicted spatial velocity is: ", '\n', 2*self.Q(current_quat).transpose().dot(current_quat_d))
 
 
         current_quat = pydart.utils.transformations.quaternion_from_matrix(rotation)
@@ -276,7 +276,7 @@ class orientationTask:
 
 
 
-        print "the current error v is: ", '\n', error_v.transpose()
+        print ("the current error v is: ", '\n', error_v.transpose())
 
         temp_id = -np.identity(4)
         temp_id[0, 0] = 1
@@ -285,22 +285,22 @@ class orientationTask:
 
         error_v_calc = 0.5*block_one.dot(calc_w)
         
-        print "the calculated error v is: ", '\n', error_v_calc.transpose()
+        print ("the calculated error v is: ", '\n', error_v_calc.transpose())
         
         error_acc = (error_v - self.error_v_last)/self.robot.world.dt        
-        print "the current error acc is: ", '\n', error_acc.transpose()
+        print ("the current error acc is: ", '\n', error_acc.transpose())
 
         angular_jacobian_dot = self.robot.bodynodes[self.bodyNodeIndex].angular_jacobian_deriv()
         
         ddq = (self.robot.ddq).reshape((self.robot.ndofs, 1))
         error_acc_calc = 0.5*block_one.dot(angular_jacobian_dot.dot(dq) + angular_jacobian.dot(ddq) )
-        print "the calculated error acc is: ", '\n', error_acc_calc.transpose()
+        print ("the calculated error acc is: ", '\n', error_acc_calc.transpose())
 
         error_test_1 = self.quat_desired_m.dot(current_quat_con)
         error_test_2 = (self.quat_desired_m.transpose()).dot(current_quat)
 
-        print "old error is: ", error_test_1.transpose()
-        print "new error is: ", error_test_2.transpose()
+        print ("old error is: ", error_test_1.transpose())
+        print ("new error is: ", error_test_2.transpose())
 
         # update
         self.rotation_last = rotation
@@ -365,12 +365,12 @@ class orientationTask:
         #
         # print "The inferred  error is: ", '\n', temp_error.transpose()
 
-        print "The desired quaternion is: ", '\n', self.desiredOrientation
-        print "The current quaternion is: ", '\n', current_quat.transpose()
+        print ("The desired quaternion is: ", '\n', self.desiredOrientation)
+        print ("The current quaternion is: ", '\n', current_quat.transpose())
         #print "The desired quat matrix is: ", '\n',self.quat_desired_m
         #print "The temp_id matrix is: ", '\n', temp_id
 
-        print "The orientation task error is: ", '\n', error.transpose()
+        print ("The orientation task error is: ", '\n', error.transpose())
         # test_error = np.reshape(self.Q_bar(temp_id.dot(current_quat)).dot(self.desiredOrientation), (4,1))
         # print "The test error is: ", '\n', self.Q_bar(temp_id.dot(current_quat)).dot(self.desiredOrientation)
 
@@ -397,10 +397,17 @@ class orientationTask:
         # constant = dimension_Matrix.dot(constant)
 
         Q = newJacobian.T.dot(newJacobian)
-        Q = np.block([
-            [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
-            [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
-        ])
+
+        Q_size = Q.shape[0]
+        Q_new  = np.zeros((Q_size + self.robot.ndofs, Q_size + self.robot.ndofs))
+        Q_new[:Q_size, :Q_size] = Q
+        Q = Q_new
+
+        
+        # Q = np.block([
+        #     [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
+        #     [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
+        # ])
         P = 2 * constant.T.dot(newJacobian)
         zero_vector = np.zeros((1, self.robot.ndofs))
         P = np.concatenate((P, zero_vector), axis=1)
@@ -450,19 +457,18 @@ if __name__ == "__main__":
 
     # print "The jacobian is: ", '\n', jacobian
     # print "The jacobian derivative is: ", '\n', jacobian_dot
-    print "The Q matrix is: ", '\n', Q
-    print "The P matrix is: ", '\n', P
-    print "The C matrix is: ", '\n', C
+    print ("The Q matrix is: ", '\n', Q)
+    print ("The P matrix is: ", '\n', P)
 
     test_obj = qpObj.qpObj(test_robot, 100)
     test_obj.addTask(test_task)
 
-    print "The weight matrix is: ", '\n', test_obj.dofWeightMatrix
-    print "The numer of tasks is: ", test_obj.numTasks()
+    print ("The weight matrix is: ", '\n', test_obj.dofWeightMatrix)
+    print ("The numer of tasks is: ", test_obj.numTasks())
 
     [Q_obj, P_obj, C_obj] = test_obj.calcMatricies()
-    print "The Q_obj matrix is: ", '\n', Q_obj
-    print "The P_obj matrix is: ", '\n', P_obj
-    print "The C_obj matrix is: ", '\n', C_obj
+    print ("The Q_obj matrix is: ", '\n', Q_obj)
+    print ("The P_obj matrix is: ", '\n', P_obj)
+    print ("The C_obj matrix is: ", '\n', C_obj)
 
 

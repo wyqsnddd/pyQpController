@@ -33,8 +33,8 @@ class jointVelocityLimitConstraints:
             self.upper.append(dof.velocity_upper_limit())
             self.lower.append(dof.velocity_lower_limit())
 
-        print "The joint velocity upper limit is: ", self.upper
-        print "The joint velocity lower limit is: ", self.lower
+        print ("The joint velocity upper limit is: ", self.upper)
+        print ("The joint velocity lower limit is: ", self.lower)
         
         self.upper = np.reshape(self.upper, (self.robot.ndofs, 1))
         self.lower = np.reshape(self.lower, (self.robot.ndofs, 1))
@@ -96,13 +96,13 @@ if __name__ == "__main__":
 
 
     [G, h ] = a.calcMatricies()
-    print "The G  is: ",'\n', G, G.shape
-    print "The h is: ",'\n', h, h.shape
+    print ("The G  is: ",'\n', G, G.shape)
+    print ("The h is: ",'\n', h, h.shape)
 
 
     w, v = np.linalg.eig(test_robot.M)
-    print "w", w.shape
-    print "v", v.shape
-    print "1/w", 1/w
-    print "w", w
-    print "test", test_robot.M.dot((v.dot(np.diag(1/w)).dot(v.T)))
+    #print "w", w.shape
+    #print "v", v.shape
+    #print "1/w", 1/w
+    #print "w", w
+    #print "test", test_robot.M.dot((v.dot(np.diag(1/w)).dot(v.T)))

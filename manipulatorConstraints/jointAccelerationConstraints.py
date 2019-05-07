@@ -18,8 +18,8 @@ class jointAccelerationLimitConstraints:
         self.upper = np.reshape(self.upper, (self.robot.ndofs, 1))
         self.lower = -self.upper
         
-        print "The joint acc upper limit is: ", self.upper
-        print "The joint acc lower limit is: ", self.lower
+        print ("The joint acc upper limit is: ", self.upper)
+        print ("The joint acc lower limit is: ", self.lower)
 
     def update(self, impactEstimator):
         self.average_impact_acc = impactEstimator.readAverageDdq()
@@ -72,8 +72,8 @@ if __name__ == "__main__":
 
 
     [G, h ] = a.calcMatricies()
-    print "The G  is: ",'\n', G, G.shape
-    print "The h is: ",'\n', h, h.shape
+    print ("The G  is: ",'\n', G, G.shape)
+    print ("The h is: ",'\n', h, h.shape)
 
 
 

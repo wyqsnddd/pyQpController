@@ -28,8 +28,8 @@ class jointLimitConstraints:
 
         self.upper = (self.robot.position_upper_limits()).reshape((self.robot.ndofs, 1))
         self.lower = (self.robot.position_lower_limits()).reshape((self.robot.ndofs, 1))
-        print "The joint upper limit is: ", self.upper.transpose()
-        print "The joint lower limit is: ", self.lower.transpose()
+        print ("The joint upper limit is: ", self.upper.transpose())
+        print ("The joint lower limit is: ", self.lower.transpose())
 
         self.dt = dt
 
@@ -88,8 +88,8 @@ if __name__ == "__main__":
 
 
     [G, h ] = a.calcMatricies()
-    print "The G  is: ",'\n', G, G.shape
-    print "The h is: ",'\n', h, h.shape
+    print ("The G  is: ",'\n', G, G.shape)
+    print ("The h is: ",'\n', h, h.shape)
 
     # dim = 3
     # test_q = uniform(dim,1)

@@ -3,19 +3,19 @@ import pydart2 as pydart
 import numpy as np
 from qpControllers import manipulatorQP
 from manipulatorTasks import contactAdmittanceTask, admittanceTask, positionTask, orientationTask
-from manipulatorController import  manipulatorController, jointVelocityJumpEstimator
-import executeACC
-
-from impactTask import impactEstimator
+#from manipulatorController import  manipulatorController, jointVelocityJumpEstimator
+from controllers import  executeACC, manipulatorController
+from impactTask import impactEstimator, jointVelocityJumpEstimator
 
 import logging
 import time
 import os
 
-class manipulatorImpactController(manipulatorController):
+class manipulatorImpactController(manipulatorController.manipulatorController):
     #def __init__(self, inputSkel, data, dt, logger=None):
     def __init__(self, inputSkel, data, dt):
-        manipulatorController.__init__(self, inputSkel, data, dt)
+        manipulatorController.manipulatorController.__init__(self, inputSkel, data, dt)
+        #manipulatorController.__init__(self, inputSkel, data, dt)
 
 
         self.switchedTasks = False
@@ -77,7 +77,7 @@ class manipulatorImpactController(manipulatorController):
         self.qp.obj.addTask(newAdmittanceTask)
 
         logger.info("initialized admittance task ")
-        print "The admittance task selection matrix is: ", '\n', self.qp.obj.tasks[0].selectionMatrix
+        print ("The admittance task selection matrix is: ", '\n', self.qp.obj.tasks[0].selectionMatrix)
 
     def addContactAdmittanceTask(self, ee_position):
         logger = logging.getLogger(__name__)
@@ -112,7 +112,7 @@ class manipulatorImpactController(manipulatorController):
         self.qp.obj.addTask(newAdmittanceTask)
 
         logger.info("initialized admittance task ")
-        print "The admittance task selection matrix is: ", '\n', self.qp.obj.tasks[0].selectionMatrix
+        print ("The admittance task selection matrix is: ", '\n', self.qp.obj.tasks[0].selectionMatrix)
 
     def addPositionTask(self):
         logger = logging.getLogger(__name__)
@@ -200,7 +200,7 @@ class manipulatorImpactController(manipulatorController):
 
 
         if self.impactDetected() & (self.switchedTasks == False):
-            print "Impact detected"
+            print ("Impact detected")
             self.logData()
 
             # Notify the QP that we are in the contact mode

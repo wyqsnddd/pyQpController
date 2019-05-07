@@ -54,7 +54,7 @@ if __name__ == '__main__':
     root = logging.getLogger()
     root.setLevel(logging.INFO)
 
-    print "logger is set."
+    print ("logger is set.")
 
     world = cubes_KR_R650.slidingBoxKR5World()
 
@@ -104,12 +104,8 @@ if __name__ == '__main__':
     # target  = np.zeros(self.robot.num_dofs())
     # self.controller = executeACC.jointAccController(self.robot, target)
 
-    #win = pydart.gui.viewer.launch(world,"QP Impact Controller", default_camera=0)  # Use Z-up camera
-    win = pydart.gui.pyqt5.window.PyQt5Window(world, "QP_IMPACT_controller")
 
-    # win = pydart.gui.viewer.PydartWindow(world)
-    win.camera_event(0)
-    win.set_capture_rate(10)
+    win = pydart.gui.viewer.launch(world,"QP Impact Controller", default_camera=0)  # Use Z-up camera
 
 
 

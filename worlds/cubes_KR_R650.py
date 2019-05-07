@@ -59,7 +59,7 @@ class cubeKR5World(pydart.World):
 
         command = "ffmpeg -f image2 -r 30 -start_number " + start_number + " -i ./data/captures/robot.%4d.png -t  " + amount + " -vcodec  mpeg4 -y movie.mp4"
 
-        print "the command is: ",'\n', command
+        print ("the command is: ",'\n', command)
         os.popen(command)
 
 
@@ -329,7 +329,7 @@ class slidingBoxKR5World(pydart.World):
 
         command = "ffmpeg -f image2 -r 30 -start_number " + start_number + " -i ./data/captures/robot.%4d.png -t  " + amount + " -vcodec  mpeg4 -y movie.mp4"
 
-        print "the command is: ",'\n', command
+        print ("the command is: ",'\n', command)
         os.popen(command)
 
 
@@ -477,27 +477,27 @@ class slidingBoxKR5World(pydart.World):
 
     def set_big_box_mass(self, mass):
         self.robot.world.skeletons[2].bodynodes[0].set_mass(mass)
-        print "The side box weight is: ", self.robot.world.skeletons[2].bodynodes[0].mass()
+        print ("The side box weight is: ", self.robot.world.skeletons[2].bodynodes[0].mass())
 
     def set_side_box_mass(self, mass):
         self.robot.world.skeletons[2].bodynodes[1].set_mass(mass)
-        print "The side box weight is: ",self.robot.world.skeletons[2].bodynodes[1].mass()
+        print ("The side box weight is: ",self.robot.world.skeletons[2].bodynodes[1].mass())
 
 
     def reset_velocity_task(self, velocity):
         if (self.robot.controller.switchedTasks):
-            print "The transation velocity task is already removed"
+            print ("The transation velocity task is already removed")
         else:
             self.robot.controller.qp.obj.tasks[0].desiredTranslationVelocity[0]=velocity
-            print "The desired translation velocity is: ",self.robot.controller.qp.obj.tasks[0].desiredTranslationVelocity[0]
+            print ("The desired translation velocity is: ",self.robot.controller.qp.obj.tasks[0].desiredTranslationVelocity[0])
 
 
     def reset_admittance_task(self, force=None):
         if(self.robot.controller.switchedTasks):
             self.robot.controller.qp.obj.tasks[0].desiredForce[0] = force
-            print "The desired admittance task force is: ", self.robot.controller.qp.obj.tasks[0].desiredForce[0]
+            print ("The desired admittance task force is: ", self.robot.controller.qp.obj.tasks[0].desiredForce[0])
         else:
-            print "The admittance task is not activated yet"
+            print ("The admittance task is not activated yet")
 
     def clear_captures(self):
         command = "rm ./data/captures/robot*"
@@ -553,7 +553,7 @@ class cubeTwoKR5World(pydart.World):
 
         command = "ffmpeg -f image2 -r 30 -start_number " + start_number + " -i ./data/captures/robot.%4d.png -t  " + amount + " -vcodec  mpeg4 -y movie.mp4"
 
-        print "the command is: ",'\n', command
+        print ("the command is: ",'\n', command)
         os.popen(command)
 
 
@@ -732,7 +732,7 @@ class cubeKR5World_admittance_task(pydart.World):
             self.controller.enabled = not self.controller.enabled
 
     def on_step_event(self, ):
-        print "duration is: ", self.duration
+        print ("duration is: ", self.duration)
         if self.force is not None and self.duration >= 0:
             self.duration -= 1
             #self.skeletons[-1].body('h_spine').add_ext_force(self.force)
@@ -750,7 +750,7 @@ class cubeKR5World_admittance_task(pydart.World):
 
         command = "ffmpeg -f image2 -r 30 -start_number " + start_number + " -i ./data/captures/robot.%4d.png -t  " + amount + " -vcodec  mpeg4 -y movie.mp4"
 
-        print "the command is: ",'\n', command
+        print ("the command is: ",'\n', command)
         os.popen(command)
 
     def print_text(self, txt=None):
@@ -812,7 +812,7 @@ class cubeKR5World_admittance_task(pydart.World):
 
         if self.force is not None and self.duration >= 0:
             p0 = self.skeletons[-1].body('palm').C
-            print "p0 is: ", p0
+            print ("p0 is: ", p0)
             p1 = p0 + 0.01*self.force
             ri.set_color(0.0, 1.0, 0.0)
             ri.render_arrow(p0.reshape(3), p1.reshape(3), r_base=0.05, head_width=0.1, head_len=0.1)

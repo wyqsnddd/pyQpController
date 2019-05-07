@@ -109,10 +109,16 @@ class admittanceTask:
         self.qpForceErrorIntegral = self.qpForceErrorIntegral + qp_Ki*qpForceError*self.robot.world.dt
 
         Q = newJacobian_linear.T.dot(newJacobian_linear)
-        Q = np.block([
-            [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
-            [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
-        ])
+        Q_size = Q.shape[0]
+        Q_new  = np.zeros((Q_size + self.robot.ndofs, Q_size + self.robot.ndofs))
+        Q_new[:Q_size, :Q_size] = Q
+        Q = Q_new
+
+        
+        # Q = np.block([
+        #     [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
+        #     [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
+        # ])
 
         P = 2 * constant.T.dot(newJacobian_linear)
         zero_vector = np.zeros((1, self.robot.ndofs))
@@ -165,12 +171,12 @@ class admittanceTask:
         else:
             forceError = self.selectionMatrix.dot(self.equivalentForceVector - self.desiredForce)
 
-        print "The desired force is: ", self.desiredForce.T
+        print ("The desired force is: ", self.desiredForce.T)
         # print "The current QP force is: ", qpContact.getContactForce().T
         # print "The current target force is: ", f_qp.T
 #        print "The current target force is: ", f_target.T
-        print "The current sensor force is: ", self.equivalentForceVector.T
-        print "The force error is: ", forceError.T
+        print ("The current sensor force is: ", self.equivalentForceVector.T)
+        print ("The force error is: ", forceError.T)
 
 
 
@@ -184,10 +190,19 @@ class admittanceTask:
         self.forceErrorIntegral = self.forceErrorIntegral + self.Ki*forceError*self.robot.world.dt
 
         Q = newJacobian_linear.T.dot(newJacobian_linear)
-        Q = np.block([
-            [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
-            [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
-        ])
+        # Q = np.block([
+        #     [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
+        #     [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
+        # ])
+        Q_size = Q.shape[0]
+        Q_new  = np.zeros((Q_size + self.robot.ndofs, Q_size + self.robot.ndofs))
+        Q_new[:Q_size, :Q_size] = Q
+        Q = Q_new
+
+        # Q = np.block([
+        #     [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
+        #     [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
+        # ])
 
         P = 2 * constant.T.dot(newJacobian_linear)
         zero_vector = np.zeros((1, self.robot.ndofs))
@@ -262,19 +277,19 @@ if __name__ == "__main__":
 
     # print "The jacobian is: ", '\n', jacobian
     # print "The jacobian derivative is: ", '\n', jacobian_dot
-    print "The Q matrix is: ", '\n', Q
-    print "The P matrix is: ", '\n', P
-    print "The C matrix is: ", '\n', C
+    # print "The Q matrix is: ", '\n', Q
+    # print "The P matrix is: ", '\n', P
+    # print "The C matrix is: ", '\n', C
 
     test_obj = qpObj.qpObj(test_robot, 100)
     test_obj.addTask(test_task)
 
-    print "The weight matrix is: ", '\n', test_obj.dofWeightMatrix
-    print "The numer of tasks is: ", test_obj.numTasks()
+    print ("The weight matrix is: ", '\n', test_obj.dofWeightMatrix)
+    print ("The numer of tasks is: ", test_obj.numTasks())
 
     [Q_obj, P_obj, C_obj] = test_obj.calcMatricies()
-    print "The Q_obj matrix is: ", '\n', Q_obj
-    print "The P_obj matrix is: ", '\n', P_obj
-    print "The C_obj matrix is: ", '\n', C_obj
+    print ("The Q_obj matrix is: ", '\n', Q_obj)
+    print ("The P_obj matrix is: ", '\n', P_obj)
+    print ("The C_obj matrix is: ", '\n', C_obj)
 
 

@@ -133,7 +133,7 @@ class impactEstimator:
             [real_F, real_delta_tau, real_delta_dq] = self.checkImpulsiveQuantities()
             self.saveLog(predicted_F, predicted_delta_tau, predicted_delta_dq,  predicted_average_ddq, real_F, real_delta_tau, real_delta_dq)
 
-            print "Impact detected."
+            print ("Impact detected.")
             self.updateParameters()
             # print "Difference between the predicted impulsive F and the real impulsive F is: ",'\n', predicted_F - real_F
             # print "Difference between the predicted delta torque and the real delta torque is: ", '\n', predicted_delta_tau - real_delta_tau

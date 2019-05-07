@@ -113,16 +113,16 @@ if __name__ == "__main__":
 
     # print "The jacobian is: ", '\n', jacobian
     # print "The jacobian derivative is: ", '\n', jacobian_dot
-    print "The Q matrix is: ", '\n', Q
-    print "The P matrix is: ", '\n', P
-    print "The C matrix is: ", '\n', C
+    print ("The Q matrix is: ", '\n', Q)
+    print ("The P matrix is: ", '\n', P)
+    print ("The C matrix is: ", '\n', C)
 
     test_obj = qpObj(test_robot)
     test_obj.addTask(test_task)
 
 
-    print "The weight matrix is: ", '\n', test_obj.dofWeightMatrix
-    print "The numer of tasks is: ", test_obj.numTasks()
+    print ("The weight matrix is: ", '\n', test_obj.dofWeightMatrix)
+    print ("The numer of tasks is: ", test_obj.numTasks())
 
 
 
@@ -138,11 +138,11 @@ if __name__ == "__main__":
     test_orientationTask = orientationTask.orientationTask(test_robot, current_quat, taskWeight, Kd=5, Kp=10, bodyNodeIndex=-1)
 
     test_obj.addTask(test_orientationTask)
-    print "The weight matrix is: ", '\n', test_obj.dofWeightMatrix
-    print "The numer of tasks is: ", test_obj.numTasks()
+    print ("The weight matrix is: ", '\n', test_obj.dofWeightMatrix)
+    print ("The numer of tasks is: ", test_obj.numTasks())
 
 
     [Q_obj, P_obj, C_obj] = test_obj.calcMatricies()
-    print "The Q_obj matrix is: ", '\n', Q_obj
-    print "The P_obj matrix is: ", '\n', P_obj
-    print "The C_obj matrix is: ", '\n', C_obj
+    print ("The Q_obj matrix is: ", '\n', Q_obj)
+    print ("The P_obj matrix is: ", '\n', P_obj)
+    print ("The C_obj matrix is: ", '\n', C_obj)

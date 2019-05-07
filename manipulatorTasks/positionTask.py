@@ -86,13 +86,21 @@ class positionTask:
         #2*self.Kw*newJacobian.dot(self.robot.dq) + (translation - self.desiredPosition)
 
 
-
-
         Q = newJacobian.T.dot(newJacobian)
-        Q = np.block([
-            [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
-            [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
-        ])
+
+        Q_size = Q.shape[0]
+        Q_new  = np.zeros((Q_size + self.robot.ndofs, Q_size + self.robot.ndofs))
+        Q_new[:Q_size, :Q_size] = Q
+
+        Q = Q_new
+
+        # Q = np.block([
+        #     [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
+        #     [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
+        # ])
+
+
+
 
         P = 2*constant.T.dot(newJacobian)
         zero_vector = np.zeros((1, self.robot.ndofs))
