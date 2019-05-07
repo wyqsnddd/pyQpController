@@ -1,3 +1,4 @@
+
 # Impact-friendly task space quadratic optimization robot controller
 
 The simulation is based on the [python interface](https://github.com/sehoonha/pydart2) of the [DART simulator](https://dartsim.github.io/). 
