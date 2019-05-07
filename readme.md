@@ -16,10 +16,10 @@ The similar results could be found for the equality constraint (21). Each task i
 |Equations in the paper  | Simulation code |
 | ------------- | :-------------: |
 | Joint position limits (6) | [jointPositionLimits.py]( manipulatorConstraints/jointPositionLimits.py) |
-| Joint velocity limits (7)  |  [jointVelocityConstraints.py]( ../manipulatorConstraints/jointVelocityConstraints.py)|
+| Joint velocity limits (7)  |  [jointVelocityConstraints.py]( manipulatorConstraints/jointVelocityConstraints.py)|
 | Joint torque limits (8)  |  [torqueLimitConstraints.py](manipulatorConstraints/torqueLimitConstraints.py)|
-| impact joint position limits (15) |  [robustJointPositionLimits.py](manipulatorConstraints/robustJointLimitConstraints.py) |
-| impact joint velocity limits (16)  |[robustJointVelocityConstraints.py](manipulatorConstraints/robustJointVelocityLimitConstraints.py)|
+| impact joint position limits (15) |  [robustJointPositionLimits.py](manipulatorConstraints/robustJointPositionLimits.py) |
+| impact joint velocity limits (16)  |[robustJointVelocityConstraints.py](manipulatorConstraints/robustJointVelocityConstraints.py)|
 | impulse torque constraint (18) | [impulseTorqueLimitConstraints.py](manipulatorConstraints/impulseTorqueLimitConstraints.py) |
 | force-aware torque constraint (19) |[torqueLimitConstraints.py](manipulatorConstraints/torqueLimitConstraints.py) |
 | impact dynamics equation (21) |  [impactConstraints.py](manipulatorConstraints/impactConstraints.py) |
