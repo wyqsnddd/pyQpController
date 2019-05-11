@@ -1,5 +1,9 @@
 
-# Impact-friendly task space quadratic optimization robot controller
+# <center>Impact-friendly QP controller</center>
+
+[![Impact-friendly QP controller](https://img.youtube.com/vi/ZlPM9PbJnnY/0.jpg)](https://www.youtube.com/watch?v=ZlPM9PbJnnY)
+ 
+ 
 
 The simulation is based on the [python interface](https://github.com/sehoonha/pydart2) of the [DART simulator](https://dartsim.github.io/). 
 
