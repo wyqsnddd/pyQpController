@@ -1,0 +1,177 @@
+<?xml version="1.0" ?>
+<skel version="1.0">
+  <world name="world 1">
+    <physics>
+      <time_step>0.001</time_step>
+      <gravity>0 -9.81 0</gravity>
+      <collision_detector>fcl_mesh</collision_detector>
+    </physics>
+
+    <skeleton name="ground_skeleton">
+      <body name="ground">
+	<transformation>0 -0.375 0 0 0 0</transformation>
+	<visualization_shape>
+	  <transformation>0 0 0 0 0 0</transformation>
+	  <geometry>
+	    <box>
+	      <size>2.5 0.05 2.5</size>
+	    </box>
+	  </geometry>
+	  <color>0.95 0.95 0.95</color>
+	</visualization_shape>
+	<collision_shape>
+	  <transformation>0 0 0 0 0 0</transformation>
+	  <geometry>
+	    <box>
+	      <size>2.5 0.05 2.5</size>
+	    </box>
+	  </geometry>
+	</collision_shape>                                
+      </body>
+      <joint type="weld" name="joint_ground">
+	<parent>world</parent>
+	<child>ground</child>
+      </joint>
+    </skeleton>	
+    <!--
+    <skeleton name="fixed_box_skeleton">
+      <body name="fixed_box">
+        <gravity>1</gravity>
+        <transformation>0.36 0.15 0.3 0 0 0</transformation>
+        <inertia>
+          <mass>200</mass>
+          <offset>0 0 0</offset>
+        </inertia>
+        <visualization_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.1 1.0 0.4</size>
+            </box>
+          </geometry>
+          <color>0.8 0.3 0.3</color>
+        </visualization_shape>
+        <collision_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.1 1.0 0.4</size>
+            </box>
+          </geometry>
+        </collision_shape>                                
+      </body>
+      
+      <joint type="weld" name="joint_fix">
+        <parent>world</parent>
+        <child>fixed_box</child>
+      </joint>
+    </skeleton>	
+    -->
+    <skeleton name="fixed_box_skeleton_two">
+      <body name="fixed_box_two">
+        <gravity>1</gravity>
+        <transformation>0.7 -0.1 0.3 0 0 0 </transformation>
+	<!---0.1 -0.125 -0.6 0 0 0-->
+        <inertia>
+          <mass>200</mass>
+          <offset>0 0 0</offset>
+        </inertia>
+        <visualization_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>1.0 0.5 1.0</size>
+            </box>
+          </geometry>
+          <color>0.1 0.3 0.7</color>
+        </visualization_shape>
+        <collision_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>1.0 0.5 1.0</size>
+            </box>
+          </geometry>
+        </collision_shape>                                
+      </body>
+      
+      <joint type="weld" name="joint_fix">
+        <parent>world</parent>
+        <child>fixed_box_two</child>
+      </joint>
+    </skeleton>	
+    
+
+
+    
+    <skeleton name="floating_box_combined_skeleton">
+      <body name="floating_box">
+        <gravity>1</gravity>
+	<transformation>0.46 0.245 0.3 0 0 0</transformation>
+	<!---0.1 0.22 -0.35 0 0 0-->
+        <inertia>
+          <mass>5</mass>
+          <offset>0 0 0</offset>
+        </inertia>
+        <visualization_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.3 0.2 0.5</size>
+            </box>
+          </geometry>
+          <color>0.3 0.8 0.3</color>
+        </visualization_shape>
+        <collision_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.3 0.2 0.5</size>
+            </box>
+          </geometry>
+        </collision_shape>
+      </body>
+      
+      <body name="coarse_flat_surface">
+        <gravity>1</gravity>
+	<transformation>0.26 0.245 0.3 0 0 0</transformation>
+	<!---0.1 0.22 -0.35 0 0 0-->
+        <inertia>
+          <mass>0.1</mass>
+          <offset>0 0 0</offset>
+        </inertia>
+        <visualization_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.1 0.2 0.5</size>
+            </box>
+          </geometry>
+          <color>1.0 0.5 0.3</color>
+        </visualization_shape>
+        <collision_shape>
+          <transformation>0 0 0 0 0 0</transformation>
+          <geometry>
+            <box>
+              <size>0.1 0.2 0.5</size>
+            </box>
+          </geometry>
+        </collision_shape>
+      </body>
+      
+      <joint type="free" name="joint_float">
+        <parent>world</parent>
+        <child>floating_box</child>
+    	<dynamics friction="0.1"/>
+      </joint>
+      <joint type="weld" name="joint_surface">
+        <parent>floating_box</parent>
+        <child>coarse_flat_surface</child>
+      </joint>
+      
+    </skeleton>
+    
+
+    
+  </world>
+</skel>
