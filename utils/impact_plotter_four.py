@@ -49,10 +49,10 @@ if __name__ =="__main__":
 
     time = loaded['time']
 
-    # impact_time_1 = [0.24, 0.245] # Generic QP impact case
+    impact_time_1 = [0.24, 0.245] # Generic QP impact case
     # impact_time_1 = [0.815, 0.825]
     # impact_time_1 = [0.80, 0.815]
-    impact_time_1 = [0.795, 0.805]
+    #impact_time_1 = [0.795, 0.805]
     impact_time_2 = [0.485, 0.495]
     impact_time_3 = [0.72, 0.73]
     impact_time_4 = [0.99, 1.0]
@@ -68,7 +68,7 @@ if __name__ =="__main__":
     tau = loaded['tau']
     ee_v = loaded['ee_v']
     ee_f = loaded['ee_f']
-    f_QP = loaded['f_QP']
+    #f_QP = loaded['f_QP']
     length = len(time)
     f_desired = np.ones((length ,1))*57
     
@@ -389,9 +389,9 @@ if __name__ =="__main__":
 
     ax80.autoscale(enable=True, axis='x', tight=True)
     plt.axvspan(impact_time_1[0], impact_time_1[1], color='red', alpha=0.1)
-    # plt.axvspan(impact_time_2[0], impact_time_2[1], color='red', alpha=0.1)
-    # plt.axvspan(impact_time_3[0], impact_time_3[1], color='red', alpha=0.1)
-    # plt.axvspan(impact_time_4[0], impact_time_4[1], color='red', alpha=0.1)
+    plt.axvspan(impact_time_2[0], impact_time_2[1], color='red', alpha=0.1)
+    plt.axvspan(impact_time_3[0], impact_time_3[1], color='red', alpha=0.1)
+    plt.axvspan(impact_time_4[0], impact_time_4[1], color='red', alpha=0.1)
 
     plt.grid(True)
     ax80.locator_params(nbins=6, axis='y')
@@ -439,13 +439,11 @@ if __name__ =="__main__":
     plt.plot(time, lower_bound, 'darkslategrey', linestyle='-.', label=r'Lower  bound: $\delta   \underline{\tau}$ ', linewidth=2.0)
     ax81.set_xlim([0, 1.2])
     
-    # ax81.autoscale(enable=True, axis='x', tight=True)
     plt.setp(ax81.get_xticklabels(), visible=False)
     plt.grid(True)
-    ax81.set_ylim([1.05*lower, 50])
-    # ax81.set_ylim([1.15*lower, 1.15*upper])
-    # ax81.set_ylim([4.5*lower, 4.5*upper])
-    plt.title("Impulse joint torque constraints [$Nm$]", fontsize=10)
+    #ax81.set_ylim([1.05*lower, 50])
+    ax81.set_ylim([-900, 800])
+    plt.title("Impulsive joint torque constraints [$Nm$]", fontsize=10)
     # ax81.set_ylabel('Joint Torque  [$Nm$]', **font)
     plt.yticks(fontsize=10)
     plt.xticks(fontsize=10)
@@ -453,9 +451,9 @@ if __name__ =="__main__":
     ax81.locator_params(nbins=x_bins, axis='x')
 
     plt.axvspan(impact_time_1[0], impact_time_1[1], color='red', alpha=0.1)
-    # plt.axvspan(impact_time_2[0], impact_time_2[1], color='red', alpha=0.1)
-    # plt.axvspan(impact_time_3[0], impact_time_3[1], color='red', alpha=0.1)
-    # plt.axvspan(impact_time_4[0], impact_time_4[1], color='red', alpha=0.1)
+    plt.axvspan(impact_time_2[0], impact_time_2[1], color='red', alpha=0.1)
+    plt.axvspan(impact_time_3[0], impact_time_3[1], color='red', alpha=0.1)
+    plt.axvspan(impact_time_4[0], impact_time_4[1], color='red', alpha=0.1)
 
     plt.axhline(y=-200, xmin=0.02, xmax=0.66, linewidth=8, color='green', alpha=0.2)
 
@@ -468,102 +466,21 @@ if __name__ =="__main__":
     
     plt.plot(time, predict_impulseTau[:,1], color='indigo', linestyle='--', label='Predicted: $\delta \\tau_1$')
     plt.plot(time, impulseTau[:,1], 'indigo', label='Torque: $\\tau_0$')
-    
-    # plt.plot(time, upper_bound, 'r')
-    # plt.plot(time, lower_bound, 'g')
-    # ax82.set_ylabel('$\delta \\tau_1$', **font)
-    # ax82.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-    # ax82.autoscale(enable=True, axis='x', tight=True)
-    # ax82.locator_params(nbins=y_bins, axis='y')
-    # plt.setp(ax82.get_xticklabels(), visible=False)
-    # plt.grid(True)
-    # ax82.set_ylim([lower - 20, upper + 20])
-    # plt.axvspan(impact_time_1[0], impact_time_1[1], color='red', alpha=0.1)
-
-    # ax83 = plt.subplot(613)
     # plt.yticks(fontsize=10)
     plt.plot(time, predict_impulseTau[:,2], color='magenta', linestyle='--', label='Predicted:  $\delta \\tau_2$')
     plt.plot(time, impulseTau[:,2], 'magenta', label='Torque: $\\tau_2$')
-    # plt.plot(time, upper_bound, 'r')
-    # plt.plot(time, lower_bound, 'g')
-    # ax83.set_ylabel('$\delta \\tau_2$', **font)
-    # ax83.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-    # ax83.autoscale(enable=True, axis='x', tight=True)
-    # ax83.locator_params(nbins=y_bins, axis='y')
-    # plt.setp(ax83.get_xticklabels(), visible=False)
-    # plt.grid(True)
-    # ax83.set_ylim([lower - 20, upper + 20])
-    # plt.axvspan(impact_time_1[0], impact_time_1[1], color='red', alpha=0.1)
-
-    # ax84 = plt.subplot(614)
-    # plt.yticks(fontsize=10)
     plt.plot(time, predict_impulseTau[:,3], color='crimson', linestyle='--', label='Predicted:  $\delta \\tau_3$')
     plt.plot(time, impulseTau[:,3], 'crimson', label='Torque:  $\\tau_3$')
-    # plt.plot(time, upper_bound, 'r')
-    # plt.plot(time, lower_bound, 'g')
-    # ax84.set_ylabel('$\delta \\tau_3$', **font)
-    # ax84.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-    # ax84.autoscale(enable=True, axis='x', tight=True)
-    # ax84.locator_params(nbins=y_bins, axis='y')
-    # plt.setp(ax84.get_xticklabels(), visible=False)
-    # plt.grid(True)
-    # ax84.set_ylim([lower - 20, upper + 20])
-    # plt.axvspan(impact_time_1[0], impact_time_1[1], color='red', alpha=0.1)
-
-    # ax85 = plt.subplot(615)
-    # plt.yticks(fontsize=10)
     plt.plot(time, predict_impulseTau[:,4], color='peru', linestyle='--', label='Predicted:  $\delta \\tau_4$')
     plt.plot(time, impulseTau[:,4], 'peru', label='Torque:  $\\tau_4$')
-    # plt.plot(time, upper_bound, 'r')
-    # plt.plot(time, lower_bound, 'g')
-    # ax85.set_ylabel('$\delta \\tau_4$', **font)
-    # ax85.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-    # ax85.autoscale(enable=True, axis='x', tight=True)
-    # ax85.locator_params(nbins=y_bins, axis='y')
-    # plt.setp(ax85.get_xticklabels(), visible=False)
-    # plt.grid(True)
-    # ax85.set_ylim([lower - 20, upper + 20])
-    # plt.axvspan(impact_time_1[0], impact_time_1[1], color='red', alpha=0.1)
-
-    # ax86 = plt.subplot(616)
-    # plt.yticks(fontsize=10)
     plt.plot(time, predict_impulseTau[:,5], color='darkorange', linestyle='--', label='Predicted:  $\delta \\tau_5$')
     plt.plot(time, impulseTau[:,5], 'darkorange', label='Torque:  $\\tau_5$')
-    # plt.plot(time, upper_bound, 'r')
-    # plt.plot(time, lower_bound, 'g')
-    # ax86.set_ylabel('$\delta \\tau_5$', **font)
     plt.xlabel('Time [$s$]')
 
     ax81.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-    # ax81.autoscale(enable=True, axis='x', tight=True)
-    # ax86.locator_params(nbins=y_bins, axis='y')
-    # plt.grid(True)
-    # ax86.set_ylim([lower - 20, upper + 20])
-    # plt.axvspan(impact_time_1[0], impact_time_1[1], color='red', alpha=0.1)
-    # ax81.legend(loc='lower left', prop={'size':6}, fancybox=True, framealpha=0.3, shadow=False, borderpad=2, handlelength=4 )
-    ax81.legend(loc='lower right', prop={'size':4}, fancybox=True, framealpha=0.3, shadow=False, borderpad=2, handlelength=4 )
+    ax81.legend(loc='lower right', prop={'size':6}, fancybox=True, framealpha=0.3, shadow=False, borderpad=2, handlelength=4 )
     ax81.autoscale(enable=True, axis='x', tight=True)
     plt.setp(ax81.get_xticklabels(), visible=True)
-
-
-    # # Arrow
-    # plt.annotate("", xy=(0.24, -200), xycoords='data',
-    #              xytext=(0.6, -800), textcoords='data',
-    #              arrowprops=dict(arrowstyle="->", connectionstyle="arc3"))
-    # plt.annotate("", xy=(0.485, -200), xycoords='data',
-    #              xytext=(0.6, -800), textcoords='data',
-    #              arrowprops=dict(arrowstyle="->", connectionstyle="arc3"))
-    # plt.annotate("", xy=(0.72, -200), xycoords='data',
-    #              xytext=(0.6, -800), textcoords='data',
-    #              arrowprops=dict(arrowstyle="->", connectionstyle="arc3"))
-    # plt.annotate("", xy=(0.99, -200), xycoords='data',
-    #              xytext=(0.6, -800), textcoords='data',
-    #              arrowprops=dict(arrowstyle="->", connectionstyle="arc3"))
-    # # Text
-    # plt.text(0.6, -800, r'Violation of $\delta   \underline{\tau} $',
-    #          {'color': 'k', 'fontsize': 10, 'ha': 'center', 'va': 'center',
-    #           'bbox': dict(boxstyle="round", fc="w", ec="k", pad=0.2)})
-
     plt.annotate("", xy=(0.6, -200), xycoords='data',
                  xytext=(0.6, -120), textcoords='data',
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3"))
@@ -600,7 +517,7 @@ if __name__ =="__main__":
 
     ax81 = plt.subplot(212)
     plt.plot(time, -ee_f[:,0], 'g', label='$f$')
-    plt.plot(time, f_QP[:,0], 'r', label='$f_{QP}$')
+    #plt.plot(time, f_QP[:,0], 'r', label='$f_{QP}$')
     plt.plot(time, f_desired, 'b', linestyle='-.', label='$f^*$')
     
     plt.title("Contact force $f_{x}$  [$N$] ", fontsize=10)
