@@ -63,10 +63,6 @@ class impactConstraints:
 
         temp_A = (self.res + 1)*(M_inv.dot(J_dagger)).dot(jacobian)
 
-        # A = np.block([
-        #     [temp_A*self.robot.world.dt, np.identity(self.robot.ndofs)]
-        # ])
-
         A_new  = np.zeros((temp_A.shape[0], temp_A.shape[1] + self.robot.ndofs))
         A_new[:temp_A.shape[0], :temp_A.shape[1]] = temp_A*self.robot.world.dt
         A_new[:temp_A.shape[0], temp_A.shape[1]:] = np.identity(self.robot.ndofs)

@@ -35,14 +35,6 @@ class robustJointVelocityLimitConstraints:
 
     def __init__(self, skel, dt):
         self.robot = skel
-
-        # if len(upper) != len(lower):
-        #     raise Exception("Dimension does not match")
-        # if upper.shape[1] is not 1:
-        #     raise Exception("Upper limits is not a vector")
-        # if lower.shape[1] is not 1:
-        #     raise Exception("Lower limits is not a vector")
-
         if ((dt<0.0) and (dt > 1.0)):
             raise Exception("Unproper dt")
 
@@ -91,34 +83,3 @@ class robustJointVelocityLimitConstraints:
             # Keep h as it is.
 
         return [G, h]
-
-if __name__ == "__main__":
-
-    print('Hello, PyDART!')
-
-
-
-    pydart.init()
-
-    test_world = pydart.World(1.0 / 2000.0, "../data/skel/two_cubes.skel")
-
-    test_robot = test_world.add_skeleton("../data/KR5/KR5_sixx_R650.urdf")
-
-    #upper = np.reshape(array([1.0, 1.0, 1.0]), (3,1))
-    dt = 0.1
-    #lower = np.reshape(array([-1.0, -1.0, -1.0]), (3,1))
-
-    a = robustJointVelocityLimitConstraints(test_robot, dt)
-
-
-    [G, h ] = a.calcMatricies()
-    #print "The G  is: ",'\n', G, G.shape
-    #print "The h is: ",'\n', h, h.shape
-
-
-    w, v = np.linalg.eig(test_robot.M)
-    #print "w", w.shape
-    #print "v", v.shape
-    #print "1/w", 1/w
-    #print "w", w
-    #print "test", test_robot.M.dot((v.dot(np.diag(1/w)).dot(v.T)))

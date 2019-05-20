@@ -74,10 +74,6 @@ class manipulatorQP:
 
         logger = logging.getLogger(__name__)
 
-        #self.jointsUpper = np.reshape(self.robot.q_upper(), (self.dof,1))
-        #self.jointsLower = np.reshape(self.robot.q_lower(), (self.dof,1))
-        #dt = 0.01
-        #dt = data["qpController"]["jointLimits"]["dt"]
         print ("dt is:", dt)
 
         self.contactAware = data["qpController"]["contact"]["enabled"]
@@ -102,20 +98,8 @@ class manipulatorQP:
 
         self.jointAccelerationLimitConstraints = jointAccelerationConstraints.jointAccelerationLimitConstraints(self.robot)
 
-        # The joint velocity limtis is not given by skeleton
-        # self.jointsVUpper =
-        # self.jointsVLower =
-
         upper = data["qpController"]["torqueLimits"]["upper"]
         lower = data["qpController"]["torqueLimits"]["lower"]
-
-        # if self.impactRobust:
-        #     upper = data["qpController"]["torqueLimits"]["upper"]
-        #     lower = data["qpController"]["torqueLimits"]["lower"]
-        # else:
-        #     upper = data["qpController"]["impulseTorqueLimits"]["upper"]
-        #     lower = data["qpController"]["impulseTorqueLimits"]["lower"]
-
 
         self.torqueLower = np.reshape(np.asarray(lower), (self.dof, 1))
         self.torqueUpper = np.reshape(np.asarray(upper), (self.dof, 1))
@@ -507,39 +491,12 @@ def jointAccToTau(robot, jointAcc):
     @param jointAcc The resolved acceleration from the QP.
     """
 
-    # Use the end-effector Jacobian
     J = robot.bodynodes[-1].world_jacobian()
 
-    # It seems that we can work with this equality if there is no forces
-    #print "coriolis and gravities are: ", '\n', robot.coriolis_and_gravity_forces()
-
-    # print "test J is: ",'\n', J.transpose().dot(robot.constraint_forces().reshape((robot.ndofs,1)))
-
     tau = robot.M.dot(jointAcc) + robot.coriolis_and_gravity_forces().reshape((robot.ndofs, 1)) - robot.constraint_forces().reshape((robot.ndofs,1))
-    # J.transpose().dot(robot.constraint_forces().reshape((robot.ndofs,1)))
 
 
     return tau
 
 
 
-if __name__ == "__main__":
-    print('Hello, PyDART!')
-
-    pydart.init()
-
-    test_world = pydart.World(1.0 / 2000.0, "../data/skel/two_cubes.skel")
-
-    test_robot = test_world.add_skeleton("../data/KR5/KR5_sixx_R650.urdf")
-
-    with open('../config/impact_one.json') as file:
-        qpData = json.load(file)
-
-    test_qp = manipulatorQP(test_robot, qpData)
-
-    solution = test_qp.solve()
-    print ("The solution is: ", '\n', solution)
-
-    test_tau = jointAccToTau(test_robot, solution)
-
-    print ("The torque should be: ", '\n', test_tau)

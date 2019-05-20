@@ -32,20 +32,11 @@ import time
 import os
 
 class manipulatorController:
-    #def __init__(self, inputSkel, data, dt, logger=None):
     def __init__(self, inputSkel, data, dt):
-
-        # if logger is None:
-        #     raise Exception("Logger is not set")
-        # else:
-        #     self.logger = logger
-
         self.skel = inputSkel
         #self.targetPosition = inputTargetPosition
         self.enabled = True
-        #self.accController = executeACC.jointAccController(inputSkel)
 
-        #self.qp = manipulatorQP.manipulatorQP(self.skel, data, dt, logger)
         self.qp = manipulatorQP.manipulatorQP(self.skel, data, dt)
 
         self.joint_v_K_v = data["jointVelocityController"]["K_v"]
@@ -105,12 +96,6 @@ class manipulatorController:
             self.jointVelocityJumpEstimator = jointVelocityJumpEstimator.jointVelocityJumpEstimator(self.skel, res_lower, res_upper, bodyNodeLink, tauUpper, tauLower)
 
 
-            #self.dq_last = np.zeros((self.skel.ndofs, 1))
-    # def updateTarget(self, inputTargetPosition):
-    #     self.targetPosition = inputTargetPosition
-    #     # update the reference point of each task:
-
-
     def solveQP(self):
 
         return self.qp.solve(self.impactEstimator)
@@ -150,19 +135,13 @@ class manipulatorController:
     def jointVelocityControl(self, jointAcc):
 
         jointAccError = (np.reshape(self.skel.ddq, (self.skel.ndofs,1)) - jointAcc)
-        #jointAccError = self.skel.ddq - jointAcc.reshape((1, self.skel.ndofs))
 
         tau = self.tau_last - self.joint_v_K_v * (jointAccError) * self.skel.world.dt
 
-        #tau = self.tau_last + self.joint_v_K_v * (jointAcc) * self.skel.world.dt
 
         self.tau_last = tau
-        #self.tau_last = (self.joint_v_K_v *self.skel.dq).reshape((self.skel.ndofs, 1))
 
         tau = tau.flatten()
-
-        #tau = tau + self.gravityCompensationTau()
-        #tau = tau
 
         logger = logging.getLogger(__name__)
         logger.debug('The generated tau is %s ', tau)
@@ -329,22 +308,14 @@ class manipulatorController:
             if (self.jointVelocityJumpEstimatorEnabled):
                 self.jointVelocityJumpEstimator.update(self.sol_ddq, self.sol_delta_dq)
 
-            # print "The generated joint acc is: ", '\n', solution
             self.sol_acc_his.append(self.sol_ddq)
             self.sol_lambda_his.append(self.sol_weights)
-            # self.f_QP_his.append( self.qp.contact.getContactGenerationMatrix().dot(np.reshape(self.sol_weights, (self.qp.contact.Nc, 1))))
             self.f_QP_his.append(np.reshape(self.qp.contact.getContactGenerationMatrix().dot(self.sol_weights), (3, 1)))
 
             tau = self.jointAccToTau(self.sol_ddq)
 
-            # tau = self.jointVelocityControl(self.solution)
             self.tau_his.append(self.tau_last)
             return tau
         else:
             return np.zeros((self.skel.ndofs, 1)).flatten()
-        #return self.jointPositionControl(solution)
-        #return self.jointVelocityControl(self.solution)
-        #return [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-        #return self.jointPDControl(solution)
-
 

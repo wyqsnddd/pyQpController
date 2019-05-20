@@ -36,32 +36,9 @@ class manipulatorImpactController(manipulatorController.manipulatorController):
     #def __init__(self, inputSkel, data, dt, logger=None):
     def __init__(self, inputSkel, data, dt):
         manipulatorController.manipulatorController.__init__(self, inputSkel, data, dt)
-        #manipulatorController.__init__(self, inputSkel, data, dt)
 
 
         self.switchedTasks = False
-
-
-
-    # def updateTarget(self, inputTargetPosition):
-    #     self.targetPosition = inputTargetPosition
-    #     # update the reference point of each task:
-    #
-    # def logData(self):
-    #     time_now = time.strftime("%b_%d_%Y_%H-%M-%S", time.gmtime())
-    #
-    #     log_file_name = os.path.join('./log/data', 'data_' + time_now )
-    #
-    #     np.savez_compressed(log_file_name, error=self.errorZero, time=self.time, dq=self.dq_his, robot_c=self.robot_c,
-    #                         acc=self.acc_his, q=self.q_his, tau=self.tau_his, sol_q=self.sol_q_his,
-    #                         sol_dq=self.sol_dq_his, sol_acc=self.sol_acc_his, sol_tau=self.sol_tau_his)
-    #
-    #     if(self.impactEstimatorEnabled):
-    #         impac_log_file_name = os.path.join('./log/data', 'impact-data_' + time_now)
-    #         np.savez_compressed(impac_log_file_name, time=self.impactEstimator.time, predict_F=self.impactEstimator.predictionLog.impulsiveForce, predict_delta_tau=self.impactEstimator.predictionLog.deltaTorque, predict_delta_dq = self.impactEstimator.predictionLog.deltaDq,
-    #                             actual_F = self.impactEstimator.actualLog.impulsiveForce, actual_delta_tau = self.impactEstimator.actualLog.deltaTorque, actual_delta_dq = self.impactEstimator.actualLog.deltaDq)
-    #
-
 
     def impactDetected(self):
 
@@ -81,7 +58,6 @@ class manipulatorImpactController(manipulatorController.manipulatorController):
         Ki = self.qp.data["qpController"]["admittanceTask"]["Ki"]
         linkIndex = self.qp.data["qpController"]["admittanceTask"]["bodyLinkNumber"]
 
-        # test_desiredPosition = listToArray.listToArray(test_desiredPosition)
         test_desiredForce = np.asarray(test_desiredForce).reshape((3, 1))
 
         test_selectionVector = self.qp.data["qpController"]["admittanceTask"]["axis_selection"]
@@ -89,8 +65,6 @@ class manipulatorImpactController(manipulatorController.manipulatorController):
 
         logger.info("desired force is: %s, controller gains are %d and %d. End-effector is link: %d ",
                     test_desiredForce, Ki, Kf, linkIndex)
-        # test_vector = np.zeros(5)
-        # initialize the tasks:
         newAdmittanceTask = admittanceTask.admittanceTask(self.skel, test_desiredForce, test_weight,
                                                           test_selectionVector, Kf=Kf, Ki=Ki,
                                                           bodyNodeIndex=linkIndex,
@@ -144,14 +118,6 @@ class manipulatorImpactController(manipulatorController.manipulatorController):
         Kp = self.qp.data["qpController"]["positionTask"]["Kp"]
         Kd = self.qp.data["qpController"]["positionTask"]["Kd"]
         linkIndex = self.qp.data["qpController"]["positionTask"]["bodyLinkNumber"]
-
-        # test_desiredPosition = listToArray.listToArray(test_desiredPosition)
-        #test_desiredPosition = self.qp.data["qpController"]["positionTask"]["setPoint"]
-        #test_desiredPosition = np.asarray(test_desiredPosition).reshape((3, 1))
-
-
-        # test_vector = np.zeros(5)
-        # initialize the tasks:
 
         test_selectionVector = self.qp.data["qpController"]["positionTask"]["axis_selection"]
         test_selectionVector = np.asarray(test_selectionVector).reshape((3, 1))
@@ -240,10 +206,6 @@ class manipulatorImpactController(manipulatorController.manipulatorController):
 
             logger = logging.getLogger(__name__)
             logger.info("translational velocity task is removed")
-            #print "The velocity task selection matrix is: ",'\n', self.qp.obj.tasks[0].selectionMatrix
-            #logger.info("The amount of tasks is: %d", len(self.qp.obj.tasks))
-
-            # self.addAdmittanceTask()
             transform = self.skel.bodynodes[-1].world_transform()
             translation = transform[[0, 1, 2], 3].reshape((3, 1))
 
@@ -273,14 +235,7 @@ class manipulatorImpactController(manipulatorController.manipulatorController):
         self.tau_his.append(self.tau_last)
 
         self.sol_lambda_his.append(self.sol_weights)
-        # self.f_QP_his.append( self.qp.contact.getContactGenerationMatrix().dot(np.reshape(self.sol_weights, (self.qp.contact.Nc, 1))))
         self.f_QP_his.append(np.reshape(self.qp.contact.getContactGenerationMatrix().dot(self.sol_weights), (3, 1)))
 
         return tau
-        #return self.gravityCompensationTau()
-
-        #return self.jointVelocityControl(solution)
-
-        #return self.jointPositionControl(solution)
-
 

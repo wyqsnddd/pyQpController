@@ -49,19 +49,12 @@ class jointAccelerationLimitConstraints:
     def calcMatricies(self, useContactVariables, qpContact):
         zero_block = np.zeros((2*self.robot.ndofs, self.robot.ndofs))
 
-        G_1 = np.concatenate((np.identity(self.robot.ndofs), -np.identity(self.robot.ndofs)), axis=0)
-        G_2 = np.concatenate((np.identity(self.robot.ndofs), -np.identity(self.robot.ndofs)), axis=0)
+        G = np.concatenate((np.identity(self.robot.ndofs), -np.identity(self.robot.ndofs)), axis=0)
 
-        # G = np.concatenate((G_1, G_2), axis=0)
-        G = G_1
         G = np.concatenate((G, zero_block), axis=1)
 
-        h_1 = np.reshape(np.concatenate((self.upper, -self.lower)),(12,1))
-        #h_2 = np.reshape(np.concatenate((self.upper - self.average_impact_acc, -self.lower + self.average_impact_acc)),(12, 1))
+        h = np.reshape(np.concatenate((self.upper, -self.lower)),(12,1))
                          
-        # h = np.reshape(np.concatenate((h_1, h_2)), (24,1))
-        h = h_1
-
         if (useContactVariables):
             # Append more columns corresponding to the contact force varialbes
             contact_size = qpContact.Nc
@@ -72,29 +65,4 @@ class jointAccelerationLimitConstraints:
             G = G_new
 
         return [G, h]
-
-if __name__ == "__main__":
-
-    print('Hello, PyDART!')
-
-
-
-    pydart.init()
-
-    test_world = pydart.World(1.0 / 2000.0, "../data/skel/two_cubes.skel")
-
-    test_robot = test_world.add_skeleton("../data/KR5/KR5_sixx_R650.urdf")
-
-    #upper = np.reshape(array([1.0, 1.0, 1.0]), (3,1))
-    dt = 0.1
-    #lower = np.reshape(array([-1.0, -1.0, -1.0]), (3,1))
-
-    a = jointAccelerationLimitConstraints(test_robot)
-
-
-    [G, h ] = a.calcMatricies()
-    print ("The G  is: ",'\n', G, G.shape)
-    print ("The h is: ",'\n', h, h.shape)
-
-
 

@@ -81,11 +81,6 @@ class impactEstimator:
 
         self.M_last = self.robot.M
 
-        # Note that Tau_last is updated after the computation of joint controller
-        #self.tau_last = self.robot.controller.tau_last
-
-        # (J M J^T)_inv
-
         M_inv = np.linalg.pinv(self.M_last)
         temp = self.J_last.dot(M_inv)
         self.impactConstant_last = np.linalg.pinv(temp.dot(self.J_last.T))
@@ -156,10 +151,6 @@ class impactEstimator:
 
             print ("Impact detected.")
             self.updateParameters()
-            # print "Difference between the predicted impulsive F and the real impulsive F is: ",'\n', predicted_F - real_F
-            # print "Difference between the predicted delta torque and the real delta torque is: ", '\n', predicted_delta_tau - real_delta_tau
-            # print "Difference between the predicted dq and the real dq is: ", '\n', predicted_delta_dq - real_delta_dq
-            # print "Prediction finished. "
         else:
             # update the parameters as usual
             self.updateParameters()

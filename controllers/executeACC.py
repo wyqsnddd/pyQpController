@@ -36,11 +36,6 @@ class jointAccController:
             return tau
         # use the dynamics equation to generate the desired torque
 
-        # Use the end-effector Jacobian
-        J = self.skel.bodynodes[-1].jacobian()
-
-        # It seems that we can work with this equality if there is no forces
-        #tau = self.skel.M.dot(self.target) + self.skel.c - J.transpose().dot(self.skel.constraint_forces())
         tau = self.skel.M.dot(self.target) + self.skel.c - self.skel.constraint_forces()
 
         return tau

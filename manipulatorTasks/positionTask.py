@@ -91,22 +91,12 @@ class positionTask:
 
         transform = self.robot.bodynodes[self.bodyNodeIndex].world_transform()
         translation = transform[[0,1,2],3].reshape((3,1))
-        #print "The transform is: ", transform, " shape: ", transform.shape
-        #print "The translation is: ", translation
 
         dq = (self.robot.dq).reshape((self.robot.ndofs, 1))
 
         self.error = self.selectionMatrix.dot(translation - self.desiredPosition)
 
-        # logger = logging.getLogger(__name__)
-        # logger.info('The position task error is: %s ', error)
-
-        #print "The position task error is: ", '\n', error
-
         constant = (newJacobian_dot + self.Kd*newJacobian).dot(dq) + self.Kp*(self.error)
-        #2*self.Kw*newJacobian.dot(self.robot.dq) + (translation - self.desiredPosition)
-
-
         Q = newJacobian.T.dot(newJacobian)
 
         Q_size = Q.shape[0]
@@ -114,13 +104,6 @@ class positionTask:
         Q_new[:Q_size, :Q_size] = Q
 
         Q = Q_new
-
-        # Q = np.block([
-        #     [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
-        #     [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
-        # ])
-
-
 
 
         P = 2*constant.T.dot(newJacobian)
@@ -142,5 +125,4 @@ class positionTask:
             P = P_new
 
 
-        #return [newJacobian, newJacobian_dot, Q, P, C]
         return [self.taskWeight*Q, self.taskWeight*P, self.taskWeight*C]

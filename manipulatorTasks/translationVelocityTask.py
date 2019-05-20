@@ -74,12 +74,6 @@ class translationVelocityTask:
         newJacobian_dot = self.robot.bodynodes[self.bodyNodeIndex].linear_jacobian_deriv()
         newJacobian_dot = self.selectionMatrix.dot(newJacobian_dot)
 
-        # transform = self.robot.bodynodes[self.bodyNodeIndex].world_transform()
-        # translation = transform[[0,1,2],3].reshape((3,1))
-
-        #print "The transform is: ", transform, " shape: ", transform.shape
-        #print "The translation is: ", translation
-
         dq = (self.robot.dq).reshape((self.robot.ndofs, 1))
 
         self.error = self.selectionMatrix.dot(newJacobian.dot(dq) - self.desiredTranslationVelocity)
@@ -87,11 +81,7 @@ class translationVelocityTask:
         logger = logging.getLogger(__name__)
         logger.debug('The position task error is: %s ', self.error)
 
-        #print "The position task error is: ", '\n', error
         constant = (newJacobian_dot + self.Kp * newJacobian).dot(dq) - self.Kp * self.selectionMatrix.dot(self.desiredTranslationVelocity)
-        #constant = (newJacobian_dot + self.Kp*newJacobian).dot(dq) - self.Kp*error
-        #2*self.Kw*newJacobian.dot(self.robot.dq) + (translation - self.desiredPosition)
-
 
         Q = newJacobian.T.dot(newJacobian)
         Q_size = Q.shape[0]
@@ -99,11 +89,6 @@ class translationVelocityTask:
         Q_new[:Q_size, :Q_size] = Q
         Q = Q_new
         
-        # Q = np.block([
-        #     [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
-        #     [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
-        # ])
-
         P = 2*constant.T.dot(newJacobian)
         zero_vector = np.zeros((1, self.robot.ndofs))
         P = np.concatenate((P, zero_vector), axis=1)
@@ -121,45 +106,7 @@ class translationVelocityTask:
             P_new[0, :QP_size] = P
             P = P_new
 
-        #return [newJacobian, newJacobian_dot, Q, P, C]
         return [Q, P, C]
 
 
 
-
-if __name__ == "__main__":
-
-    print('Hello, PyDART!')
-
-    pydart.init()
-
-    test_world = pydart.World(1.0 / 2000.0, "../data/skel/two_cubes.skel")
-
-    test_robot = test_world.add_skeleton("../data/KR5/KR5_sixx_R650.urdf")
-
-
-
-    test_desiredVelocity = array([0.1, 0.0, 0.0]).reshape((3,1))
-
-    test_task = translationVelocityTask(test_robot, test_desiredVelocity)
-
-    [Q, P, C] = test_task.calcMatricies()
-
-    # print "The jacobian is: ", '\n', jacobian
-    # print "The jacobian derivative is: ", '\n', jacobian_dot
-    # print "The Q matrix is: ", '\n', Q
-    # print "The P matrix is: ", '\n', P
-    # print "The C matrix is: ", '\n', C
-
-    test_obj = qpObj.qpObj(test_robot)
-    test_obj.addTask(test_task)
-
-
-    # print "The weight matrix is: ", '\n', test_obj.dofWeightMatrix
-    # print "The numer of tasks is: ", test_obj.numTasks()
-
-
-    [Q_obj, P_obj, C_obj] = test_obj.calcMatricies()
-    # print "The Q_obj matrix is: ", '\n', Q_obj
-    # print "The P_obj matrix is: ", '\n', P_obj
-    # print "The C_obj matrix is: ", '\n', C_obj

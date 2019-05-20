@@ -91,7 +91,6 @@ class maxImpactForceTask:
             QP_size = 2*self.robot.ndofs
             contact_size = qpContact.Nc
             Q_new  = np.zeros((QP_size + contact_size, QP_size + contact_size))
-            #Q_new[:QP_size, :QP_size] = Q # write the old info
             Q = Q_new
 
             P_new = np.zeros((1, QP_size + contact_size))

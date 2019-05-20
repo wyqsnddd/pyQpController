@@ -102,8 +102,6 @@ class admittanceTask:
 
 
     def update(self):
-        # check if we are in contact
-        #self.robot.world.contact
         pass
 
     def calcQPAdmittaceMatricies(self, qpContact):
@@ -135,12 +133,6 @@ class admittanceTask:
         Q_new[:Q_size, :Q_size] = Q
         Q = Q_new
 
-        
-        # Q = np.block([
-        #     [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
-        #     [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
-        # ])
-
         P = 2 * constant.T.dot(newJacobian_linear)
         zero_vector = np.zeros((1, self.robot.ndofs))
         P = np.concatenate((P, zero_vector), axis=1)
@@ -153,12 +145,8 @@ class admittanceTask:
         # Minimize the error: ||f_qp - f_desired||_2
         constant = 1.0
         f_qp = qpContact.getContactForce()
-        #force_Q = constant*f_qp.transpose().dot(f_qp)
 
-        #force_Q = constant*qpContact.getContactGenerationMatrix().transpose().dot(qpContact.getContactGenerationMatrix())
-        #force_Q = (force_Q.transpose() + force_Q)/2
         force_Q = np.identity(4)
-        #force_Q = np.zeros((4,4))
 
         force_P = - constant*(self.desiredForce.transpose()).dot(qpContact.getContactGenerationMatrix())
 
@@ -180,24 +168,18 @@ class admittanceTask:
         
 
 
-        # I am not sure if this is the right way to do it.
         self.equivalentForceVector = - equivalentForce[0:3:1].reshape((3,1))
         self.currentForce = self.equivalentForceVector
 
         if self.qpForceRegulating:
             f_qp = qpContact.getContactForce()
-            # f_target = -(f_qp - self.desiredForce)
-            # forceError = self.selectionMatrix.dot(self.equivalentForceVector - f_target)
             forceError = self.selectionMatrix.dot(self.equivalentForceVector - f_qp)
         else:
             forceError = self.selectionMatrix.dot(self.equivalentForceVector - self.desiredForce)
 
-        print ("The desired force is: ", self.desiredForce.T)
-        # print "The current QP force is: ", qpContact.getContactForce().T
-        # print "The current target force is: ", f_qp.T
-#        print "The current target force is: ", f_target.T
-        print ("The current sensor force is: ", self.equivalentForceVector.T)
-        print ("The force error is: ", forceError.T)
+        #print ("The desired force is: ", self.desiredForce.T)
+        #print ("The current sensor force is: ", self.equivalentForceVector.T)
+        #print ("The force error is: ", forceError.T)
 
 
 
@@ -211,19 +193,10 @@ class admittanceTask:
         self.forceErrorIntegral = self.forceErrorIntegral + self.Ki*forceError*self.robot.world.dt
 
         Q = newJacobian_linear.T.dot(newJacobian_linear)
-        # Q = np.block([
-        #     [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
-        #     [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
-        # ])
         Q_size = Q.shape[0]
         Q_new  = np.zeros((Q_size + self.robot.ndofs, Q_size + self.robot.ndofs))
         Q_new[:Q_size, :Q_size] = Q
         Q = Q_new
-
-        # Q = np.block([
-        #     [Q,          np.zeros((self.robot.ndofs, self.robot.ndofs))],
-        #     [np.zeros((self.robot.ndofs, self.robot.ndofs)), np.zeros((self.robot.ndofs, self.robot.ndofs))]
-        # ])
 
         P = 2 * constant.T.dot(newJacobian_linear)
         zero_vector = np.zeros((1, self.robot.ndofs))
@@ -250,15 +223,7 @@ class admittanceTask:
                 Q_new[2 * self.robot.ndofs:, 2 * self.robot.ndofs:] = force_Q*weights
                 P_new[:, 2 * self.robot.ndofs:] = force_P*weights
 
-            # if self.qpForceRegulating:
-            #     [force_Q, force_P, force_C] = self.calcQPAdmittaceMatricies(qpContact)
-            #     weight_qpForce = 1.0
-            #     # Q_new[2 * self.robot.ndofs:, 2 * self.robot.ndofs:] = force_Q
-            #     # P_new[:, 2 * self.robot.ndofs:] = force_P
-            #     Q_new[:2 * self.robot.ndofs, :2 * self.robot.ndofs] += force_Q*weight_qpForce
-            #     P_new[:, :2 * self.robot.ndofs] += force_P*weight_qpForce
-
-
+        
             Q = Q_new
             P = P_new
 
@@ -273,44 +238,4 @@ class admittanceTask:
             return self.motionCase(useContactVariables, qpContact)
         else:
             return self.basicCase(useContactVariables, qpContact)
-
-if __name__ == "__main__":
-
-    print('Hello, PyDART!')
-
-    pydart.init()
-    world_file = "../data/skel/two_cubes.skel"
-    robot_file = "../data/KR5/KR5_sixx_R650.urdf"
-
-    test_world = cubes_KR_R650.cubeKR5World_admittance_task( world_file, robot_file)
-
-    test_robot = test_world.skeletons[-1]
-
-
-
-    desiredForce = np.reshape([10.0, 0.0, 0.0], (3,1))
-    # test_desiredPosition = array([0.1, 0.2, 0.3]).reshape((3,1))
-    taskWeight = 1000
-
-    test_task = admittanceTask(test_robot, desiredForce, taskWeight, Kf=100, Ki=20, bodyNodeIndex=-1)
-
-    [Q, P, C] = test_task.calcMatricies()
-
-    # print "The jacobian is: ", '\n', jacobian
-    # print "The jacobian derivative is: ", '\n', jacobian_dot
-    # print "The Q matrix is: ", '\n', Q
-    # print "The P matrix is: ", '\n', P
-    # print "The C matrix is: ", '\n', C
-
-    test_obj = qpObj.qpObj(test_robot, 100)
-    test_obj.addTask(test_task)
-
-    print ("The weight matrix is: ", '\n', test_obj.dofWeightMatrix)
-    print ("The numer of tasks is: ", test_obj.numTasks())
-
-    [Q_obj, P_obj, C_obj] = test_obj.calcMatricies()
-    print ("The Q_obj matrix is: ", '\n', Q_obj)
-    print ("The P_obj matrix is: ", '\n', P_obj)
-    print ("The C_obj matrix is: ", '\n', C_obj)
-
 
