@@ -6,7 +6,7 @@
 |[![Impact-friendly QP controller](https://img.youtube.com/vi/ZlPM9PbJnnY/0.jpg)](https://www.youtube.com/watch?v=ZlPM9PbJnnY)  |  [![Impact-aware QP controller](http://img.youtube.com/vi/K9ar8tsPN8s/0.jpg)](http://www.youtube.com/watch?v=K9ar8tsPN8s "Video Title")   |
 | ------------- | :-------------: |
  
-pyQpController is the proof of concept simulator attached to the paper: [Impact-Friendly Robust Control Design with Task-Space Quadratic Optimization](https://pdfs.semanticscholar.org/2d37/f86c6c1ff63986cc1f9d6bc7d1bfac1274ed.pdf?_ga=2.217802134.1089995681.1567288698-1926356895.1556608070) pyQpController is based on the [python interface](https://github.com/sehoonha/pydart2) of the [DART simulator](https://dartsim.github.io/). 
+pyQpController is the proof of concept simulator attached to the paper: [Impact-Friendly Robust Control Design with Task-Space Quadratic Optimization](http://www.roboticsproceedings.org/rss15/p32.html) pyQpController is based on the [python interface](https://github.com/sehoonha/pydart2) of the [DART simulator](https://dartsim.github.io/). 
 
 We explicitly introduce discrete impact dynamics model into the QP-based controllers to generate robot motions that are robust to impact-induced state jumps in the joint velocities and joint torques. Our simulations, validate that our proposed impact-friendly QP controller is robust to contact impacts, shall they be expected or not. Therefore, we can exploit it for establishing contacts with high velocities, and explicitly generate task-purpose impulsive forces.
 
