@@ -1,11 +1,19 @@
 
 # <center>Impact-friendly QP controller</center>
 
-[![Impact-friendly QP controller](https://img.youtube.com/vi/ZlPM9PbJnnY/0.jpg)](https://www.youtube.com/watch?v=ZlPM9PbJnnY)
- 
- 
 
-The simulation is based on the [python interface](https://github.com/sehoonha/pydart2) of the [DART simulator](https://dartsim.github.io/). 
+ 
+|[![Impact-friendly QP controller](https://img.youtube.com/vi/ZlPM9PbJnnY/0.jpg)](https://www.youtube.com/watch?v=ZlPM9PbJnnY)  |  [![Impact-aware QP controller](http://img.youtube.com/vi/K9ar8tsPN8s/0.jpg)](http://www.youtube.com/watch?v=K9ar8tsPN8s "Video Title")   |
+| ------------- | :-------------: |
+ 
+pyQpController is the proof of concept simulator attached to the paper: [Impact-Friendly Robust Control Design with Task-Space Quadratic Optimization](http://www.roboticsproceedings.org/rss15/p32.html) pyQpController is based on the [python interface](https://github.com/sehoonha/pydart2) of the [DART simulator](https://dartsim.github.io/). 
+
+We explicitly introduce discrete impact dynamics model into the QP-based controllers to generate robot motions that are robust to impact-induced state jumps in the joint velocities and joint torques. Our simulations, validate that our proposed impact-friendly QP controller is robust to contact impacts, shall they be expected or not. Therefore, we can exploit it for establishing contacts with high velocities, and explicitly generate task-purpose impulsive forces.
+
+Recently we extended the concept for floating-based robot, i.e. a HRP4 humanoid robot, where we successfully applied impact at 0.35 m/s and achieved impulsive force of 133 N without breaking the hardware or losing balance. The C++ implementation is available at [mc_impact_pusher](https://github.com/wyqsnddd/mc_impact_pusher).
+
+
+
 
  ### 1. Running guide: 
 We can find a quick start from the  [Running guide](doc/running_guide.md)
