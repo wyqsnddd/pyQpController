@@ -1,4 +1,4 @@
-Once the DART simulator and its python interface pydart2 is correctly configured, we can use the following commands to run the simulations: 
+Once the DART simulator and its python interface [pydart2](https://pydart2.readthedocs.io/en/latest/install.html) is correctly configured, we can use the following commands to run the simulations: 
 
   #### 1. Collide with an unknow wall:
 - Enter the main containing [impact_one.py](@ref impact_one.py) and run the following: 
